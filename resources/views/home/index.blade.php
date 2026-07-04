@@ -1,69 +1,28 @@
-<?php
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Escape Room</title>
+    <meta charset="utf-8">
+</head>
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+<body style="margin:0;background:radial-gradient(circle,#1a1a1a,#000);color:white;font-family:sans-serif;">
 
-return new class extends Migration {
-    public function up(): void {
-        Schema::create('teams', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('leader_id')->constrained('users')->cascadeOnDelete();
-            $table->string('title');
-            $table->string('city');
-            $table->dateTime('game_date');
-            $table->time('game_time');
-            $table->integer('current_members')->default(1);
-            $table->integer('needed_members');
-            $table->enum('gender', ['any','male','female']);
-            $table->integer('min_age')->nullable();
-            $table->integer('max_age')->nullable();
-            $table->timestamps();
-        });
-    }
+<div style="height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;">
 
-    public function down(): void {
-        Schema::dropIfExists('teams');
-    }
-};
-<?php
+    <h1 style="font-size:70px;color:#ff0033;letter-spacing:5px;">
+        ESCAPE ROOM
+    </h1>
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+    <p style="opacity:0.7;font-size:18px;margin-top:-10px;">
+        تجربه واقعی ترس، هیجان و معما
+    </p>
 
-return new class extends Migration {
-    public function up(): void {
-        Schema::create('team_members', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('team_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->timestamps();
-        });
-    }
+    <a href="/teams"
+       style="margin-top:30px;padding:15px 30px;background:#ff0033;color:white;text-decoration:none;border-radius:12px;font-size:18px;">
+        ورود به اتاق‌ها
+    </a>
 
-    public function down(): void {
-        Schema::dropIfExists('team_members');
-    }
-};
-<?php
+</div>
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
-
-return new class extends Migration {
-    public function up(): void {
-        Schema::create('team_join_requests', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('team_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->enum('status', ['pending','accepted','rejected'])->default('pending');
-            $table->timestamps();
-        });
-    }
-
-    public function down(): void {
-        Schema::dropIfExists('team_join_requests');
-    }
-};
+</body>
+</html>
