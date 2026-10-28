@@ -1,0 +1,9 @@
+@extends('layouts.panel')
+@section('title', 'کد تخفیف')
+@section('content')
+<div class="page-h"><h1>کدهای تخفیف</h1></div>
+<form class="card mb" method="post" action="{{ route('admin.coupons.store') }}">@csrf <h3>ساخت کد سراسری</h3>
+  <div class="grid4"><div class="field"><label>کد</label><input class="input" dir="ltr" name="code" required style="text-transform:uppercase"></div><div class="field"><label>نوع</label><select name="type"><option value="percent">درصدی</option><option value="fixed">مبلغ ثابت</option></select></div><div class="field"><label>مقدار</label><input class="input" dir="ltr" type="number" name="value" required></div><div class="field"><label>سقف تخفیف (تومان)</label><input class="input" dir="ltr" type="number" name="max_discount"></div><div class="field"><label>حداقل مبلغ رزرو</label><input class="input" dir="ltr" type="number" name="min_amount"></div><div class="field"><label>تعداد استفاده</label><input class="input" dir="ltr" type="number" name="usage_limit"></div><div class="field"><label>اعتبار (روز)</label><input class="input" dir="ltr" type="number" name="valid_days"></div></div>
+  <button class="btn">ساخت کد</button></form>
+<div class="card pad0"><div class="table-wrap"><table class="tbl"><thead><tr><th>کد</th><th>مقدار</th><th>مالک</th><th>استفاده</th><th>انقضا</th><th></th></tr></thead><tbody>@foreach($items as $c)<tr><td class="ltr"><b>{{ $c->code }}</b></td><td>{{ $c->type === 'percent' ? fa($c->value).'٪' : toman($c->value) }}</td><td>{{ $c->host?->name ?? 'سراسری' }}</td><td>{{ fa($c->used_count) }}{{ $c->usage_limit ? '/'.fa($c->usage_limit) : '' }}</td><td class="small">{{ $c->expires_at ? jdate($c->expires_at, 'Y/m/d') : '—' }}</td><td><form method="post" action="{{ route('admin.coupons.toggle', $c) }}">@csrf<button class="btn btn-sm {{ $c->is_active ? 'btn-ghost' : 'btn-green' }}">{{ $c->is_active ? 'غیرفعال' : 'فعال' }}</button></form></td></tr>@endforeach</tbody></table></div></div>
+@endsection

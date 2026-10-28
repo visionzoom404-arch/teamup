@@ -1,0 +1,141 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Amenity;
+use App\Models\Property;
+use App\Models\Review;
+use App\Support\Jalali;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+
+class PublicController extends Controller
+{
+    public function home()
+    {
+        $base = Property::approved()->with('images');
+
+        return view('home', [
+            'featured' => (clone $base)->where('featured', true)->latest('id')->take(8)->get(),
+            'latest' => (clone $base)->latest('id')->take(8)->get(),
+            'top' => (clone $base)->where('reviews_count', '>', 0)->orderByDesc('rating_avg')->take(4)->get(),
+            'destinations' => Property::approved()->selectRaw('city, province, count(*) as c, min(price_weekday) as p')->groupBy('city', 'province')->orderByDesc('c')->take(8)->get(),
+            'stats' => ['properties' => Property::approved()->count(), 'cities' => Property::approved()->distinct('city')->count('city')],
+        ]);
+    }
+
+    /** پارس تاریخ شمسی (۱۴۰۵/۰۳/۱۲) یا میلادی ورودی */
+    public static function parseDate(?string $v): ?Carbon
+    {
+        if (! $v) {
+            return null;
+        }
+        $v = Jalali::latinDigits(trim($v));
+        try {
+            if (preg_match('#^(\d{4})[/-](\d{1,2})[/-](\d{1,2})$#', $v, $m)) {
+                return (int) $m[1] < 1700 ? Jalali::carbon((int) $m[1], (int) $m[2], (int) $m[3]) : Carbon::create((int) $m[1], (int) $m[2], (int) $m[3])->startOfDay();
+            }
+        } catch (\Throwable) {
+        }
+
+        return null;
+    }
+
+    public function search(Request $r)
+    {
+        $q = Property::approved()->with('images');
+        $in = self::parseDate($r->check_in);
+        $out = self::parseDate($r->check_out);
+
+        if ($r->filled('q')) {
+            $term = '%'.$r->q.'%';
+            $q->where(fn ($w) => $w->where('title', 'like', $term)->orWhere('city', 'like', $term)->orWhere('province', 'like', $term));
+        }
+        $r->filled('province') && $q->where('province', $r->province);
+        $r->filled('city') && $q->where('city', $r->city);
+        $r->filled('type') && $q->whereIn('type', (array) $r->type);
+        $r->filled('guests') && $q->where('capacity_max', '>=', (int) $r->guests);
+        $r->filled('bedrooms') && $q->where('bedrooms', '>=', (int) $r->bedrooms);
+        $r->filled('min_price') && $q->where('price_weekday', '>=', (int) $r->min_price);
+        $r->filled('max_price') && $q->where('price_weekday', '<=', (int) $r->max_price);
+        $r->boolean('instant') && $q->where('instant_booking', true);
+        foreach ((array) $r->amenity as $key) {
+            $q->whereHas('amenities', fn ($a) => $a->where('key', $key));
+        }
+        if ($in && $out && $out->gt($in)) {
+            $q->available($in, $out);
+        }
+
+        match ($r->sort) {
+            'cheap' => $q->orderBy('price_weekday'),
+            'expensive' => $q->orderByDesc('price_weekday'),
+            'rating' => $q->orderByDesc('rating_avg'),
+            'new' => $q->latest('id'),
+            default => $q->orderByDesc('featured')->orderByDesc('rating_avg')->latest('id'),
+        };
+
+        return view('search', [
+            'items' => $q->paginate(12)->withQueryString(),
+            'amenities' => Amenity::orderBy('sort')->get(),
+            'in' => $in, 'out' => $out,
+        ]);
+    }
+
+    public function show(Property $property, Request $r)
+    {
+        $owner = auth()->id() === $property->host_id || auth()->user()?->isAdmin();
+        abort_unless($property->status === 'approved' || $owner, 404);
+        $property->increment('views');
+        $property->load(['images', 'amenities', 'host', 'reviews.guest']);
+
+        $similar = Property::approved()->with('images')->where('id', '!=', $property->id)->where(fn ($w) => $w->where('city', $property->city)->orWhere('type', $property->type))->take(4)->get();
+
+        // روزهای غیرقابل‌رزرو برای تقویم (۱۸۰ روز آینده)
+        $from = today();
+        $to = today()->addDays(240);
+        $blocked = $property->days()->where('is_blocked', true)->whereBetween('date', [$from, $to])->pluck('date')->map->toDateString()->all();
+        $booked = [];
+        foreach ($property->bookings()->active()->where('check_out', '>', $from)->get() as $b) {
+            for ($d = $b->check_in->copy(); $d->lt($b->check_out); $d->addDay()) {
+                $booked[] = $d->toDateString();
+            }
+        }
+
+        return view('property', [
+            'p' => $property, 'similar' => $similar,
+            'unavailable' => array_values(array_unique(array_merge($blocked, $booked))),
+            'isFav' => auth()->check() && auth()->user()->favorites()->whereKey($property->id)->exists(),
+        ]);
+    }
+
+    public function quote(Property $property, Request $r)
+    {
+        $in = self::parseDate($r->check_in);
+        $out = self::parseDate($r->check_out);
+        if (! $in || ! $out) {
+            return response()->json(['ok' => false, 'error' => 'تاریخ ورود و خروج را انتخاب کنید.']);
+        }
+        $guests = max(1, (int) $r->adults + (int) $r->children);
+        $q = $property->quote($in, $out, $guests, $r->coupon);
+        if ($q['ok']) {
+            $q['html'] = view('partials.quote', ['q' => $q, 'p' => $property])->render();
+            unset($q['lines']);
+        }
+
+        return response()->json($q);
+    }
+
+    public function toggleFavorite(Property $property)
+    {
+        $res = auth()->user()->favorites()->toggle($property->id);
+
+        return request()->expectsJson() ? response()->json(['fav' => ! empty($res['attached'])]) : back();
+    }
+
+    public function page(string $slug)
+    {
+        abort_unless(in_array($slug, ['about', 'rules', 'become-host', 'contact']), 404);
+
+        return view('pages.'.$slug);
+    }
+}
