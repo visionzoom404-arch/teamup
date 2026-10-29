@@ -13,6 +13,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // پشت Cloudflare/nginx: تشخیص https و IP واقعی
+        $middleware->trustProxies(at: '*');
         $middleware->alias(['role' => EnsureRole::class]);
         $middleware->redirectGuestsTo(fn () => route('login'));
         $middleware->redirectUsersTo(fn () => auth()->user()->homeRoute());

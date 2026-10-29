@@ -32,7 +32,7 @@ class DatabaseSeeder extends Seeder
             PeakPeriod::firstOrCreate(['title' => "نوروز $y"], ['starts_on' => Jalali::carbon($y, 1, 1), 'ends_on' => Jalali::carbon($y, 1, 13)]);
         }
 
-        User::updateOrCreate(['phone' => '09120000000'], ['name' => 'مدیر می‌جا', 'password' => 'admin1234', 'role' => 'admin']);
+        User::updateOrCreate(['phone' => '09120000000'], ['name' => 'مدیر می‌جا', 'password' => env('MIJA_ADMIN_PASSWORD', 'admin1234'), 'role' => 'admin']);
 
         if (! app()->environment('production')) {
             $this->demo();

@@ -44,3 +44,14 @@ php artisan serve
 
 ## انتقال به سرور جدید
 ۱. پوشه‌ی `mija/` را منتقل کنید ۲. `composer install --no-dev` ۳. `.env` (با `APP_ENV=production`، `APP_URL`، دیتابیس) ۴. `php artisan migrate --force` ۵. `storage:link` و cron ۶. دیتابیس و `storage/app/public` را از سرور قدیم کپی کنید.
+
+## استقرار روی سرور (nginx + PHP 8.3 + SQLite، پشت Cloudflare)
+روی سرور خالی Ubuntu/Debian با root:
+```bash
+git clone -b claude/blissful-bardeen-1rjd75 https://github.com/visionzoom404-arch/teamup.git /root/teamup
+sudo bash /root/teamup/mija/deploy/setup-server.sh amirxui.site
+```
+- همین دستور برای به‌روزرسانی هم قابل اجراست (`git pull` و اجرای دوباره؛ دیتابیس و عکس‌ها حفظ می‌شوند).
+- اطلاعات ورود مدیر در `/root/mija-admin.txt` ساخته می‌شود.
+- در Cloudflare حالت SSL/TLS را روی **Full** بگذارید.
+- ⚠️ تا زمانی که درگاه واقعی وصل نشده، `MIJA_GATEWAY=sandbox` هر پرداختی را «موفق» می‌پذیرد؛ سایت را به کاربران واقعی معرفی نکنید.
