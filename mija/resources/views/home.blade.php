@@ -5,7 +5,9 @@
 <div class="container">
   {{-- ===== قهرمان ===== --}}
   <section class="stage" data-parallax>
+    @if($hero = site_image('hero'))<img class="stage-photo" src="{{ $hero }}" alt="" fetchpriority="high">@else
     @include('partials.auth-scene', ['bare' => true])
+    @endif
     <div class="stage-in">
       <span class="glass-dark badge-g" style="margin-bottom:16px"><x-i3 name="sun" class="sm"/> اقامتی به‌یادماندنی، مستقیم از میزبان</span>
       <h1>همین امروز <span class="rotor"><span>ویلا</span><span>کلبه</span><span>باغ‌ویلا</span><span>سوئیت</span></span> رویایی‌ات را رزرو کن</h1>

@@ -32,20 +32,24 @@ class DatabaseSeeder extends Seeder
             PeakPeriod::firstOrCreate(['title' => "نوروز $y"], ['starts_on' => Jalali::carbon($y, 1, 1), 'ends_on' => Jalali::carbon($y, 1, 13)]);
         }
 
-        if (! app()->environment('production')) {
+        if (! app()->environment('production') || env('MIJA_DEMO')) {
             $this->demo();
         }
     }
 
     private function demo(): void
     {
-        User::updateOrCreate(['phone' => '09120000000'], ['name' => 'مدیر می‌جا', 'password' => 'admin1234', 'role' => 'admin']);
+        // در حالت production رمز حساب‌های نمونه تصادفی است (فقط برای نمایش اقامتگاه‌ها)
+        $pw = fn (string $d) => app()->environment('production') ? \Illuminate\Support\Str::random(24) : $d;
+        if (! app()->environment('production')) {
+            User::updateOrCreate(['phone' => '09120000000'], ['name' => 'مدیر می‌جا', 'password' => 'admin1234', 'role' => 'admin']);
+        }
         $hosts = [
-            User::updateOrCreate(['phone' => '09121111111'], ['name' => 'علی رضایی', 'bio' => 'هشت سال است در شمال میزبان مسافران هستم. تمیزی و آرامش مهمان‌ها اولویت اول من است؛ هر ساعت از شبانه‌روز پاسخگو هستم.', 'password' => 'host1234', 'role' => 'host', 'host_verified' => true, 'sheba' => 'IR062960000000100324200001', 'bank_owner' => 'علی رضایی', 'city' => 'نوشهر']),
-            User::updateOrCreate(['phone' => '09122222222'], ['name' => 'مریم احمدی', 'bio' => 'میزبان اقامتگاه‌های بوم‌گردی و باغ‌ویلا؛ عاشق پذیرایی با چای و شیرینی محلی.', 'password' => 'host1234', 'role' => 'host', 'host_verified' => true, 'city' => 'رشت']),
+            User::updateOrCreate(['phone' => '09121111111'], ['name' => 'علی رضایی', 'bio' => 'هشت سال است در شمال میزبان مسافران هستم. تمیزی و آرامش مهمان‌ها اولویت اول من است؛ هر ساعت از شبانه‌روز پاسخگو هستم.', 'password' => $pw('host1234'), 'role' => 'host', 'host_verified' => true, 'sheba' => 'IR062960000000100324200001', 'bank_owner' => 'علی رضایی', 'city' => 'نوشهر']),
+            User::updateOrCreate(['phone' => '09122222222'], ['name' => 'مریم احمدی', 'bio' => 'میزبان اقامتگاه‌های بوم‌گردی و باغ‌ویلا؛ عاشق پذیرایی با چای و شیرینی محلی.', 'password' => $pw('host1234'), 'role' => 'host', 'host_verified' => true, 'city' => 'رشت']),
         ];
-        $guest = User::updateOrCreate(['phone' => '09123333333'], ['name' => 'سارا محمدی', 'password' => 'guest1234', 'role' => 'guest', 'wallet' => 2000000, 'city' => 'تهران']);
-        User::updateOrCreate(['phone' => '09124444444'], ['name' => 'رضا کریمی', 'password' => 'guest1234', 'role' => 'guest']);
+        $guest = User::updateOrCreate(['phone' => '09123333333'], ['name' => 'سارا محمدی', 'password' => $pw('guest1234'), 'role' => 'guest', 'wallet' => 2000000, 'city' => 'تهران']);
+        User::updateOrCreate(['phone' => '09124444444'], ['name' => 'رضا کریمی', 'password' => $pw('guest1234'), 'role' => 'guest']);
 
         $amen = Amenity::pluck('id', 'key');
         $items = [

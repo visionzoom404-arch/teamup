@@ -1,0 +1,22 @@
+=== نصب «می‌جا» روی سرور ===
+
+نیازمندی: سرور Ubuntu 22/24 یا Debian 12 (خالی)، دسترسی root، و دامنه‌ای که در Cloudflare به IP سرور اشاره می‌کند.
+
+۱) فایل mija-installer.tar.gz را روی سرور آپلود کنید (WinSCP / FileZilla / scp):
+     scp mija-installer.tar.gz root@IP_SERVER:/root/
+
+۲) روی سرور (SSH):
+     cd /root && tar -xzf mija-installer.tar.gz && cd mija-installer
+
+۳) (اختیاری ولی مهم) عکس‌های واقعی را داخل پوشه‌ی  photos/  بگذارید (راهنما: photos/README.txt)
+
+۴) نصب — با یک دستور (موبایل و رمز مدیر دلخواه خودتان؛ MIJA_DEMO=1 یعنی چند اقامتگاه نمونه هم ساخته شود):
+     MIJA_DEMO=1 MIJA_ADMIN_PHONE=09xxxxxxxxx MIJA_ADMIN_PASSWORD='رمز-قوی' bash install.sh your-domain.com
+
+۵) در Cloudflare: بخش SSL/TLS را روی «Full» بگذارید. سپس https://your-domain.com را باز کنید.
+
+به‌روزرسانی بعدی: بسته‌ی جدید را باز کنید و دوباره  bash install.sh your-domain.com  بزنید (دیتابیس و عکس‌ها حفظ می‌شود).
+حذف اقامتگاه‌ها و کاربران نمونه قبل از انتشار واقعی:
+     cd /var/www/mija && sudo -u www-data php artisan mija:demo-clear --force
+
+⚠️ تا وقتی درگاه پرداخت واقعی (زرین‌پال و...) وصل نشده، پرداخت «آزمایشی» است و هر پرداختی موفق ثبت می‌شود؛ سایت را به کاربران واقعی معرفی نکنید.

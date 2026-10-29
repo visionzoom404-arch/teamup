@@ -17,7 +17,7 @@
       </section>
     </div>
   </main>
-  <aside class="auth-scene" id="auth-scene">@include('partials.auth-scene')</aside>
+  <aside class="auth-scene" id="auth-scene">@if($lg = site_image('login'))<img class="stage-photo" src="{{ $lg }}" alt=""><div class="scene-copy" style="z-index:4"><p style="font-size:26px;font-weight:800;margin:0;text-shadow:0 4px 18px rgba(0,0,0,.4)">اقامتگاه رویایی‌ات، فقط چند لمس آن‌طرف‌تر</p></div>@else @include('partials.auth-scene') @endif</aside>
 </div>
 <script src="{{ asset('vendor/gsap.min.js') }}"></script>
 <script src="{{ asset('js/jalali.js') }}"></script>

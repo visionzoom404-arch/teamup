@@ -26,3 +26,17 @@ if (! function_exists('setting')) {
         return \App\Models\Setting::get($key, $default ?? config('mija.'.$key));
     }
 }
+
+if (! function_exists('site_image')) {
+    /** تصویر سراسری سایت (مثلاً hero) که از طریق mija:photos بارگذاری شده؛ وگرنه null */
+    function site_image(string $name): ?string
+    {
+        foreach (['jpg', 'webp', 'png'] as $ext) {
+            if (\Illuminate\Support\Facades\Storage::disk('public')->exists("site/$name.$ext")) {
+                return asset("storage/site/$name.$ext").'?v='.\Illuminate\Support\Facades\Storage::disk('public')->lastModified("site/$name.$ext");
+            }
+        }
+
+        return null;
+    }
+}

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # نصب/به‌روزرسانی «می‌جا» روی سرور Ubuntu/Debian خالی (nginx + PHP 8.3 + SQLite) پشت Cloudflare
 # استفاده (روی سرور، با root، از داخل پوشه‌ی کلون‌شده‌ی مخزن):
-#   MIJA_ADMIN_PHONE=09xxxxxxxxx MIJA_ADMIN_PASSWORD='...' bash mija/deploy/setup-server.sh amirxui.site
+#   MIJA_ADMIN_PHONE=09xxxxxxxxx MIJA_ADMIN_PASSWORD='...' [MIJA_DEMO=1] bash mija/deploy/setup-server.sh amirxui.site
+#   MIJA_DEMO=1  → اقامتگاه‌های نمونه هم ساخته شود (برای دیدن سایت پر)
 set -euo pipefail
 
 DOMAIN="${1:?دامنه را وارد کنید. مثال: bash setup-server.sh amirxui.site}"
@@ -13,7 +14,9 @@ SRC="$(cd "$(dirname "$0")/.." && pwd)"
 export DEBIAN_FRONTEND=noninteractive COMPOSER_ALLOW_SUPERUSER=1
 echo "==> نصب بسته‌ها"
 apt-get update -y
-apt-get install -y software-properties-common curl unzip git rsync nginx sqlite3 openssl ca-certificates composer
+HAS_VENDOR=0; [ -f "$SRC/vendor/autoload.php" ] && HAS_VENDOR=1
+apt-get install -y software-properties-common curl unzip git rsync nginx sqlite3 openssl ca-certificates
+[ "$HAS_VENDOR" = 0 ] && apt-get install -y composer
 if ! apt-cache show php8.3-fpm >/dev/null 2>&1; then
   . /etc/os-release
   if [ "$ID" = "ubuntu" ]; then add-apt-repository -y ppa:ondrej/php; else
@@ -26,15 +29,16 @@ apt-get install -y php8.3-fpm php8.3-cli php8.3-sqlite3 php8.3-mbstring php8.3-x
 
 echo "==> کپی کد به $APP"
 mkdir -p "$APP"
-rsync -a --delete \
-  --exclude '/vendor' --exclude '/.env' --exclude '/database/database.sqlite' \
-  --exclude '/storage' --exclude '/node_modules' --exclude '/deploy' \
-  "$SRC"/ "$APP"/
+EXC=(--exclude '/.env' --exclude '/database/database.sqlite' --exclude '/storage' --exclude '/node_modules' --exclude '/deploy' --exclude '/photos' --exclude '/INSTALL-FA.txt')
+[ "$HAS_VENDOR" = 0 ] && EXC+=(--exclude '/vendor')
+rsync -a --delete "${EXC[@]}" "$SRC"/ "$APP"/
 mkdir -p "$APP"/storage/{app/public,framework/{cache/data,sessions,views},logs} "$APP"/bootstrap/cache
 cd "$APP"
 
-echo "==> نصب وابستگی‌ها"
-composer install --no-dev --optimize-autoloader --no-interaction
+if [ "$HAS_VENDOR" = 0 ]; then
+  echo "==> نصب وابستگی‌ها"
+  composer install --no-dev --optimize-autoloader --no-interaction
+fi
 
 FIRST=0
 if [ ! -f .env ]; then
@@ -61,6 +65,11 @@ elif [ "$FIRST" = 1 ]; then
   umask 077; printf 'موبایل مدیر: 09120000000\nرمز: %s\n' "$GEN" > /root/mija-admin.txt
 fi
 rm -f public/storage; php artisan storage:link
+# عکس‌های واقعی: اگر پوشه‌ی photos کنار نصب‌کننده تصویر داشته باشد، وارد سایت می‌شود
+if [ -d "$SRC/photos" ] && find "$SRC/photos" -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) | grep -q .; then
+  echo "==> وارد کردن عکس‌ها"
+  php artisan mija:photos --dir="$SRC/photos" --per="${MIJA_PHOTOS_PER:-5}"
+fi
 php artisan config:cache && php artisan route:cache && php artisan view:cache
 
 chown -R www-data:www-data storage bootstrap/cache database

@@ -12,6 +12,7 @@
 <meta name="apple-mobile-web-app-title" content="می‌جا">
 <meta property="og:title" content="@yield('title', 'رزرو ویلا و کلبه') | می‌جا">
 <meta property="og:image" content="{{ asset('img/mija-logo.png') }}">
+<link rel="preload" href="{{ asset('fonts/Estedad-800.woff2') }}" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="{{ asset('fonts/Vazirmatn-Regular.woff2') }}" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{{ asset('css/mija.css') }}?v={{ filemtime(public_path('css/mija.css')) }}">
 <link rel="stylesheet" href="{{ asset('vendor/swiper-bundle.min.css') }}">

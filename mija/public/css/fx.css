@@ -2,6 +2,15 @@
    می‌جا — لایه‌ی افکت و انیمیشن (روی mija.css)
    ========================================================== */
 
+/* فونت عنوان‌ها: استداد (Estedad) — OFL */
+@font-face{font-family:Estedad;font-weight:600;font-display:swap;src:url(../fonts/Estedad-600.woff2) format('woff2');unicode-range:U+0600-06FF,U+200C-200D,U+FB50-FDFF,U+FE70-FEFF}
+@font-face{font-family:Estedad;font-weight:800;font-display:swap;src:url(../fonts/Estedad-800.woff2) format('woff2');unicode-range:U+0600-06FF,U+200C-200D,U+FB50-FDFF,U+FE70-FEFF}
+@font-face{font-family:Estedad;font-weight:600;font-display:swap;src:url(../fonts/Estedad-latin-600.woff2) format('woff2');unicode-range:U+0000-00FF}
+@font-face{font-family:Estedad;font-weight:800;font-display:swap;src:url(../fonts/Estedad-latin-800.woff2) format('woff2');unicode-range:U+0000-00FF}
+:root{--font-display:Estedad,Vazir,system-ui,sans-serif}
+h1,h2,h3,.brand span,.tile b,.stage h1,.auth-card h1,.pcard .price b,.qrow.total,.prof-hero h1,.step b,.feat b,.cta h2,.sec-h h2,.dest b,.page-h h1,.lvl h2,.trust b,.chip b,.role-pill{font-family:var(--font-display)}
+h1,h2,h3{letter-spacing:-.4px}
+
 /* نوار پیشرفت بالای صفحه هنگام جابه‌جایی */
 .navbar-progress{position:fixed;top:0;inset-inline:0;height:3px;z-index:200;background:linear-gradient(90deg,#FF3B3B,#FF9A1F,#FFD76A);transform:scaleX(0);transform-origin:right;pointer-events:none;box-shadow:0 0 12px rgba(255,150,30,.7)}
 body{animation:pageIn .55s cubic-bezier(.2,.8,.2,1)}
@@ -315,3 +324,8 @@ html,body{overflow-x:clip}
 @media (max-width:560px){.occ>span{width:96px}}
 
 [hidden]{display:none!important}
+
+.stage-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+.auth-scene .stage-photo{filter:saturate(1.05)}
+.auth-scene:has(.stage-photo)::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(40,4,16,.55),transparent 45%,rgba(40,4,16,.35));z-index:2}
+.stage:has(.stage-photo)::after{background:linear-gradient(180deg,rgba(30,4,14,.55),rgba(30,4,14,.15) 50%,rgba(30,4,14,.4))}
