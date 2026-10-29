@@ -4,9 +4,9 @@
 @php $u = auth()->user(); @endphp
 <div class="page-h"><h1>کیف پول و برداشت</h1></div>
 <div class="tiles">
-  <div class="tile card"><div class="ic"><x-icon name="wallet"/></div><b>{{ toman($u->wallet, false) }}</b><span>قابل برداشت (تومان)</span></div>
-  <div class="tile card"><div class="ic blue"><x-icon name="clock"/></div><b>{{ toman($pendingIncome, false) }}</b><span>در انتظار ورود مهمان</span></div>
-  <div class="tile card"><div class="ic dark"><x-icon name="send"/></div><b>{{ toman($locked, false) }}</b><span>در حال تسویه</span></div>
+  <div class="tile card"><div class="ic3"><x-i3 name="p_wallet"/></div><b>{{ toman($u->wallet, false) }}</b><span>قابل برداشت (تومان)</span></div>
+  <div class="tile card"><div class="ic3"><x-i3 name="p_hourglass"/></div><b>{{ toman($pendingIncome, false) }}</b><span>در انتظار ورود مهمان</span></div>
+  <div class="tile card"><div class="ic3"><x-i3 name="sparkle"/></div><b>{{ toman($locked, false) }}</b><span>در حال تسویه</span></div>
 </div>
 <div class="card mb"><h3>درخواست برداشت</h3>
   @if(! $u->sheba)<div class="alert warn"><x-icon name="info"/>ابتدا شماره شبا را در <a href="{{ route('profile') }}" style="text-decoration:underline">پروفایل</a> ثبت کنید.</div>@else<p class="small muted">واریز به شبا: <span class="ltr">{{ $u->sheba }}</span> ({{ $u->bank_owner }}) — حداقل {{ toman(setting('min_payout')) }}</p>@endif

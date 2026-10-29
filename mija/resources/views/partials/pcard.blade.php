@@ -2,6 +2,7 @@
 <a href="{{ route('property', $p) }}" class="pcard">
   <div class="ph">
     <img src="{{ $p->cover() }}" alt="{{ $p->title }}" loading="lazy">
+    <span class="pp">@if(isset($p->quote_total)){{ toman($p->quote_total, false) }}@else{{ toman($p->startingPrice(), false) }}@endif <small>تومان</small></span>
     <div class="tags">
       @if(max($p->weekly_discount, $p->monthly_discount) > 0)<span class="tag-sale">تا {{ fa(max($p->weekly_discount, $p->monthly_discount)) }}٪ تخفیف</span>@endif
       @if($p->featured)<span class="tag-glass gold"><x-icon name="star" class="sm"/> ویژه</span>@endif

@@ -27,10 +27,10 @@
     <div class="lvl-steps">@foreach(config('mija.levels') as $l)<div class="{{ $lv['nights'] >= $l['nights'] ? 'on' : '' }}" style="--c:{{ $l['color'] }}"><i></i><b>{{ $l['name'] }}</b><small>{{ $l['cashback'] ? fa($l['cashback']).'٪ بازگشت وجه' : 'شروع' }}</small></div>@endforeach</div>
   </div>
   <div class="tiles" style="grid-template-columns:1fr 1fr;margin:0">
-    <div class="tile card"><div class="ic"><x-icon name="calendar"/></div><b>{{ fa($stats['trips']) }}</b><span>سفر قطعی</span></div>
-    <div class="tile card"><div class="ic green"><x-icon name="star"/></div><b>{{ fa($stats['reviews']) }}</b><span>نظر ثبت‌شده</span></div>
-    <div class="tile card"><div class="ic red"><x-icon name="heart"/></div><b>{{ fa($stats['favorites']) }}</b><span>علاقه‌مندی</span></div>
-    <div class="tile card"><div class="ic blue"><x-icon name="wallet"/></div><b>{{ toman($u->wallet, false) }}</b><span>موجودی کیف پول</span></div>
+    <div class="tile card"><div class="ic3"><x-i3 name="p_calendar"/></div><b>{{ fa($stats['trips']) }}</b><span>سفر قطعی</span></div>
+    <div class="tile card"><div class="ic3"><x-i3 name="p_star"/></div><b>{{ fa($stats['reviews']) }}</b><span>نظر ثبت‌شده</span></div>
+    <div class="tile card"><div class="ic3"><x-i3 name="p_heart"/></div><b>{{ fa($stats['favorites']) }}</b><span>علاقه‌مندی</span></div>
+    <div class="tile card"><div class="ic3"><x-i3 name="p_wallet"/></div><b>{{ toman($u->wallet, false) }}</b><span>موجودی کیف پول</span></div>
   </div>
 </div>
 @endif
@@ -38,10 +38,10 @@
 {{-- ===================== میزبان ===================== --}}
 @if($r === 'host')
 <div class="tiles">
-  <div class="tile card"><div class="ic"><x-icon name="star"/></div><b>{{ $hs['rating'] ? fa(number_format($hs['rating'], 1)) : '—' }}</b><span>امتیاز ({{ fa($hs['reviews']) }} نظر)</span></div>
-  <div class="tile card"><div class="ic green"><x-icon name="check"/></div><b>{{ fa($hs['completed']) }}</b><span>اقامت انجام‌شده</span></div>
-  <div class="tile card"><div class="ic blue"><x-icon name="chat"/></div><b>{{ $hs['response_rate'] !== null ? fa($hs['response_rate']).'٪' : '—' }}</b><span>نرخ پاسخ‌گویی</span></div>
-  <div class="tile card"><div class="ic dark"><x-icon name="clock"/></div><b>{{ $hs['response_hours'] !== null ? fa($hs['response_hours']).' ساعت' : '—' }}</b><span>میانگین زمان پاسخ</span></div>
+  <div class="tile card"><div class="ic3"><x-i3 name="p_star"/></div><b>{{ $hs['rating'] ? fa(number_format($hs['rating'], 1)) : '—' }}</b><span>امتیاز ({{ fa($hs['reviews']) }} نظر)</span></div>
+  <div class="tile card"><div class="ic3"><x-i3 name="check"/></div><b>{{ fa($hs['completed']) }}</b><span>اقامت انجام‌شده</span></div>
+  <div class="tile card"><div class="ic3"><x-i3 name="p_chat"/></div><b>{{ $hs['response_rate'] !== null ? fa($hs['response_rate']).'٪' : '—' }}</b><span>نرخ پاسخ‌گویی</span></div>
+  <div class="tile card"><div class="ic3"><x-i3 name="p_hourglass"/></div><b>{{ $hs['response_hours'] !== null ? fa($hs['response_hours']).' ساعت' : '—' }}</b><span>میانگین زمان پاسخ</span></div>
 </div>
 <div class="grid2" style="gap:18px;align-items:start;margin-bottom:18px">
   <div class="card"><div class="row" style="gap:16px;margin-bottom:10px"><div class="ring-p" style="--p:{{ $percent }}"><span>{{ fa($percent) }}٪</span></div><div><h3 style="margin:0">پیشرفت راه‌اندازی</h3><div class="small muted">با تکمیل مراحل، رزرو بیشتری می‌گیرید</div></div></div>
@@ -55,10 +55,10 @@
 {{-- ===================== مدیر ===================== --}}
 @if($r === 'admin')
 <div class="tiles">
-  <div class="tile card"><div class="ic dark"><x-icon name="users"/></div><b>{{ fa($adm['users']) }}</b><span>کل کاربران</span></div>
-  <div class="tile card"><div class="ic"><x-icon name="home"/></div><b>{{ fa($adm['properties']) }}</b><span>اقامتگاه</span></div>
-  <div class="tile card"><div class="ic blue"><x-icon name="calendar"/></div><b>{{ fa($adm['bookings']) }}</b><span>رزرو</span></div>
-  <div class="tile card"><div class="ic red"><x-icon name="bell"/></div><b>{{ fa($adm['pending_props'] + $adm['pending_payouts']) }}</b><span>نیازمند اقدام</span></div>
+  <div class="tile card"><div class="ic3"><x-i3 name="family"/></div><b>{{ fa($adm['users']) }}</b><span>کل کاربران</span></div>
+  <div class="tile card"><div class="ic3"><x-i3 name="p_house"/></div><b>{{ fa($adm['properties']) }}</b><span>اقامتگاه</span></div>
+  <div class="tile card"><div class="ic3"><x-i3 name="p_calendar"/></div><b>{{ fa($adm['bookings']) }}</b><span>رزرو</span></div>
+  <div class="tile card"><div class="ic3"><x-i3 name="p_bell"/></div><b>{{ fa($adm['pending_props'] + $adm['pending_payouts']) }}</b><span>نیازمند اقدام</span></div>
 </div>
 <div class="grid2" style="gap:18px;align-items:start;margin-bottom:18px">
   <div class="card"><h3><x-i3 name="p_lock" class="sm"/> امنیت حساب</h3>

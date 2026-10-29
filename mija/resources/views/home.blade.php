@@ -23,7 +23,9 @@
     <div class="chip chip-b glass-w"><x-i3 name="p_shield" class="lg"/><div><b>پرداخت امن</b><small>ضمانت بازگشت وجه</small></div></div>
   </section>
 
-  <form class="searchbar glass stage-search" action="{{ route('search') }}" method="get">
+  <form class="searchbar glass stage-search" action="{{ route('search') }}" method="get" id="home-search">
+    <button type="button" class="sp-pill" data-open-search><x-i3 name="p_search"/><span><b>کجا می‌خوای بری؟</b><small>مقصد · تاریخ · تعداد نفرات</small></span><i>جستجو</i></button>
+    <div class="sp-head"><b>جستجوی اقامتگاه</b><button type="button" class="btn btn-sm btn-icon btn-light" data-close-search aria-label="بستن"><x-icon name="x" class="sm"/></button></div>
     <div><label>کجا می‌خوای بری؟</label><select name="province"><option value="">همه‌ی استان‌ها</option>@foreach(config('mija.provinces') as $pv => $cs)<option>{{ $pv }}</option>@endforeach</select></div>
     <div class="rp" data-rangepicker data-unavailable="[]">
       <label>کی؟ (ورود و خروج)</label>

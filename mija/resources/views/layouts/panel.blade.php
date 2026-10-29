@@ -60,9 +60,9 @@ $quick = array_slice($menus, 0, 4);
 <nav class="bottomnav" aria-label="منوی پنل">
   <ul>
     @foreach($quick as $m)
-      <li><a href="{{ route($m[0]) }}" class="{{ $isOn($m[0]) ? 'on' : '' }}"><x-icon name="{{ $m[2] }}"/>{{ \Illuminate\Support\Str::before($m[1], ' ') }}@if(!empty($m[3]))<span class="dot">{{ fa($m[3]) }}</span>@endif</a></li>
+      <li><a href="{{ route($m[0]) }}" class="{{ $isOn($m[0]) ? 'on' : '' }}"><x-i3 name="{{ ['home'=>'p_house','chart'=>'trend','calendar'=>'p_calendar','heart'=>'p_heart','wallet'=>'p_wallet','bell'=>'p_bell','user'=>'user','users'=>'family','star'=>'p_star','tag'=>'p_tag','coins'=>'p_coin','list'=>'receipt','settings'=>'p_key'][$m[2]] ?? 'sparkle' }}"/><span>{{ \Illuminate\Support\Str::before($m[1], ' ') }}</span>@if(!empty($m[3]))<span class="dot">{{ fa($m[3]) }}</span>@endif</a></li>
     @endforeach
-    <li><button type="button" id="more-btn"><x-icon name="grid"/>بیشتر</button></li>
+    <li><button type="button" id="more-btn"><x-i3 name="sparkle"/><span>بیشتر</span></button></li>
   </ul>
 </nav>
 <div class="sheet-back" id="sheet-back"></div>

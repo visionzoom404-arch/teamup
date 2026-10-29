@@ -4,14 +4,14 @@
 <div class="page-h"><div><h1>سلام {{ \Illuminate\Support\Str::before(auth()->user()->name, ' ') }} <x-i3 name="wave" class="lg h-i3"/></h1><div class="muted">سفر بعدی‌ات را برنامه‌ریزی کن.</div></div><a class="btn" href="{{ route('search') }}"><x-icon name="search"/> جستجوی اقامتگاه</a></div>
 
 <div class="tiles">
-  <div class="tile card"><div class="ic"><x-icon name="calendar"/></div><b>{{ fa($stats['total']) }}</b><span>کل رزروها</span></div>
-  <div class="tile card"><div class="ic green"><x-icon name="check"/></div><b>{{ fa($stats['done']) }}</b><span>اقامت انجام‌شده</span></div>
-  <div class="tile card"><div class="ic blue"><x-icon name="sun"/></div><b>{{ fa($stats['nights']) }}</b><span>شب اقامت</span></div>
-  <div class="tile card"><div class="ic red"><x-icon name="heart"/></div><b>{{ fa($stats['fav']) }}</b><span>علاقه‌مندی</span></div>
+  <div class="tile card"><div class="ic3"><x-i3 name="p_calendar"/></div><b>{{ fa($stats['total']) }}</b><span>کل رزروها</span></div>
+  <div class="tile card"><div class="ic3"><x-i3 name="check"/></div><b>{{ fa($stats['done']) }}</b><span>اقامت انجام‌شده</span></div>
+  <div class="tile card"><div class="ic3"><x-i3 name="sun"/></div><b>{{ fa($stats['nights']) }}</b><span>شب اقامت</span></div>
+  <div class="tile card"><div class="ic3"><x-i3 name="p_heart"/></div><b>{{ fa($stats['fav']) }}</b><span>علاقه‌مندی</span></div>
 </div>
 
 @if($next)
-<div class="card" style="background:linear-gradient(120deg,rgba(17,18,22,.94),rgba(150,18,34,.92));color:#fff;margin-bottom:20px">
+<div class="card" style="background:linear-gradient(120deg,rgba(17,18,22,.94),rgba(190,80,10,.92));color:#fff;margin-bottom:20px">
   <div class="row wrap" style="gap:18px"><img src="{{ $next->property->cover() }}" style="width:130px;height:100px;border-radius:16px;object-fit:cover" alt="">
     <div class="grow"><span class="badge gold">سفر بعدی شما</span><h3 style="color:#fff;margin:6px 0 2px">{{ $next->property->title }}</h3><div style="opacity:.85">{{ jdate($next->check_in, 'l j F') }} · {{ $next->property->province }}، {{ $next->property->city }}</div><div class="small" style="opacity:.75">{{ ($d = (int) today()->diffInDays($next->check_in, false)) > 0 ? fa($d).' روز دیگر' : 'در حال اقامت' }}</div></div>
     <a class="btn btn-gold" href="{{ route('guest.bookings.show', $next) }}">جزئیات سفر</a></div>

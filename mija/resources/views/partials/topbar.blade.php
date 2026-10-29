@@ -13,7 +13,7 @@
     <div class="top-actions">
       @auth
         <a href="{{ route('notices') }}" class="top-btn" aria-label="اعلان‌ها"><x-icon name="bell"/>@if($unread)<span class="dot">{{ fa($unread) }}</span>@endif</a>
-        <a href="{{ $u->homeRoute() }}" class="top-btn solid"><i class="rdot {{ $u->role }}"></i><span class="top-hide-m">{{ \Illuminate\Support\Str::limit($u->name, 14) }}</span><small class="top-hide-m role-mini {{ $u->role }}">{{ $u->roleLabel() }}</small></a>
+        <a href="{{ $u->homeRoute() }}" class="top-btn solid"><img class="tb-av" src="{{ $u->avatarUrl() }}" alt=""><span class="top-hide-m">{{ \Illuminate\Support\Str::limit($u->name, 14) }}</span><small class="top-hide-m role-mini {{ $u->role }}">{{ $u->roleLabel() }}</small></a>
       @else
         <a href="{{ route('login') }}" class="top-btn top-hide-m">ورود</a>
         <a href="{{ route('register') }}" class="top-btn solid">ثبت‌نام</a>

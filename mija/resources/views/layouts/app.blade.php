@@ -22,19 +22,24 @@
 @endunless
 
 @php $role = auth()->user()?->role; @endphp
-<nav class="bottomnav" aria-label="منوی اصلی">
+<nav class="bottomnav tabbar" aria-label="منوی اصلی">
   <ul>
-    <li><a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'on' : '' }}"><x-icon name="home"/>خانه</a></li>
-    <li><a href="{{ route('search') }}" class="{{ request()->routeIs('search') ? 'on' : '' }}"><x-icon name="search"/>جستجو</a></li>
+    <li><a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'on' : '' }}"><x-i3 name="p_house"/><span>خانه</span></a></li>
     @if($role === 'guest')
-      <li><a href="{{ route('guest.bookings') }}"><x-icon name="calendar"/>سفرها</a></li>
-      <li><a href="{{ route('guest.favorites') }}"><x-icon name="heart"/>نشان‌شده</a></li>
+      <li><a href="{{ route('guest.bookings') }}"><x-i3 name="p_calendar"/><span>سفرها</span></a></li>
     @else
-      <li><a href="{{ route('page', 'become-host') }}"><x-icon name="key"/>میزبان شوید</a></li>
+      <li><a href="{{ route('page', 'become-host') }}"><x-i3 name="p_key"/><span>میزبان شو</span></a></li>
     @endif
-    <li><a href="{{ auth()->check() ? auth()->user()->homeRoute() : route('login') }}" class="{{ request()->routeIs('login','register') ? 'on' : '' }}"><x-icon name="user"/>{{ auth()->check() ? 'پنل من' : 'ورود' }}</a></li>
+    <li class="fab"><a href="{{ route('search') }}" class="{{ request()->routeIs('search') ? 'on' : '' }}" aria-label="جستجو"><span class="fab-ic"><x-i3 name="p_search"/></span><span>جستجو</span></a></li>
+    @if($role)
+      <li><a href="{{ route('notices') }}"><x-i3 name="p_bell"/><span>اعلان‌ها</span></a></li>
+    @else
+      <li><a href="{{ route('register') }}"><x-i3 name="p_gift"/><span>ثبت‌نام</span></a></li>
+    @endif
+    <li><a href="{{ auth()->check() ? auth()->user()->homeRoute() : route('login') }}" class="{{ request()->routeIs('login','register') ? 'on' : '' }}"><x-i3 name="user"/><span>{{ auth()->check() ? 'پنل من' : 'ورود' }}</span></a></li>
   </ul>
 </nav>
+<div class="sheet-back" id="sheet-back"></div>
 @include('partials.scripts')
 </body>
 </html>

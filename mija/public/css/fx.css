@@ -448,3 +448,114 @@ body::before{background:
 
 .i3[viewBox] {overflow:visible}
 .feat .ico .i3,.step .no .i3{filter:drop-shadow(0 6px 8px rgba(150,60,0,.25))}
+
+/* ==========================================================
+   بازطراحی مینیمال و سه‌بعدی نسخه‌ی موبایل
+   ========================================================== */
+.pcard .pp{display:none}
+.sp-pill,.sp-head{display:none}
+.tile .ic3{width:56px;height:56px;margin-bottom:8px;display:grid;place-items:center;border-radius:19px;background:linear-gradient(150deg,#fff,#FFF1E0);box-shadow:inset 0 1px 0 #fff,0 12px 22px -10px rgba(242,107,15,.5),0 0 0 1px rgba(242,107,15,.1)}
+.tile .ic3 .i3{width:42px;height:42px}
+.tile{transition:.3s cubic-bezier(.2,.8,.2,1)}.tile:hover{transform:translateY(-4px)}
+
+/* منوی پایین: آیکن‌های سه‌بعدی + دکمه‌ی شناور جستجو */
+.tabbar{overflow:visible}
+.tabbar li a,.tabbar li button{gap:2px;font-size:10.5px}
+.tabbar .i3{width:27px;height:27px;filter:drop-shadow(0 3px 4px rgba(120,40,0,.35));transition:transform .35s cubic-bezier(.3,1.6,.5,1)}
+.tabbar a.on .i3{transform:translateY(-3px) scale(1.18)}
+.tabbar a:active .i3{transform:scale(.85)}
+.tabbar .fab{flex:1.1;position:relative}
+.tabbar .fab a{overflow:visible;background:none!important;box-shadow:none!important}
+.fab-ic{position:absolute;top:-34px;inset-inline-start:calc(50% - 33px);width:66px;height:66px;border-radius:50%;display:grid;place-items:center;
+  background:radial-gradient(circle at 34% 26%,#FFF1D6 0%,#FFC27A 35%,#F77A1C 75%,#D95A08 100%);border:3px solid rgba(255,255,255,.95);
+  box-shadow:0 18px 30px -8px rgba(242,107,15,.8),0 0 0 7px rgba(255,255,255,.28),inset 0 3px 0 rgba(255,255,255,.8),inset 0 -9px 14px rgba(160,50,0,.28);transition:transform .35s cubic-bezier(.3,1.6,.5,1)}
+.fab-ic .i3{width:38px;height:38px;transform:none!important;filter:drop-shadow(0 4px 5px rgba(120,40,0,.4))}
+.tabbar .fab a:active .fab-ic{transform:scale(.9)}
+.tabbar .fab a>span:last-child{margin-top:34px}
+.tabbar .fab a.on .fab-ic{box-shadow:0 18px 30px -8px rgba(242,107,15,.9),0 0 0 7px rgba(255,255,255,.5),inset 0 3px 0 rgba(255,255,255,.8),inset 0 -9px 14px rgba(160,50,0,.28)}
+
+@media (max-width:860px){
+  :root{--header-h:58px;--nav-h:70px}
+  body{font-size:14.5px}
+  .container{padding:0 14px}
+  h2{font-size:20px}
+  .sec{padding:22px 0}.sec-h{margin-bottom:12px}
+  .sec-h p{font-size:12.5px}
+  .topbar .container{gap:8px}
+  .brand img{width:34px;height:34px}.brand{font-size:19px}
+
+  /* قهرمان فشرده */
+  .stage{min-height:0;border-radius:30px;margin-top:10px}
+  .stage-in{padding:22px 18px 74px}
+  .stage.light h1{font-size:34px;line-height:1.3}
+  .stage .sub{font-size:14px;max-width:none}
+  .stage .badge-g{font-size:12px}
+  .trust{flex-wrap:nowrap;overflow-x:auto;gap:12px;margin-top:16px;padding-bottom:4px;scrollbar-width:none}
+  .trust::-webkit-scrollbar{display:none}.trust>div{flex:none}.trust b{font-size:17px}.trust small{font-size:11px}
+
+  /* جستجو: قرص جمع‌شونده → شیت */
+  .stage-search{display:block;padding:7px!important;margin:-44px 12px 0!important;border-radius:26px}
+  .stage-search>:not(.sp-pill){display:none}
+  .sp-pill{display:flex;align-items:center;gap:12px;width:100%;padding:6px 6px 6px 12px;border-radius:20px;border:0;background:transparent;font:inherit;text-align:start;cursor:pointer;color:var(--ink)}
+  .sp-pill .i3{width:40px;height:40px;flex:none}
+  .sp-pill>span{flex:1;min-width:0}.sp-pill b{display:block;font-size:15px;font-family:var(--font-display)}.sp-pill small{color:var(--muted);font-size:11.5px}
+  .sp-pill i{font-style:normal;padding:11px 20px;border-radius:99px;background:linear-gradient(165deg,#FFA24D,#F26B0F 60%,#E85D04);color:#fff;font-weight:800;font-size:13px;border:1px solid rgba(255,255,255,.7);box-shadow:0 10px 20px -6px rgba(242,107,15,.65),inset 0 1.5px 0 rgba(255,255,255,.7)}
+  .stage-search.sheet-open{position:fixed!important;inset-inline:0;bottom:0;top:auto;margin:0!important;z-index:95;border-radius:32px 32px 0 0;max-height:92vh;overflow:auto;padding:16px 16px calc(26px + var(--safe-b))!important;display:grid;grid-template-columns:1fr;gap:12px;animation:sheetUp .42s cubic-bezier(.2,.8,.2,1);background:linear-gradient(180deg,#fff,#FFF8EF)!important}
+  .stage-search.sheet-open>:not(.sp-pill){display:block}
+  .stage-search.sheet-open>.sp-head{display:flex;align-items:center;justify-content:space-between}
+  .stage-search.sheet-open>.presets{display:flex}
+  .stage-search.sheet-open>.btn{display:inline-flex}
+  .stage-search.sheet-open>.sp-pill{display:none}
+  @keyframes sheetUp{from{transform:translateY(100%)}}
+  body.search-open .sheet-back{opacity:1;pointer-events:auto;z-index:90}
+
+  /* دسته‌ها */
+  .cat-big{width:104px!important;padding:14px 8px 12px;font-size:12.5px;border-radius:24px}
+  .cb-ic{width:56px;height:56px;border-radius:19px}.cb-ic .i3{width:42px;height:42px}
+
+  /* کارت اقامتگاه: عکس بزرگ + قیمت روی عکس */
+  .pcard{border-radius:28px;box-shadow:0 22px 40px -22px rgba(120,50,0,.45),0 0 0 1px rgba(255,255,255,.9)}
+  .pcard:active{transform:scale(.975)}
+  .pcard .ph{aspect-ratio:16/11.5}
+  .pcard .pb{padding:12px 14px 14px}
+  .pcard .pp{display:inline-flex;align-items:baseline;gap:4px;position:absolute;inset-inline-end:10px;bottom:10px;z-index:3;padding:6px 13px;border-radius:99px;background:rgba(255,255,255,.85);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid #fff;font-weight:800;font-size:14px;color:var(--brand-d);box-shadow:0 8px 18px -6px rgba(120,50,0,.4)}
+  .pcard .pp small{font-size:10px;font-weight:600;opacity:.75}
+  .pcard .price{display:none}
+  .pcard .meta{margin:4px 0 0}
+
+  /* مقصدها و بخش‌ها */
+  .bento{grid-auto-rows:136px;gap:10px}.bt{padding:14px;border-radius:24px}.bt-t b{font-size:18px}
+  .steps-3{gap:18px}.step .no{width:74px;height:74px;border-radius:24px}
+  .feat{grid-template-columns:1fr 1fr;gap:10px}.feat .card{padding:16px 12px}
+  .cta{padding:22px;border-radius:26px}
+  .faq summary{padding:14px 16px}
+  .marq{margin-inline:-14px}
+
+  /* پنل‌ها */
+  .tiles{grid-template-columns:1fr 1fr;gap:10px}.tile{padding:14px;border-radius:22px}.tile b{font-size:19px}
+  .page-h h1{font-size:22px}
+  .card{border-radius:24px;padding:16px}
+  .item-row{border-radius:22px}
+  .prof-hero{border-radius:26px;padding:18px}.ph-avatar{width:76px;height:76px;border-radius:24px}.prof-hero h1{font-size:21px}
+  .btn-lg{min-height:52px}
+
+  /* صفحه‌ی اقامتگاه */
+  .gal-sw{border-radius:28px;margin-top:10px}.gal-sw img{height:300px}
+  .facts{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-inline:-14px;padding-inline:14px}.facts::-webkit-scrollbar{display:none}.fact{flex:none}
+  .mobile-book{border-radius:26px;padding:8px 8px 8px 14px;background:linear-gradient(145deg,rgba(255,255,255,.95),rgba(255,248,238,.88))!important}
+  .mobile-book b{font-family:var(--font-display);font-size:17px;color:var(--brand-d)}
+  .rp-pop{border-radius:28px 28px 0 0;bottom:0;inset-inline:0}
+}
+
+.tb-av{width:28px;height:28px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.9);box-shadow:0 2px 6px rgba(0,0,0,.25);margin-inline-start:-8px}
+.top-btn.solid{padding-inline:12px 14px}
+.pshow>*{min-width:0}
+.amen{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+@media (max-width:860px){
+  .stage .balloon{display:none}
+  .trust{padding:8px 12px;border-radius:20px;background:linear-gradient(145deg,rgba(255,255,255,.9),rgba(255,255,255,.62));border:1px solid #fff;box-shadow:0 12px 24px -12px rgba(150,60,0,.4)}
+  .stage.light .trust .t-i{width:34px;height:34px}
+  .card.flat.row{flex-wrap:wrap}
+  .sp-head .btn{width:38px;min-height:38px;padding:0}
+  .sp-head .btn .icon{width:18px;height:18px;color:#C2500A;stroke:#C2500A}
+}

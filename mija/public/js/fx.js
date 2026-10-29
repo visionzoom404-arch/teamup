@@ -32,7 +32,7 @@
   if (nav) {
     const ind = document.createElement('span'); ind.className = 'indicator'; nav.prepend(ind);
     // موقعیت نشانگر با offsetLeft نسبت به ul محاسبه می‌شود
-    const placeAbs = () => { const on = $('a.on', nav); if (!on) { ind.style.opacity = 0; return; } const li = on.parentElement; ind.style.opacity = 1; ind.style.left = li.offsetLeft + 'px'; ind.style.width = li.offsetWidth + 'px'; ind.style.transform = 'none'; ind.style.insetInlineStart = 'auto'; };
+    const placeAbs = () => { const on = $('a.on', nav); if (!on || on.parentElement.classList.contains('fab')) { ind.style.opacity = 0; return; } const li = on.parentElement; ind.style.opacity = 1; ind.style.left = li.offsetLeft + 'px'; ind.style.width = li.offsetWidth + 'px'; ind.style.transform = 'none'; ind.style.insetInlineStart = 'auto'; };
     placeAbs(); addEventListener('resize', placeAbs); setTimeout(placeAbs, 400);
   }
 
@@ -175,6 +175,24 @@
     const t = new Date(el.dataset.countdown).getTime(); const tick = () => { let d = t - Date.now(); if (d < 0) { el.textContent = 'در حال اقامت'; return; } const day = Math.floor(d / 864e5), h = Math.floor(d % 864e5 / 36e5), m = Math.floor(d % 36e5 / 6e4); el.innerHTML = `<b>${fa(day)}</b> روز <b>${fa(h)}</b> ساعت <b>${fa(m)}</b> دقیقه`; };
     tick(); setInterval(tick, 30000);
   });
+
+  /* ---------- جستجوی موبایل (شیت) ---------- */
+  const hs = $('#home-search');
+  if (hs) {
+    const back = $('#sheet-back');
+    const set = o => { hs.classList.toggle('sheet-open', o); document.body.classList.toggle('search-open', o); document.body.style.overflow = o ? 'hidden' : ''; };
+    $$('[data-open-search]').forEach(b => b.addEventListener('click', () => set(true)));
+    $$('[data-close-search]').forEach(b => b.addEventListener('click', () => set(false)));
+    back && back.addEventListener('click', () => { if (hs.classList.contains('sheet-open')) set(false); });
+  }
+
+  /* ---------- پارالاکس با ژیروسکوپ گوشی (اندروید/موبایل‌های بدون درخواست مجوز) ---------- */
+  if (!reduce && matchMedia('(pointer:coarse)').matches && window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission !== 'function') {
+    $$('[data-parallax]').forEach(box => {
+      const layers = $$('.layer', box).map(l => ({ el: l, d: +l.dataset.depth || 10 }));
+      addEventListener('deviceorientation', e => { if (e.gamma == null) return; const x = Math.max(-25, Math.min(25, e.gamma)) / 40, y = Math.max(-25, Math.min(25, (e.beta || 45) - 45)) / 60; layers.forEach(({ el, d }) => el.style.translate = `${-x * d}px ${-y * d * .5}px`); });
+    });
+  }
 
   /* ---------- قلب: انیمیشن ---------- */
   document.addEventListener('click', e => { const f = e.target.closest('[data-fav]'); if (f) { f.classList.add('pop'); setTimeout(() => f.classList.remove('pop'), 600); } }, true);

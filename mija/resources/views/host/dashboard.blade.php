@@ -16,11 +16,11 @@ $shareChart = ['labels' => $share->pluck('t')->all(), 'data' => $share->pluck('n
 @endif
 
 <div class="tiles">
-  <div class="tile card"><div class="ic"><x-icon name="coins"/></div><b data-count="{{ $stats['income'] }}">{{ toman($stats['income'], false) }}</b><span>کل درآمد (تومان)</span></div>
-  <div class="tile card"><div class="ic dark"><x-icon name="wallet"/></div><b>{{ toman($u->wallet, false) }}</b><span>موجودی کیف پول</span></div>
-  <div class="tile card"><div class="ic blue"><x-icon name="calendar"/></div><b>{{ fa($stats['bookings']) }}</b><span>رزرو قطعی</span></div>
-  <div class="tile card"><div class="ic green"><x-icon name="home"/></div><b>{{ fa($stats['active']) }}/{{ fa($stats['properties']) }}</b><span>اقامتگاه فعال</span></div>
-  <div class="tile card"><div class="ic red"><x-icon name="star"/></div><b>{{ $hs['rating'] ? fa(number_format($hs['rating'], 1)) : '—' }}</b><span>میانگین امتیاز</span></div>
+  <div class="tile card"><div class="ic3"><x-i3 name="p_coin"/></div><b data-count="{{ $stats['income'] }}">{{ toman($stats['income'], false) }}</b><span>کل درآمد (تومان)</span></div>
+  <div class="tile card"><div class="ic3"><x-i3 name="p_wallet"/></div><b>{{ toman($u->wallet, false) }}</b><span>موجودی کیف پول</span></div>
+  <div class="tile card"><div class="ic3"><x-i3 name="p_calendar"/></div><b>{{ fa($stats['bookings']) }}</b><span>رزرو قطعی</span></div>
+  <div class="tile card"><div class="ic3"><x-i3 name="p_house"/></div><b>{{ fa($stats['active']) }}/{{ fa($stats['properties']) }}</b><span>اقامتگاه فعال</span></div>
+  <div class="tile card"><div class="ic3"><x-i3 name="p_star"/></div><b>{{ $hs['rating'] ? fa(number_format($hs['rating'], 1)) : '—' }}</b><span>میانگین امتیاز</span></div>
 </div>
 
 @if($pendingRequests->count())

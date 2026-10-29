@@ -14,12 +14,12 @@ $d2 = ['labels' => collect($propStatus)->keys()->map(fn ($k) => $stl[$k] ?? $k)-
   <form method="post" action="{{ route('admin.tick') }}">@csrf<button class="btn btn-sm btn-light"><x-icon name="bolt" class="sm"/> اجرای تسویه و انقضا</button></form></div>
 
 <div class="tiles">
-  <div class="tile card"><div class="ic"><x-icon name="coins"/></div><b>{{ toman($kpi['gmv'], false) }}</b><span>حجم رزروها (تومان)</span></div>
-  <div class="tile card"><div class="ic green"><x-icon name="wallet"/></div><b>{{ toman($kpi['commission'], false) }}</b><span>کمیسیون پلتفرم</span></div>
-  <div class="tile card"><div class="ic blue"><x-icon name="calendar"/></div><b>{{ fa($kpi['bookings']) }}</b><span>کل رزروها</span></div>
-  <div class="tile card"><div class="ic dark"><x-icon name="users"/></div><b>{{ fa($kpi['users']) }}</b><span>مهمان</span></div>
-  <div class="tile card"><div class="ic red"><x-icon name="key"/></div><b>{{ fa($kpi['hosts']) }}</b><span>میزبان</span></div>
-  <div class="tile card"><div class="ic"><x-icon name="home"/></div><b>{{ fa($kpi['properties']) }}</b><span>اقامتگاه فعال</span></div>
+  <div class="tile card"><div class="ic3"><x-i3 name="p_coin"/></div><b>{{ toman($kpi['gmv'], false) }}</b><span>حجم رزروها (تومان)</span></div>
+  <div class="tile card"><div class="ic3"><x-i3 name="p_wallet"/></div><b>{{ toman($kpi['commission'], false) }}</b><span>کمیسیون پلتفرم</span></div>
+  <div class="tile card"><div class="ic3"><x-i3 name="p_calendar"/></div><b>{{ fa($kpi['bookings']) }}</b><span>کل رزروها</span></div>
+  <div class="tile card"><div class="ic3"><x-i3 name="family"/></div><b>{{ fa($kpi['users']) }}</b><span>مهمان</span></div>
+  <div class="tile card"><div class="ic3"><x-i3 name="p_key"/></div><b>{{ fa($kpi['hosts']) }}</b><span>میزبان</span></div>
+  <div class="tile card"><div class="ic3"><x-i3 name="p_house"/></div><b>{{ fa($kpi['properties']) }}</b><span>اقامتگاه فعال</span></div>
 </div>
 
 @if(array_sum($queue))

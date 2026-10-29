@@ -16,10 +16,10 @@
     </div>
   </section>
   <div class="tiles">
-    <div class="tile card"><div class="ic"><x-icon name="star"/></div><b>{{ $hs['rating'] ? fa(number_format($hs['rating'], 1)) : '—' }}</b><span>امتیاز میانگین</span></div>
-    <div class="tile card"><div class="ic blue"><x-icon name="chat"/></div><b>{{ fa($hs['reviews']) }}</b><span>نظر مهمانان</span></div>
-    <div class="tile card"><div class="ic green"><x-icon name="check"/></div><b>{{ fa($hs['completed']) }}</b><span>اقامت موفق</span></div>
-    <div class="tile card"><div class="ic dark"><x-icon name="clock"/></div><b>{{ $hs['response_rate'] !== null ? fa($hs['response_rate']).'٪' : '—' }}</b><span>نرخ پاسخ‌گویی</span></div>
+    <div class="tile card"><div class="ic3"><x-i3 name="p_star"/></div><b>{{ $hs['rating'] ? fa(number_format($hs['rating'], 1)) : '—' }}</b><span>امتیاز میانگین</span></div>
+    <div class="tile card"><div class="ic3"><x-i3 name="p_chat"/></div><b>{{ fa($hs['reviews']) }}</b><span>نظر مهمانان</span></div>
+    <div class="tile card"><div class="ic3"><x-i3 name="check"/></div><b>{{ fa($hs['completed']) }}</b><span>اقامت موفق</span></div>
+    <div class="tile card"><div class="ic3"><x-i3 name="p_hourglass"/></div><b>{{ $hs['response_rate'] !== null ? fa($hs['response_rate']).'٪' : '—' }}</b><span>نرخ پاسخ‌گویی</span></div>
   </div>
   <div class="sec-h"><h2>اقامتگاه‌های {{ \Illuminate\Support\Str::before($h->name, ' ') }}</h2></div>
   @if($props->count())<div class="grid-cards">@foreach($props as $p)@include('partials.pcard')@endforeach</div>@else<div class="card empty"><x-i3 name="p_house"/><p>اقامتگاه فعالی ندارد.</p></div>@endif
