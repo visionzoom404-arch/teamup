@@ -3,31 +3,11 @@
   const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
   const reduce = matchMedia('(prefers-reduced-motion:reduce)').matches;
 
-  /* ---------- ورود متحرک ---------- */
+  /* ---------- ورود آرام ---------- */
   if (window.gsap && !reduce) {
-    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
-    tl.from('#auth-card', { y: 60, opacity: 0, scale: .96, duration: .9 })
-      .from('.auth-logo img', { scale: 0, rotate: -40, duration: .8, ease: 'back.out(2)' }, '-=.55')
-      .from('[data-a]', { y: 22, opacity: 0, duration: .55, stagger: .07 }, '-=.5')
-      .from('.auth-top > *', { y: -16, opacity: 0, stagger: .1, duration: .5 }, 0.1)
-      .from('.chip', { scale: .4, opacity: 0, stagger: .15, duration: .8, ease: 'back.out(1.8)' }, .5)
-      .from('.pin-float', { y: -120, opacity: 0, duration: 1.1, ease: 'bounce.out' }, .35)
-      .from('.scene .layer', { y: 80, opacity: 0, stagger: .08, duration: 1 }, 0);
+    gsap.from('#auth-card .auth-logo', { y: 14, opacity: 0, duration: .7, ease: 'power3.out' });
+    gsap.from('[data-a]', { y: 16, opacity: 0, duration: .6, stagger: .06, ease: 'power3.out', delay: .12 });
   }
-
-  /* ---------- پارالاکس با ماوس و ژیروسکوپ ---------- */
-  const scene = $('#auth-scene');
-  if (scene && !reduce) {
-    const layers = $$('.layer', scene).map(l => ({ el: l, d: +l.dataset.depth || 10 }));
-    const move = (x, y) => layers.forEach(({ el, d }) => { el.style.translate = `${x * d}px ${y * d * .5}px`; });
-    scene.addEventListener('mousemove', e => { const r = scene.getBoundingClientRect(); move(-((e.clientX - r.left) / r.width - .5) * .8, -((e.clientY - r.top) / r.height - .5) * .8); });
-    scene.addEventListener('mouseleave', () => move(0, 0));
-    window.addEventListener('deviceorientation', e => { if (e.gamma == null) return; move(-Math.max(-30, Math.min(30, e.gamma)) / 40, -Math.max(-30, Math.min(30, (e.beta || 0) - 45)) / 60); });
-  }
-
-  /* ---------- متن چرخان ---------- */
-  const rot = $$('#rot p'), dots = $$('#rot-dots i');
-  if (rot.length) { let i = 0; setInterval(() => { rot[i].classList.remove('on'); dots[i].classList.remove('on'); i = (i + 1) % rot.length; rot[i].classList.add('on'); dots[i].classList.add('on'); }, 4200); }
 
   /* ---------- نمایش رمز ---------- */
   $$('[data-eye]').forEach(b => b.addEventListener('click', () => {

@@ -39,11 +39,11 @@
   /* ---------- ورود تدریجی عناصر هنگام اسکرول ---------- */
   if (g && window.ScrollTrigger && !reduce) {
     g.registerPlugin(ScrollTrigger);
-    const sel = '.pcard,.cat,.tile,.feat .card,.dest,.item-row,.step,.testi,.faq details,.card.rv,[data-reveal]';
+    const sel = '.pcard,.cat-big,.tile,.feat .card,.bt,.item-row,.step,.faq details,[data-reveal]';
     $$(sel).forEach(el => { if (!el.closest('.swiper')) el.style.opacity = 0; });
     ScrollTrigger.batch($$(sel).filter(el => !el.closest('.swiper')), {
       start: 'top 92%', once: true,
-      onEnter: els => g.fromTo(els, { y: 34, opacity: 0, scale: .97 }, { y: 0, opacity: 1, scale: 1, duration: .7, ease: 'power3.out', stagger: .08, clearProps: 'transform' }),
+      onEnter: els => g.fromTo(els, { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .9, ease: 'power3.out', stagger: .07, clearProps: 'transform' }),
     });
     // عنوان بخش‌ها
     $$('.sec-h,.page-h').forEach(el => g.from(el, { y: 20, opacity: 0, duration: .6, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 95%', once: true } }));
@@ -62,14 +62,6 @@
   /* ---------- تصاویر: محو شدن پس از بارگذاری ---------- */
   $$('.pcard .ph img').forEach(i => { const ok = () => i.classList.add('loaded'); i.complete ? ok() : i.addEventListener('load', ok); i.addEventListener('error', ok); });
 
-  /* ---------- کارت سه‌بعدی روی دسکتاپ ---------- */
-  if (g && !reduce && matchMedia('(hover:hover) and (pointer:fine)').matches) {
-    $$('.pcard').forEach(c => {
-      c.addEventListener('mousemove', e => { const r = c.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5; g.to(c, { rotateY: x * 7, rotateX: -y * 7, y: -6, duration: .4, transformPerspective: 900, ease: 'power2.out' }); });
-      c.addEventListener('mouseleave', () => g.to(c, { rotateY: 0, rotateX: 0, y: 0, duration: .6, ease: 'power3.out' }));
-    });
-  }
-
   /* ---------- پارالاکس صحنه‌ها ---------- */
   $$('[data-parallax]').forEach(box => {
     if (reduce) return;
@@ -77,26 +69,17 @@
     const move = (x, y) => layers.forEach(({ el, d }) => el.style.translate = `${x * d}px ${y * d * .5}px`);
     box.addEventListener('mousemove', e => { const r = box.getBoundingClientRect(); move(-((e.clientX - r.left) / r.width - .5) * .8, -((e.clientY - r.top) / r.height - .5) * .8); });
     box.addEventListener('mouseleave', () => move(0, 0));
-    if (g && window.ScrollTrigger) layers.forEach(({ el, d }) => g.to(el, { y: -d * .9, ease: 'none', scrollTrigger: { trigger: box, start: 'top top', end: 'bottom top', scrub: true } }));
+    if (g && window.ScrollTrigger) layers.forEach(({ el, d }) => g.to(el, { y: -d * .5, ease: 'none', scrollTrigger: { trigger: box, start: 'top top', end: 'bottom top', scrub: true } }));
   });
 
-  /* ---------- چرخش کلمات عنوان ---------- */
-  $$('.rotor').forEach(r => {
-    const w = $$('span', r); if (w.length < 2) return; let i = 0; w[0].classList.add('on');
-    r.style.minWidth = Math.max(...w.map(x => x.offsetWidth)) + 'px';
-    setInterval(() => { const p = w[i]; p.classList.remove('on'); p.classList.add('out'); i = (i + 1) % w.length; const n = w[i]; n.classList.remove('out'); void n.offsetWidth; n.classList.add('on'); setTimeout(() => p.classList.remove('out'), 700); }, 2600);
-  });
-
-  /* ---------- هیرو: ورود سینمایی ---------- */
+  /* ---------- هیرو: ورود آرام ---------- */
   if (g && !reduce && $('.stage')) {
     g.timeline({ defaults: { ease: 'power3.out' } })
-      .from('.stage .scene .layer', { y: 90, opacity: 0, duration: 1.1, stagger: .09 })
-      .from('.stage-in .badge', { y: 20, opacity: 0, duration: .6 }, .25)
-      .from('.stage-in h1', { y: 36, opacity: 0, duration: .8 }, .35)
-      .from('.stage-in .sub', { y: 24, opacity: 0, duration: .7 }, .5)
-      .from('.trust > div', { y: 20, opacity: 0, stagger: .1, duration: .6 }, .65)
-      .from('.stage .searchbar', { y: 70, opacity: 0, duration: .9 }, .55)
-      .from('.stage .chip', { scale: .4, opacity: 0, stagger: .15, duration: .8, ease: 'back.out(1.8)' }, .9);
+      .from('.stage .eyebrow', { y: 16, opacity: 0, duration: .8 }, .15)
+      .from('.stage h1', { y: 34, opacity: 0, duration: 1 }, .25)
+      .from('.stage .sub', { y: 20, opacity: 0, duration: .9 }, .5)
+      .from('.trust > div', { y: 16, opacity: 0, stagger: .1, duration: .8 }, .7)
+      .from('.stage-search', { y: 40, opacity: 0, duration: 1 }, .6);
   }
 
   /* ---------- اسلایدرها ---------- */
@@ -122,10 +105,10 @@
     Chart.defaults.font.family = 'Vazir, sans-serif'; Chart.defaults.color = '#6b7080';
     $$('canvas[data-chart]').forEach(cv => {
       const d = JSON.parse(cv.dataset.chart), ctx = cv.getContext('2d'), h = cv.parentElement.clientHeight || 230;
-      const gr = ctx.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, d.color || 'rgba(255,98,30,.55)'); gr.addColorStop(1, 'rgba(255,178,26,0)');
+      const gr = ctx.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, d.color || 'rgba(180,105,42,.35)'); gr.addColorStop(1, 'rgba(255,178,26,0)');
       const type = d.type || 'line';
       new Chart(cv, {
-        type, data: { labels: d.labels, datasets: [{ data: d.data, borderColor: d.border || '#FF5A1F', backgroundColor: type === 'bar' ? (d.bar || '#FF7A00') : gr, fill: true, tension: .28, borderWidth: 3, pointRadius: 0, pointHoverRadius: 6, pointBackgroundColor: '#fff', pointBorderColor: '#FF5A1F', pointBorderWidth: 3, borderRadius: 10, maxBarThickness: 34 }] },
+        type, data: { labels: d.labels, datasets: [{ data: d.data, borderColor: d.border || '#B4692A', backgroundColor: type === 'bar' ? (d.bar || '#16130F') : gr, fill: true, tension: .28, borderWidth: 3, pointRadius: 0, pointHoverRadius: 6, pointBackgroundColor: '#fff', pointBorderColor: '#B4692A', pointBorderWidth: 3, borderRadius: 10, maxBarThickness: 34 }] },
         options: { responsive: true, maintainAspectRatio: false, animation: { duration: reduce ? 0 : 1400, easing: 'easeOutQuart' }, interaction: { intersect: false, mode: 'index' },
           plugins: { legend: { display: false }, tooltip: { rtl: true, backgroundColor: 'rgba(17,18,22,.92)', padding: 12, cornerRadius: 12, displayColors: false, callbacks: { label: c => (d.unit === 'toman' ? sep(c.parsed.y) + ' تومان' : fa(c.parsed.y) + (d.unit || '')) } } },
           scales: { x: { grid: { display: false }, border: { display: false }, reverse: true }, y: { position: 'right', beginAtZero: true, grid: { color: 'rgba(17,18,22,.06)' }, border: { display: false }, ticks: { maxTicksLimit: 5, callback: v => d.unit === 'toman' ? fa((v / 1e6).toFixed(v % 1e6 ? 1 : 0)) + 'م' : fa(v) } } } },
@@ -133,7 +116,7 @@
     });
     $$('canvas[data-donut]').forEach(cv => {
       const d = JSON.parse(cv.dataset.donut);
-      new Chart(cv, { type: 'doughnut', data: { labels: d.labels, datasets: [{ data: d.data, backgroundColor: ['#F26B0F', '#FFB21A', '#19B5AC', '#2A2C33', '#7CC8F0', '#2FAE6B'], borderWidth: 4, borderColor: '#fff', hoverOffset: 10 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '68%', animation: { duration: reduce ? 0 : 1400 }, plugins: { legend: { position: 'bottom', rtl: true, labels: { usePointStyle: true, padding: 14 } }, tooltip: { rtl: true, callbacks: { label: c => ' ' + c.label + ': ' + fa(c.parsed) } } } } });
+      new Chart(cv, { type: 'doughnut', data: { labels: d.labels, datasets: [{ data: d.data, backgroundColor: ['#16130F', '#B4692A', '#C9A24B', '#6C8FA6', '#2F6F55', '#8A8378'], borderWidth: 4, borderColor: '#fff', hoverOffset: 10 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '68%', animation: { duration: reduce ? 0 : 1400 }, plugins: { legend: { position: 'bottom', rtl: true, labels: { usePointStyle: true, padding: 14 } }, tooltip: { rtl: true, callbacks: { label: c => ' ' + c.label + ': ' + fa(c.parsed) } } } } });
     });
   }
 

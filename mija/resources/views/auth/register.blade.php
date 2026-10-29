@@ -2,16 +2,16 @@
 @section('title', 'ثبت‌نام')
 @section('card')
 @php $r = old('role', $role) === 'host' ? 'host' : 'guest'; @endphp
-<h1 data-a>ساخت حساب جدید <x-i3 name="sparkle" class="lg h-i3"/></h1>
-<p class="lead" data-a>کمتر از یک دقیقه طول می‌کشد.</p>
+<h1 data-a>ایجاد حساب.</h1>
+<p class="lead" data-a>کمتر از یک دقیقه زمان می‌برد.</p>
 <form method="post" action="{{ route('register') }}" id="auth-form" novalidate>
   @csrf
   <input type="hidden" name="ref" value="{{ old('ref', $ref) }}">
   @if(old('ref', $ref))<div class="alert ok" data-a><x-i3 name="p_gift" class="sm"/> با کد دعوت <b class="ltr">{{ old('ref', $ref) }}</b> ثبت‌نام می‌کنید؛ پس از اولین رزرو هدیه می‌گیرید.</div>@endif
   <div class="role-seg" data-r="{{ $r }}" id="role-seg" data-a>
     <span class="pill"></span>
-    <label><input type="radio" name="role" value="guest" @checked($r === 'guest')><x-i3 name="user" class="sm"/> مهمان<small>می‌خواهم رزرو کنم</small></label>
-    <label><input type="radio" name="role" value="host" @checked($r === 'host')><x-i3 name="p_key" class="sm"/> میزبان<small>ملک دارم</small></label>
+    <label><input type="radio" name="role" value="guest" @checked($r === 'guest')>مهمان<small>می‌خواهم رزرو کنم</small></label>
+    <label><input type="radio" name="role" value="host" @checked($r === 'host')>میزبان<small>ملک دارم</small></label>
   </div>
   <ul class="perks" id="perks" data-a>
     <li data-for="guest"><i><x-i3 name="villa" class="sm"/></i>هزاران ویلا و کلبه با قیمت شفاف</li>
@@ -21,24 +21,24 @@
   </ul>
   <div class="fl {{ $errors->has('name') ? 'has-err' : '' }}" data-a>
     <input id="name" name="name" autocomplete="name" placeholder=" " value="{{ old('name') }}" required>
-    <label for="name">نام و نام خانوادگی</label><span class="ico"><x-icon name="user"/></span>
+    <label for="name">نام و نام خانوادگی</label>
     @error('name')<div class="msg-e">{{ $message }}</div>@enderror
   </div>
   <div class="fl {{ $errors->has('phone') ? 'has-err' : '' }}" data-a>
     <input id="phone" name="phone" dir="ltr" inputmode="numeric" autocomplete="username" placeholder=" " value="{{ old('phone') }}" data-phone required>
-    <label for="phone">شماره موبایل</label><span class="ico"><x-icon name="phone"/></span>
+    <label for="phone">شماره موبایل</label>
     @error('phone')<div class="msg-e">{{ $message }}</div>@enderror
   </div>
   <div class="fl {{ $errors->has('password') ? 'has-err' : '' }}" data-a>
     <input id="password" name="password" type="password" dir="ltr" autocomplete="new-password" placeholder=" " minlength="6" required data-strength>
-    <label for="password">رمز عبور (حداقل ۶ کاراکتر)</label><span class="ico"><x-icon name="lock"/></span>
+    <label for="password">رمز عبور (حداقل ۶ کاراکتر)</label>
     <button type="button" class="eye" data-eye aria-label="نمایش رمز"><x-icon name="eye"/></button>
     @error('password')<div class="msg-e">{{ $message }}</div>@enderror
   </div>
   <div class="strength" id="strength" data-s="0" data-a><i></i><i></i><i></i><i></i><span></span></div>
   <div class="fl" data-a>
     <input id="pc" name="password_confirmation" type="password" dir="ltr" autocomplete="new-password" placeholder=" " required>
-    <label for="pc">تکرار رمز عبور</label><span class="ico"><x-icon name="shield"/></span>
+    <label for="pc">تکرار رمز عبور</label>
   </div>
   <button class="btn btn-auth btn-lg" data-a><span class="spin"></span><span class="lbl">ساخت حساب</span><x-icon name="chev-l"/></button>
 </form>
