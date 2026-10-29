@@ -3,23 +3,27 @@
 <head>@include('partials.head')</head>
 <body class="auth-body">
 @include('partials.i3-defs')
-<div class="auth-wrap">
-  <main class="auth-side">
-    <div class="auth-box">
-      <div class="auth-top">
-        <a href="{{ route('home') }}" class="home"><x-icon name="arrow-r" class="sm"/> بازگشت به سایت</a>
-        <span class="muted xs"><x-icon name="lock" class="sm"/> اتصال امن</span>
-      </div>
-      <section class="auth-card" id="auth-card">
-        <div class="auth-logo"><img src="{{ asset('img/mija-mark.svg') }}" alt="می‌جا"><div><div style="font-family:var(--font-display);font-weight:800;font-size:22px;line-height:1.2">می‌جا</div><div class="xs" style="letter-spacing:.34em;font-weight:700;color:var(--brand)">MIJA</div></div></div>
-        @yield('card')
-      </section>
-    </div>
-  </main>
-  <aside class="auth-scene" id="auth-scene">
-    @if($lg = site_image('login'))<img class="stage-photo" src="{{ $lg }}" alt="">@endif
-    <div class="scene-copy"><div class="mk">MIJA · جای خوب، سفر خوب</div><p class="q">اقامتی که فقط یک‌بار تجربه نمی‌کنی؛ هر بار دوباره می‌خواهی‌اش.</p><small>ویلا، کلبه و اقامتگاه‌های تأییدشده؛ مستقیم از میزبان.</small></div>
-  </aside>
+<div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+<div class="au">
+  <div class="au-top">
+    <a href="{{ route('home') }}" class="au-back"><x-icon name="arrow-r" class="sm"/> بازگشت به سایت</a>
+    <span class="au-sec"><x-icon name="lock" class="sm"/> اتصال امن</span>
+  </div>
+  <div class="au-shell" id="auth-card">
+    <section class="au-form">
+      <div class="auth-logo"><img src="{{ asset('img/mija-mark.svg') }}" alt="می‌جا"><div><b>می‌جا</b><small>MIJA</small></div></div>
+      @yield('card')
+    </section>
+    <aside class="au-show" aria-hidden="true">
+      <div class="au-orb"></div>
+      <img class="au-logo" src="{{ asset('img/mija-logo-stacked.svg') }}" alt="">
+      <div class="au-copy"><h2>جای خوب، سفر خوب.</h2><p>ویلا، کلبه و اقامتگاه‌های تأییدشده؛ مستقیم از میزبان.</p></div>
+      <div class="au-chip c1"><x-i3 name="p_bolt" class="sm"/><span><b>رزرو فوری</b><small>بدون انتظار تأیید</small></span></div>
+      <div class="au-chip c2"><x-i3 name="p_shield" class="sm"/><span><b>پرداخت امن</b><small>ضمانت بازگشت وجه</small></span></div>
+      <div class="au-chip c3"><x-i3 name="p_star" class="sm"/><span><b>۴٫۸ از ۵</b><small>رضایت مهمانان</small></span></div>
+      <div class="au-stats"><div><b>+{{ fa(\App\Models\Property::approved()->count()) }}</b><small>اقامتگاه</small></div><div><b>{{ fa(count(config('mija.regions'))) }}</b><small>منطقه</small></div><div><b>۱۰٪</b><small>کارمزد شفاف</small></div></div>
+    </aside>
+  </div>
 </div>
 <script src="{{ asset('vendor/gsap.min.js') }}"></script>
 <script src="{{ asset('js/jalali.js') }}"></script>

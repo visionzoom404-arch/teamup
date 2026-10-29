@@ -15,5 +15,6 @@
 <link rel="preload" href="{{ asset('fonts/Estedad-800.woff2') }}" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="{{ asset('fonts/Vazirmatn-Regular.woff2') }}" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{{ asset('css/lux.css') }}?v={{ filemtime(public_path('css/lux.css')) }}">
+<link rel="stylesheet" href="{{ asset('css/glass.css') }}?v={{ filemtime(public_path('css/glass.css')) }}">
 <link rel="stylesheet" href="{{ asset('vendor/swiper-bundle.min.css') }}">
 <meta name="csrf-token" content="{{ csrf_token() }}">

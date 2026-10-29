@@ -105,10 +105,11 @@
     Chart.defaults.font.family = 'Vazir, sans-serif'; Chart.defaults.color = '#6b7080';
     $$('canvas[data-chart]').forEach(cv => {
       const d = JSON.parse(cv.dataset.chart), ctx = cv.getContext('2d'), h = cv.parentElement.clientHeight || 230;
-      const gr = ctx.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, d.color || 'rgba(180,105,42,.35)'); gr.addColorStop(1, 'rgba(255,178,26,0)');
+      const gr = ctx.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, d.color || 'rgba(238,155,30,.38)'); gr.addColorStop(1, 'rgba(255,214,150,0)');
+      const bg = ctx.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, '#F9C05A'); bg.addColorStop(1, '#E8860C');
       const type = d.type || 'line';
       new Chart(cv, {
-        type, data: { labels: d.labels, datasets: [{ data: d.data, borderColor: d.border || '#B4692A', backgroundColor: type === 'bar' ? (d.bar || '#16130F') : gr, fill: true, tension: .28, borderWidth: 3, pointRadius: 0, pointHoverRadius: 6, pointBackgroundColor: '#fff', pointBorderColor: '#B4692A', pointBorderWidth: 3, borderRadius: 10, maxBarThickness: 34 }] },
+        type, data: { labels: d.labels, datasets: [{ data: d.data, borderColor: type === 'bar' ? 'rgba(255,255,255,.8)' : (d.border || '#E8860C'), backgroundColor: type === 'bar' ? (d.bar || bg) : gr, fill: true, tension: .28, borderWidth: 3, pointRadius: 0, pointHoverRadius: 6, pointBackgroundColor: '#fff', pointBorderColor: '#E8860C', pointBorderWidth: 3, borderRadius: 10, maxBarThickness: 34 }] },
         options: { responsive: true, maintainAspectRatio: false, animation: { duration: reduce ? 0 : 1400, easing: 'easeOutQuart' }, interaction: { intersect: false, mode: 'index' },
           plugins: { legend: { display: false }, tooltip: { rtl: true, backgroundColor: 'rgba(17,18,22,.92)', padding: 12, cornerRadius: 12, displayColors: false, callbacks: { label: c => (d.unit === 'toman' ? sep(c.parsed.y) + ' تومان' : fa(c.parsed.y) + (d.unit || '')) } } },
           scales: { x: { grid: { display: false }, border: { display: false }, reverse: true }, y: { position: 'right', beginAtZero: true, grid: { color: 'rgba(17,18,22,.06)' }, border: { display: false }, ticks: { maxTicksLimit: 5, callback: v => d.unit === 'toman' ? fa((v / 1e6).toFixed(v % 1e6 ? 1 : 0)) + 'م' : fa(v) } } } },
@@ -116,7 +117,7 @@
     });
     $$('canvas[data-donut]').forEach(cv => {
       const d = JSON.parse(cv.dataset.donut);
-      new Chart(cv, { type: 'doughnut', data: { labels: d.labels, datasets: [{ data: d.data, backgroundColor: ['#16130F', '#B4692A', '#C9A24B', '#6C8FA6', '#2F6F55', '#8A8378'], borderWidth: 4, borderColor: '#fff', hoverOffset: 10 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '68%', animation: { duration: reduce ? 0 : 1400 }, plugins: { legend: { position: 'bottom', rtl: true, labels: { usePointStyle: true, padding: 14 } }, tooltip: { rtl: true, callbacks: { label: c => ' ' + c.label + ': ' + fa(c.parsed) } } } } });
+      new Chart(cv, { type: 'doughnut', data: { labels: d.labels, datasets: [{ data: d.data, backgroundColor: ['#E8860C', '#F9C05A', '#1B1B1F', '#F2A93B', '#2F6F55', '#C9B79A'], borderWidth: 4, borderColor: '#fff', hoverOffset: 10 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '68%', animation: { duration: reduce ? 0 : 1400 }, plugins: { legend: { position: 'bottom', rtl: true, labels: { usePointStyle: true, padding: 14 } }, tooltip: { rtl: true, callbacks: { label: c => ' ' + c.label + ': ' + fa(c.parsed) } } } } });
     });
   }
 
