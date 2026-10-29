@@ -445,3 +445,6 @@ body::before{background:
 
 .stage.light h1 .grad-text{background:linear-gradient(120deg,#F98A25,#D9560A);-webkit-background-clip:text;background-clip:text;text-shadow:none;-webkit-text-fill-color:transparent}
 .stage.light .rotor span{background:linear-gradient(120deg,#E8710F,#C2500A);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-shadow:none}
+
+.i3[viewBox] {overflow:visible}
+.feat .ico .i3,.step .no .i3{filter:drop-shadow(0 6px 8px rgba(150,60,0,.25))}

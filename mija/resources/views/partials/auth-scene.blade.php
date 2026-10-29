@@ -71,9 +71,9 @@
 
 @unless($bare ?? false)
 <div class="pin-float"><span class="ring"></span><span class="ring r2"></span><img src="{{ asset('img/mija-mark.svg') }}" alt=""></div>
-<div class="chip chip-a glass-w"><b>۴٫۹</b><span class="stars-mini">@for($i=0;$i<5;$i++)<x-i3 name="star" class="sm"/>@endfor</span><small>رضایت مهمانان</small></div>
-<div class="chip chip-b glass-w"><x-i3 name="bolt" class="lg"/><div><b>رزرو فوری</b><small>بدون انتظار تأیید</small></div></div>
-<div class="chip chip-c glass-w"><x-i3 name="shield" class="lg"/><div><b>پرداخت امن</b><small>ضمانت بازگشت وجه</small></div></div>
+<div class="chip chip-a glass-w"><b>۴٫۹</b><span class="stars-mini">@for($i=0;$i<5;$i++)<x-i3 name="p_star" class="sm"/>@endfor</span><small>رضایت مهمانان</small></div>
+<div class="chip chip-b glass-w"><x-i3 name="p_bolt" class="lg"/><div><b>رزرو فوری</b><small>بدون انتظار تأیید</small></div></div>
+<div class="chip chip-c glass-w"><x-i3 name="p_shield" class="lg"/><div><b>پرداخت امن</b><small>ضمانت بازگشت وجه</small></div></div>
 <div class="scene-copy">
   <div class="rot" id="rot">
     <p class="on">جای خوب، سفر خوب</p>

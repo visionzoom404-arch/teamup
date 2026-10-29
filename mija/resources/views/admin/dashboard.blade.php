@@ -32,11 +32,11 @@ $d2 = ['labels' => collect($propStatus)->keys()->map(fn ($k) => $stl[$k] ?? $k)-
 
 <div class="grid2" style="gap:18px;align-items:start">
   <div class="card"><h3><x-i3 name="trend" class="sm"/> رزروهای ۱۴ روز اخیر</h3><div class="chart-box"><canvas data-chart="{{ json_encode($c1, JSON_UNESCAPED_UNICODE) }}"></canvas></div></div>
-  <div class="card"><h3><x-i3 name="coins" class="sm"/> پرداخت‌های ۱۴ روز اخیر</h3><div class="chart-box"><canvas data-chart="{{ json_encode($c2, JSON_UNESCAPED_UNICODE) }}", 'border' => '#F26B0F'])'></canvas></div></div>
+  <div class="card"><h3><x-i3 name="p_coin" class="sm"/> پرداخت‌های ۱۴ روز اخیر</h3><div class="chart-box"><canvas data-chart="{{ json_encode($c2, JSON_UNESCAPED_UNICODE) }}", 'border' => '#F26B0F'])'></canvas></div></div>
 </div>
 <div class="grid2 mt" style="gap:18px;align-items:start">
   <div class="card"><h3><x-i3 name="user" class="sm"/> ترکیب کاربران</h3><div class="chart-box"><canvas data-donut="{{ json_encode($d1, JSON_UNESCAPED_UNICODE) }}"></canvas></div></div>
-  <div class="card"><h3><x-i3 name="home" class="sm"/> وضعیت اقامتگاه‌ها</h3><div class="chart-box"><canvas data-donut="{{ json_encode($d2, JSON_UNESCAPED_UNICODE) }}"></canvas></div></div>
+  <div class="card"><h3><x-i3 name="p_house" class="sm"/> وضعیت اقامتگاه‌ها</h3><div class="chart-box"><canvas data-donut="{{ json_encode($d2, JSON_UNESCAPED_UNICODE) }}"></canvas></div></div>
 </div>
 
 <div class="grid2 mt" style="gap:18px;align-items:start">

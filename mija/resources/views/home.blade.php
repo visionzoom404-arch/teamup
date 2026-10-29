@@ -13,14 +13,14 @@
       <h1>{{ config('mija.tagline') === 'جای خوب، سفر خوب' ? 'جای خوب،' : config('mija.tagline') }} <span class="grad-text">سفر خوب</span></h1>
       <p class="sub">همین امروز <span class="rotor"><span>ویلا</span><span>کلبه</span><span>باغ‌ویلا</span><span>سوئیت</span><span>بوم‌گردی</span></span> دلخواهت رو رزرو کن؛ مستقیم از میزبان، با قیمت شفاف و پرداخت امن.</p>
       <div class="trust">
-        <div><span class="t-i"><x-i3 name="home" class="sm"/></span><span><b data-count="{{ $stats['properties'] }}">{{ fa($stats['properties']) }}</b><small>اقامتگاه تأییدشده</small></span></div>
-        <div><span class="t-i"><x-i3 name="pin" class="sm"/></span><span><b data-count="{{ $stats['cities'] }}">{{ fa($stats['cities']) }}</b><small>شهر و منطقه</small></span></div>
+        <div><span class="t-i"><x-i3 name="p_house" class="sm"/></span><span><b data-count="{{ $stats['properties'] }}">{{ fa($stats['properties']) }}</b><small>اقامتگاه تأییدشده</small></span></div>
+        <div><span class="t-i"><x-i3 name="p_pin" class="sm"/></span><span><b data-count="{{ $stats['cities'] }}">{{ fa($stats['cities']) }}</b><small>شهر و منطقه</small></span></div>
         <div><span class="t-i"><x-i3 name="family" class="sm"/></span><span><b data-count="{{ $stats['guests'] }}">{{ fa($stats['guests']) }}</b><small>مهمان خوشحال</small></span></div>
-        @if($stats['rating'])<div><span class="t-i"><x-i3 name="star" class="sm"/></span><span><b data-count="{{ $stats['rating'] }}" data-dec="1">{{ fa($stats['rating']) }}</b><small>میانگین امتیاز</small></span></div>@endif
+        @if($stats['rating'])<div><span class="t-i"><x-i3 name="p_star" class="sm"/></span><span><b data-count="{{ $stats['rating'] }}" data-dec="1">{{ fa($stats['rating']) }}</b><small>میانگین امتیاز</small></span></div>@endif
       </div>
     </div>
-    <div class="chip chip-a glass-w"><x-i3 name="bolt" class="lg"/><div><b>رزرو فوری</b><small>بدون انتظار تأیید</small></div></div>
-    <div class="chip chip-b glass-w"><x-i3 name="shield" class="lg"/><div><b>پرداخت امن</b><small>ضمانت بازگشت وجه</small></div></div>
+    <div class="chip chip-a glass-w"><x-i3 name="p_bolt" class="lg"/><div><b>رزرو فوری</b><small>بدون انتظار تأیید</small></div></div>
+    <div class="chip chip-b glass-w"><x-i3 name="p_shield" class="lg"/><div><b>پرداخت امن</b><small>ضمانت بازگشت وجه</small></div></div>
   </section>
 
   <form class="searchbar glass stage-search" action="{{ route('search') }}" method="get">
@@ -42,10 +42,10 @@
     <div data-swiper="cats"><div class="swiper"><div class="swiper-wrapper">
       @foreach([
         ['pool', 'ویلای استخردار', ['amenity' => ['pool']]], ['tiny', 'کلبه و خانه چوبی', ['type' => ['cottage', 'tiny']]], ['garden_villa', 'باغ‌ویلا', ['type' => ['garden_villa']]],
-        ['sun', 'شمال کشور', ['region' => 'north']], ['pin', 'نزدیک تهران', ['region' => 'tehran']], ['view', 'ییلاقی و کوهستانی', ['region' => 'highland']],
-        ['eco', 'کویر و بوم‌گردی', ['type' => ['eco']]], ['bolt', 'رزرو فوری', ['instant' => 1]], ['family', 'مناسب خانواده', ['amenity' => ['family']]],
+        ['sun', 'شمال کشور', ['region' => 'north']], ['p_pin', 'نزدیک تهران', ['region' => 'tehran']], ['view', 'ییلاقی و کوهستانی', ['region' => 'highland']],
+        ['eco', 'کویر و بوم‌گردی', ['type' => ['eco']]], ['p_bolt', 'رزرو فوری', ['instant' => 1]], ['family', 'مناسب خانواده', ['amenity' => ['family']]],
         ['fireplace', 'با شومینه', ['amenity' => ['fireplace']]], ['jacuzzi', 'جکوزی و سونا', ['amenity' => ['jacuzzi']]], ['pet', 'پذیرش حیوان خانگی', ['amenity' => ['pet']]],
-        ['suite', 'سوئیت و آپارتمان', ['type' => ['suite', 'apartment']]], ['tag', 'تخفیف‌دار', ['discount' => 1]],
+        ['suite', 'سوئیت و آپارتمان', ['type' => ['suite', 'apartment']]], ['p_tag', 'تخفیف‌دار', ['discount' => 1]],
       ] as [$ic, $n, $q])
         <a class="cat-big swiper-slide" href="{{ route('search', $q) }}"><span class="cb-ic"><x-i3 :name="$ic"/></span><b>{{ $n }}</b></a>
       @endforeach
@@ -96,7 +96,7 @@
   {{-- ===== رزرو فوری ===== --}}
   @if($instant->count())
   <section class="sec" data-swiper="cards">
-    <div class="sec-h"><div><h2><x-i3 name="bolt" class="h-i3"/> رزرو فوری، <span class="grad-text">بدون انتظار</span></h2><p>همین الان انتخاب کن، همین الان قطعی شو</p></div>
+    <div class="sec-h"><div><h2><x-i3 name="p_bolt" class="h-i3"/> رزرو فوری، <span class="grad-text">بدون انتظار</span></h2><p>همین الان انتخاب کن، همین الان قطعی شو</p></div>
       <div class="sw-nav"><button class="sw-btn sw-prev" aria-label="قبلی"><x-icon name="chev-r"/></button><button class="sw-btn sw-next" aria-label="بعدی"><x-icon name="chev-l"/></button></div></div>
     <div class="swiper"><div class="swiper-wrapper">@foreach($instant as $p)<div class="swiper-slide">@include('partials.pcard')</div>@endforeach</div></div>
   </section>
@@ -106,14 +106,14 @@
   <section class="sec">
     <div class="sec-h"><div><h2>رزرو در <span class="grad-text">سه قدم</span></h2><p>ساده، سریع و بدون دردسر</p></div></div>
     <div class="steps-3">
-      <div class="step"><div class="no"><x-i3 name="search" class="xl"/><span class="n">۱</span></div><b>جستجو و انتخاب</b><p class="small muted">مقصد و تاریخ رو بزن و بین اقامتگاه‌های تأییدشده انتخاب کن.</p></div>
-      <div class="step"><div class="no"><x-i3 name="bolt" class="xl"/><span class="n">۲</span></div><b>رزرو و پرداخت امن</b><p class="small muted">رزرو فوری یا درخواست به میزبان؛ پرداخت آنلاین با ضمانت.</p></div>
-      <div class="step"><div class="no"><x-i3 name="home" class="xl"/><span class="n">۳</span></div><b>سفر و لذت</b><p class="small muted">آدرس و راهنمای ورود رو بگیر و از اقامتت لذت ببر.</p></div>
+      <div class="step"><div class="no"><x-i3 name="p_search" class="xl"/><span class="n">۱</span></div><b>جستجو و انتخاب</b><p class="small muted">مقصد و تاریخ رو بزن و بین اقامتگاه‌های تأییدشده انتخاب کن.</p></div>
+      <div class="step"><div class="no"><x-i3 name="p_bolt" class="xl"/><span class="n">۲</span></div><b>رزرو و پرداخت امن</b><p class="small muted">رزرو فوری یا درخواست به میزبان؛ پرداخت آنلاین با ضمانت.</p></div>
+      <div class="step"><div class="no"><x-i3 name="p_house" class="xl"/><span class="n">۳</span></div><b>سفر و لذت</b><p class="small muted">آدرس و راهنمای ورود رو بگیر و از اقامتت لذت ببر.</p></div>
     </div>
   </section>
 
   @if($top->count())
-  <section class="sec"><div class="sec-h"><div><h2>بالاترین امتیاز <x-i3 name="star" class="h-i3"/></h2><p>محبوب‌ترین‌ها بین مهمان‌ها</p></div></div>
+  <section class="sec"><div class="sec-h"><div><h2>بالاترین امتیاز <x-i3 name="p_star" class="h-i3"/></h2><p>محبوب‌ترین‌ها بین مهمان‌ها</p></div></div>
     <div class="grid-cards">@foreach($top as $p)@include('partials.pcard')@endforeach</div></section>
   @endif
 
@@ -121,10 +121,10 @@
   <section class="sec">
     <div class="sec-h"><div><h2>چرا <span class="grad-text">می‌جا</span>؟</h2><p>چون سفر خوب، خیال راحت می‌خواد</p></div></div>
     <div class="feat">
-      <div class="card"><div class="ico"><x-i3 name="shield" class="lg"/></div><b>پرداخت امن و ضمانت</b><p class="small muted">پولت تا روز ورود نزد می‌جا می‌مونه و اگه لغو کنی طبق قوانین برمی‌گرده.</p></div>
-      <div class="card"><div class="ico"><x-i3 name="bolt" class="lg"/></div><b>رزرو فوری</b><p class="small muted">اقامتگاه‌های رزرو فوری بدون انتظار برای تأیید میزبان، همون لحظه قطعی می‌شن.</p></div>
-      <div class="card"><div class="ico"><x-i3 name="tag" class="lg"/></div><b>قیمت شفاف</b><p class="small muted">قیمت نهایی با همه‌ی هزینه‌ها پیش از پرداخت نشون داده می‌شه؛ بدون هزینه‌ی پنهان.</p></div>
-      <div class="card"><div class="ico"><x-i3 name="star" class="lg"/></div><b>نظرات واقعی</b><p class="small muted">فقط مهمان‌هایی که واقعاً اقامت داشتن می‌تونن نظر بذارن.</p></div>
+      <div class="card"><div class="ico"><x-i3 name="p_shield" class="lg"/></div><b>پرداخت امن و ضمانت</b><p class="small muted">پولت تا روز ورود نزد می‌جا می‌مونه و اگه لغو کنی طبق قوانین برمی‌گرده.</p></div>
+      <div class="card"><div class="ico"><x-i3 name="p_bolt" class="lg"/></div><b>رزرو فوری</b><p class="small muted">اقامتگاه‌های رزرو فوری بدون انتظار برای تأیید میزبان، همون لحظه قطعی می‌شن.</p></div>
+      <div class="card"><div class="ico"><x-i3 name="p_tag" class="lg"/></div><b>قیمت شفاف</b><p class="small muted">قیمت نهایی با همه‌ی هزینه‌ها پیش از پرداخت نشون داده می‌شه؛ بدون هزینه‌ی پنهان.</p></div>
+      <div class="card"><div class="ico"><x-i3 name="p_star" class="lg"/></div><b>نظرات واقعی</b><p class="small muted">فقط مهمان‌هایی که واقعاً اقامت داشتن می‌تونن نظر بذارن.</p></div>
     </div>
   </section>
 

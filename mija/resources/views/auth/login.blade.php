@@ -23,6 +23,6 @@
 <div class="divider-t" data-a>حساب نداری؟</div>
 <div class="alt-link" data-a>
   <a class="btn btn-light" href="{{ route('register') }}"><x-i3 name="user" class="sm"/> ثبت‌نام مهمان</a>
-  <a class="btn btn-gold" href="{{ route('register', ['as' => 'host']) }}"><x-i3 name="key" class="sm"/> میزبان شو</a>
+  <a class="btn btn-gold" href="{{ route('register', ['as' => 'host']) }}"><x-i3 name="p_key" class="sm"/> میزبان شو</a>
 </div>
 @endsection

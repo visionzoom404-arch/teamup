@@ -50,7 +50,7 @@
 
       <div class="card flat row" style="gap:14px">
         <img class="avatar lg" style="width:60px;height:60px" src="{{ $p->host->avatarUrl() }}" alt="">
-        <div class="grow"><div class="muted small">میزبان</div><a href="{{ route('host.public', $p->host) }}"><b>{{ $p->host->name }}</b></a> @if($p->host->host_verified)<span class="badge green"><x-icon name="shield" class="sm"/> هویت تأییدشده</span>@endif @if($hs['superhost'])<span class="badge gold"><x-i3 name="crown" class="sm"/> میزبان برتر</span>@endif<div class="xs muted">عضو از {{ jdate($p->host->created_at, 'F Y') }}@if($hs['response_rate'] !== null) · پاسخ‌گویی {{ fa($hs['response_rate']) }}٪@endif · <a href="{{ route('host.public', $p->host) }}" style="color:var(--red-d);font-weight:700">مشاهده پروفایل</a></div></div>
+        <div class="grow"><div class="muted small">میزبان</div><a href="{{ route('host.public', $p->host) }}"><b>{{ $p->host->name }}</b></a> @if($p->host->host_verified)<span class="badge green"><x-icon name="shield" class="sm"/> هویت تأییدشده</span>@endif @if($hs['superhost'])<span class="badge gold"><x-i3 name="p_crown" class="sm"/> میزبان برتر</span>@endif<div class="xs muted">عضو از {{ jdate($p->host->created_at, 'F Y') }}@if($hs['response_rate'] !== null) · پاسخ‌گویی {{ fa($hs['response_rate']) }}٪@endif · <a href="{{ route('host.public', $p->host) }}" style="color:var(--red-d);font-weight:700">مشاهده پروفایل</a></div></div>
         <div class="small muted nowrap">ورود {{ fa($p->check_in_time) }} · خروج {{ fa($p->check_out_time) }}</div>
       </div>
 

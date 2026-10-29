@@ -29,7 +29,7 @@
       <select name="bedrooms"><option value="">فرقی ندارد</option>@foreach([1,2,3,4,5] as $n)<option value="{{ $n }}" @selected(request('bedrooms')==$n)>{{ fa($n) }} خواب و بیشتر</option>@endforeach</select>
       <h4>امکانات</h4>
       <div class="chips">@foreach($amenities as $a)<label class="check" style="padding:6px 12px"><input type="checkbox" name="amenity[]" value="{{ $a->key }}" @checked(in_array($a->key, (array) request('amenity')))><x-i3 :name="$a->i3()" class="sm"/> {{ $a->name }}</label>@endforeach</div>
-      <label class="check" style="margin-top:14px"><input type="checkbox" name="discount" value="1" @checked(request('discount'))><x-i3 name="tag" class="sm"/> فقط تخفیف‌دار</label>
+      <label class="check" style="margin-top:14px"><input type="checkbox" name="discount" value="1" @checked(request('discount'))><x-i3 name="p_tag" class="sm"/> فقط تخفیف‌دار</label>
       <label class="check" style="margin-top:8px"><input type="checkbox" name="instant" value="1" @checked(request('instant'))><x-icon name="bolt" class="sm"/> فقط رزرو فوری</label>
       <div class="row" style="margin-top:18px"><button class="btn grow">اعمال فیلتر</button><a class="btn btn-light" href="{{ route('search') }}">پاک کردن</a></div>
     </aside>

@@ -6,7 +6,7 @@
       @if(max($p->weekly_discount, $p->monthly_discount) > 0)<span class="tag-sale">تا {{ fa(max($p->weekly_discount, $p->monthly_discount)) }}٪ تخفیف</span>@endif
       @if($p->featured)<span class="tag-glass gold"><x-icon name="star" class="sm"/> ویژه</span>@endif
       @if($p->instant_booking)<span class="tag-glass"><x-icon name="bolt" class="sm"/> رزرو فوری</span>@endif
-      @if($p->host && $p->host->isSuperhost())<span class="tag-glass gold"><x-i3 name="crown" class="sm"/> میزبان برتر</span>@endif
+      @if($p->host && $p->host->isSuperhost())<span class="tag-glass gold"><x-i3 name="p_crown" class="sm"/> میزبان برتر</span>@endif
     </div>
     @auth @if(auth()->user()->isGuest())
     <button type="button" class="fav {{ $fav ? 'on' : '' }}" data-fav="{{ route('favorite', $p) }}" aria-label="علاقه‌مندی"><x-icon name="heart"/></button>

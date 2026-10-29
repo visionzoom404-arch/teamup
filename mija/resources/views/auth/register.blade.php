@@ -7,17 +7,17 @@
 <form method="post" action="{{ route('register') }}" id="auth-form" novalidate>
   @csrf
   <input type="hidden" name="ref" value="{{ old('ref', $ref) }}">
-  @if(old('ref', $ref))<div class="alert ok" data-a><x-i3 name="gift" class="sm"/> با کد دعوت <b class="ltr">{{ old('ref', $ref) }}</b> ثبت‌نام می‌کنید؛ پس از اولین رزرو هدیه می‌گیرید.</div>@endif
+  @if(old('ref', $ref))<div class="alert ok" data-a><x-i3 name="p_gift" class="sm"/> با کد دعوت <b class="ltr">{{ old('ref', $ref) }}</b> ثبت‌نام می‌کنید؛ پس از اولین رزرو هدیه می‌گیرید.</div>@endif
   <div class="role-seg" data-r="{{ $r }}" id="role-seg" data-a>
     <span class="pill"></span>
     <label><input type="radio" name="role" value="guest" @checked($r === 'guest')><x-i3 name="user" class="sm"/> مهمان<small>می‌خواهم رزرو کنم</small></label>
-    <label><input type="radio" name="role" value="host" @checked($r === 'host')><x-i3 name="key" class="sm"/> میزبان<small>ملک دارم</small></label>
+    <label><input type="radio" name="role" value="host" @checked($r === 'host')><x-i3 name="p_key" class="sm"/> میزبان<small>ملک دارم</small></label>
   </div>
   <ul class="perks" id="perks" data-a>
     <li data-for="guest"><i><x-i3 name="villa" class="sm"/></i>هزاران ویلا و کلبه با قیمت شفاف</li>
-    <li data-for="guest"><i><x-i3 name="shield" class="sm"/></i>پرداخت امن و ضمانت بازگشت وجه</li>
-    <li data-for="host" hidden><i><x-i3 name="coins" class="sm"/></i>ثبت رایگان؛ فقط پس از رزرو موفق کمیسیون کسر می‌شود</li>
-    <li data-for="host" hidden><i><x-i3 name="calendar" class="sm"/></i>تقویم، قیمت و رزرو فوری را خودت مدیریت کن</li>
+    <li data-for="guest"><i><x-i3 name="p_shield" class="sm"/></i>پرداخت امن و ضمانت بازگشت وجه</li>
+    <li data-for="host" hidden><i><x-i3 name="p_coin" class="sm"/></i>ثبت رایگان؛ فقط پس از رزرو موفق کمیسیون کسر می‌شود</li>
+    <li data-for="host" hidden><i><x-i3 name="p_calendar" class="sm"/></i>تقویم، قیمت و رزرو فوری را خودت مدیریت کن</li>
   </ul>
   <div class="fl {{ $errors->has('name') ? 'has-err' : '' }}" data-a>
     <input id="name" name="name" autocomplete="name" placeholder=" " value="{{ old('name') }}" required>

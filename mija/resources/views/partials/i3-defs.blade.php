@@ -9,5 +9,13 @@
     ] as $id => [$a, $b, $c])
     <linearGradient id="{{ $id }}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="{{ $a }}"/><stop offset=".55" stop-color="{{ $b }}"/><stop offset="1" stop-color="{{ $c }}"/></linearGradient>
     @endforeach
+    <filter id="i3b" x="-30%" y="-100%" width="160%" height="300%"><feGaussianBlur stdDeviation="2.6"/></filter>
+    @foreach([
+      'pO' => ['#FFD9A0', '#FFA23D', '#F26B0F', '#A9430A'], 'pY' => ['#FFF7C8', '#FFD84F', '#FFB21A', '#B87400'], 'pC' => ['#FFFFFF', '#FFF4E4', '#F2DDBF', '#CDB085'],
+      'pR' => ['#FFC0B5', '#FF6552', '#E5202E', '#85101A'], 'pT' => ['#C2FFF6', '#45DACB', '#12A89E', '#06626A'], 'pB' => ['#DDF4FF', '#82CFF6', '#3A9AD6', '#1B5A92'],
+      'pK' => ['#9A9EAC', '#555967', '#272A32', '#0B0C10'], 'pG' => ['#DAFFC8', '#84DC5C', '#3FA83A', '#1B6528'], 'pW' => ['#FFFFFF', '#F6F8FC', '#DCE2EE', '#AAB4C8'],
+    ] as $id => [$a, $b, $c, $d])
+    <radialGradient id="{{ $id }}" cx=".34" cy=".28" r=".85"><stop offset="0" stop-color="{{ $a }}"/><stop offset=".32" stop-color="{{ $b }}"/><stop offset=".68" stop-color="{{ $c }}"/><stop offset="1" stop-color="{{ $d }}"/></radialGradient>
+    @endforeach
   </defs>
 </svg>
