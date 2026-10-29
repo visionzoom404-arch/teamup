@@ -49,17 +49,32 @@ class BookingService
         });
     }
 
+    /** هدیه‌ی دعوت: با اولین پرداخت موفق کاربر دعوت‌شده، به دعوت‌کننده و دعوت‌شده اعتبار کیف پول داده می‌شود */
+    private static function referralBonus(Booking $b): void
+    {
+        $guest = $b->guest;
+        $bonus = (int) config('mija.referral_bonus');
+        if (! $guest->referred_by || ! $bonus || $guest->bookings()->whereNotNull('paid_at')->where('id', '!=', $b->id)->exists()) {
+            return;
+        }
+        $guest->walletChange($bonus, 'هدیه‌ی دعوت دوستان — اولین رزرو', $b);
+        if ($ref = $guest->referredBy) {
+            $ref->walletChange($bonus, "هدیه‌ی دعوت {$guest->name}", $b);
+            $ref->notify('هدیه‌ی دعوت دریافت شد', toman($bonus), route($ref->isHost() ? 'host.wallet' : 'guest.wallet'));
+        }
+    }
+
     public static function accept(Booking $b): void
     {
         abort_unless($b->status === 'pending_host', 422);
-        $b->update(['status' => 'awaiting_payment', 'respond_by' => null, 'pay_by' => now()->addMinutes((int) setting('payment_window_minutes'))]);
+        $b->update(['responded_at' => now(), 'status' => 'awaiting_payment', 'respond_by' => null, 'pay_by' => now()->addMinutes((int) setting('payment_window_minutes'))]);
         $b->guest->notify('درخواست شما تأیید شد', 'برای قطعی شدن رزرو، پرداخت را انجام دهید.', route('guest.bookings.show', $b));
     }
 
     public static function reject(Booking $b, ?string $reason = null): void
     {
         abort_unless($b->status === 'pending_host', 422);
-        $b->update(['status' => 'rejected', 'cancel_reason' => $reason, 'cancelled_at' => now()]);
+        $b->update(['responded_at' => now(), 'status' => 'rejected', 'cancel_reason' => $reason, 'cancelled_at' => now()]);
         $b->guest->notify('درخواست شما رد شد', $reason, route('guest.bookings.show', $b));
     }
 
@@ -70,8 +85,9 @@ class BookingService
             $pay->update(['status' => 'paid', 'ref_id' => $refId, 'paid_at' => now()]);
             $b->update(['status' => 'confirmed', 'paid_at' => now(), 'pay_by' => null]);
         });
+        self::referralBonus($b);
         $b->host->notify('رزرو قطعی شد', "{$b->property->title} — ".jdate($b->check_in), route('host.bookings.show', $b));
-        $b->guest->notify('رزرو شما قطعی شد 🎉', "کد رزرو: {$b->code}", route('guest.bookings.show', $b));
+        $b->guest->notify('رزرو شما قطعی شد', "کد رزرو: {$b->code}", route('guest.bookings.show', $b));
     }
 
     /** لغو توسط مهمان؛ بازگشت وجه طبق سیاست لغو به کیف پول */
@@ -139,6 +155,13 @@ class BookingService
         });
         Booking::where('status', 'confirmed')->whereDate('check_out', '<', today())->get()->each(function ($b) use (&$r) {
             $b->update(['status' => 'completed']);
+            // بازگشت وجه وفاداری بر اساس سطح مهمان
+            $pct = $b->guest->level()['level']['cashback'];
+            if ($pct > 0) {
+                $cb = intdiv($b->total * $pct, 100);
+                $b->guest->walletChange($cb, "بازگشت وجه سطح وفاداری ({$pct}٪) — رزرو {$b->code}", $b);
+                $b->update(['cashback' => $cb]);
+            }
             $b->guest->notify('اقامت شما به پایان رسید', 'نظر خود را درباره‌ی اقامت ثبت کنید.', route('guest.bookings.show', $b));
             $r['completed']++;
         });

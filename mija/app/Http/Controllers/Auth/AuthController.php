@@ -24,7 +24,7 @@ class AuthController extends Controller
     }
 
     public function showLogin() { return view('auth.login'); }
-    public function showRegister(Request $r) { return view('auth.register', ['role' => $r->query('as', 'guest')]); }
+    public function showRegister(Request $r) { return view('auth.register', ['role' => $r->query('as', 'guest'), 'ref' => strtoupper((string) $r->query('ref'))]); }
 
     public function login(Request $r)
     {
@@ -40,6 +40,7 @@ class AuthController extends Controller
             return back()->withErrors(['phone' => 'حساب کاربری شما مسدود شده است.']);
         }
         $r->session()->regenerate();
+        Auth::user()->forceFill(['last_login_at' => now(), 'last_login_ip' => $r->ip()])->save();
 
         return redirect()->intended(Auth::user()->homeRoute());
     }
@@ -52,10 +53,13 @@ class AuthController extends Controller
             'phone' => ['required', 'regex:/^09\d{9}$/', 'unique:users,phone'],
             'password' => 'required|string|min:6|confirmed',
             'role' => 'required|in:guest,host',
+            'ref' => 'nullable|string|max:10',
         ]);
-        $user = User::create($data);
+        $referrer = ! empty($data['ref']) ? User::where('referral_code', strtoupper($data['ref']))->first() : null;
+        unset($data['ref']);
+        $user = User::create($data + ['referred_by' => $referrer?->id]);
         Auth::login($user);
-        $user->notify('به می‌جا خوش آمدید 👋', $user->isHost() ? 'اولین اقامتگاه خود را ثبت کنید.' : 'اقامتگاه رویایی‌تان را پیدا کنید.');
+        $user->notify('به می‌جا خوش آمدید', $user->isHost() ? 'اولین اقامتگاه خود را ثبت کنید.' : 'اقامتگاه رویایی‌تان را پیدا کنید.');
 
         return redirect($user->isHost() ? route('host.properties.create') : $user->homeRoute());
     }

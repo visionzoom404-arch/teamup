@@ -41,8 +41,8 @@ class DatabaseSeeder extends Seeder
     {
         User::updateOrCreate(['phone' => '09120000000'], ['name' => 'مدیر می‌جا', 'password' => 'admin1234', 'role' => 'admin']);
         $hosts = [
-            User::updateOrCreate(['phone' => '09121111111'], ['name' => 'علی رضایی', 'password' => 'host1234', 'role' => 'host', 'host_verified' => true, 'sheba' => 'IR062960000000100324200001', 'bank_owner' => 'علی رضایی', 'city' => 'نوشهر']),
-            User::updateOrCreate(['phone' => '09122222222'], ['name' => 'مریم احمدی', 'password' => 'host1234', 'role' => 'host', 'host_verified' => true, 'city' => 'رشت']),
+            User::updateOrCreate(['phone' => '09121111111'], ['name' => 'علی رضایی', 'bio' => 'هشت سال است در شمال میزبان مسافران هستم. تمیزی و آرامش مهمان‌ها اولویت اول من است؛ هر ساعت از شبانه‌روز پاسخگو هستم.', 'password' => 'host1234', 'role' => 'host', 'host_verified' => true, 'sheba' => 'IR062960000000100324200001', 'bank_owner' => 'علی رضایی', 'city' => 'نوشهر']),
+            User::updateOrCreate(['phone' => '09122222222'], ['name' => 'مریم احمدی', 'bio' => 'میزبان اقامتگاه‌های بوم‌گردی و باغ‌ویلا؛ عاشق پذیرایی با چای و شیرینی محلی.', 'password' => 'host1234', 'role' => 'host', 'host_verified' => true, 'city' => 'رشت']),
         ];
         $guest = User::updateOrCreate(['phone' => '09123333333'], ['name' => 'سارا محمدی', 'password' => 'guest1234', 'role' => 'guest', 'wallet' => 2000000, 'city' => 'تهران']);
         User::updateOrCreate(['phone' => '09124444444'], ['name' => 'رضا کریمی', 'password' => 'guest1234', 'role' => 'guest']);
@@ -57,6 +57,10 @@ class DatabaseSeeder extends Seeder
             [1, 'سوئیت مدرن مشرف به کوهستان', 'suite', 'تهران', 'لواسان', 'mountain', 2800000, 3600000, 4800000, 2, 4, 1, 2, 1, 55, true, 'moderate', ['jacuzzi','view','wifi','parking','ac','heating','fireplace','kitchen','tv'], false],
             [0, 'خانه چوبی تیری‌شکل (A-Frame)', 'tiny', 'گیلان', 'املش', 'cabin', 2600000, 3400000, 4400000, 2, 4, 1, 2, 1, 45, false, 'moderate', ['fireplace','view','wifi','heating','kitchen','pet','bbq'], true],
         ];
+
+        foreach ([['villa', 0], ['sea', 2], ['mountain', 1], ['cabin', 3]] as $k => [$kind, $v]) {
+            Storage::disk('public')->put("seed/art-$k.svg", SceneArt::svg($kind, 90 + $k, $v));
+        }
 
         $created = [];
         foreach ($items as $i => [$h, $title, $type, $prov, $city, $art, $wd, $we, $pk, $cb, $cm, $bd, $bed, $ba, $area, $inst, $pol, $am, $feat]) {
@@ -75,6 +79,7 @@ class DatabaseSeeder extends Seeder
                 'weekly_discount' => 10, 'monthly_discount' => 25, 'min_nights' => 1, 'max_nights' => 30,
                 'instant_booking' => $inst, 'cancellation_policy' => $pol, 'status' => 'approved', 'featured' => $feat,
                 'lat' => 36.6 + $i / 50, 'lng' => 51.5 + $i / 40,
+                'guide' => "آدرس دقیق: {$prov}، {$city}، انتهای جاده‌ی اصلی.\nکد درب ورودی: ۱۲۳۴ — رمز وای‌فای: mija1234\nکلید در جاکلیدی کنار در قرار دارد. برای هر مشکلی با من تماس بگیرید.",
             ])->save();
             $p->amenities()->sync(collect($am)->map(fn ($k) => $amen[$k])->all());
             foreach (range(0, 4) as $n) {

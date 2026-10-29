@@ -13,6 +13,7 @@
         <div class="rp-field"><div><small>ورود</small><b data-label-in>انتخاب</b></div><div><small>خروج</small><b data-label-out>انتخاب</b></div></div>
         <div class="rp-pop glass"></div>
       </div>
+      <div class="presets" style="margin-top:8px"><span class="muted xs">پیشنهاد سریع:</span><button type="button" class="qchip" data-preset="weekend">این آخر هفته</button><button type="button" class="qchip" data-preset="weekend2">آخر هفته‌ی بعد</button><button type="button" class="qchip" data-preset="midweek">۳ شب میان‌هفته</button><button type="button" class="qchip" data-preset="soon">۳ شب از فردا</button></div>
       <h4>مقصد</h4>
       <select name="province" onchange="this.form.city && (this.form.city.value='')"><option value="">همه‌ی استان‌ها</option>@foreach(config('mija.provinces') as $pv => $cs)<option @selected(request('province')==$pv)>{{ $pv }}</option>@endforeach</select>
       <input class="input" style="margin-top:8px" name="q" value="{{ request('q') }}" placeholder="نام شهر یا اقامتگاه…">
@@ -26,7 +27,7 @@
       <h4>خواب</h4>
       <select name="bedrooms"><option value="">فرقی ندارد</option>@foreach([1,2,3,4,5] as $n)<option value="{{ $n }}" @selected(request('bedrooms')==$n)>{{ fa($n) }} خواب و بیشتر</option>@endforeach</select>
       <h4>امکانات</h4>
-      <div class="chips">@foreach($amenities as $a)<label class="check" style="padding:6px 12px"><input type="checkbox" name="amenity[]" value="{{ $a->key }}" @checked(in_array($a->key, (array) request('amenity')))>{{ $a->icon }} {{ $a->name }}</label>@endforeach</div>
+      <div class="chips">@foreach($amenities as $a)<label class="check" style="padding:6px 12px"><input type="checkbox" name="amenity[]" value="{{ $a->key }}" @checked(in_array($a->key, (array) request('amenity')))><x-i3 :name="$a->i3()" class="sm"/> {{ $a->name }}</label>@endforeach</div>
       <label class="check" style="margin-top:14px"><input type="checkbox" name="instant" value="1" @checked(request('instant'))><x-icon name="bolt" class="sm"/> فقط رزرو فوری</label>
       <div class="row" style="margin-top:18px"><button class="btn grow">اعمال فیلتر</button><a class="btn btn-light" href="{{ route('search') }}">پاک کردن</a></div>
     </aside>

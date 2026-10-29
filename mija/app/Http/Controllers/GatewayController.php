@@ -47,6 +47,6 @@ class GatewayController extends Controller
         abort_unless($b->canPay(), 422, 'مهلت پرداخت به پایان رسیده است.');
         BookingService::markPaid($b, $pay, 'S'.random_int(100000, 999999));
 
-        return redirect()->route('guest.bookings.show', $b)->with('ok', 'پرداخت موفق بود و رزرو شما قطعی شد 🎉');
+        return redirect()->route('guest.bookings.show', $b)->with('ok', 'پرداخت موفق بود و رزرو شما قطعی شد')->with('celebrate', 1);
     }
 }

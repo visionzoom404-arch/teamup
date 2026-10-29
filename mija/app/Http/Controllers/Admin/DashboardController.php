@@ -40,6 +40,7 @@ class DashboardController extends Controller
             'pendingProps' => Property::with('host')->where('status', 'pending')->latest('id')->take(5)->get(),
             'recent' => Booking::with(['property', 'guest'])->latest('id')->take(8)->get(),
             'days' => $days,
+            'propStatus' => Property::selectRaw('status, count(*) c')->groupBy('status')->pluck('c', 'status'),
         ]);
     }
 

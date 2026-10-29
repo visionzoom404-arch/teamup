@@ -2,6 +2,7 @@
 <html lang="fa" dir="rtl">
 <head>@include('partials.head')<link rel="stylesheet" href="{{ asset('css/auth.css') }}?v={{ filemtime(public_path('css/auth.css')) }}"></head>
 <body class="auth-body">
+@include('partials.i3-defs')
 <div class="auth-wrap">
   <main class="auth-side">
     <i class="blob b1"></i><i class="blob b2"></i><i class="blob b3"></i>

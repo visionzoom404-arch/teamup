@@ -39,7 +39,7 @@ class PropertyController extends Controller
             'type' => ['required', Rule::in(array_keys(config('mija.property_types')))],
             'province' => 'required|string|max:60', 'city' => 'required|string|max:80',
             'address' => 'nullable|string|max:255', 'lat' => 'nullable|numeric|between:-90,90', 'lng' => 'nullable|numeric|between:-180,180',
-            'description' => 'required|string|min:30|max:4000', 'rules' => 'nullable|string|max:2000',
+            'description' => 'required|string|min:30|max:4000', 'rules' => 'nullable|string|max:2000', 'guide' => 'nullable|string|max:2000',
             'capacity_base' => 'required|integer|min:1|max:50', 'capacity_max' => 'required|integer|min:1|max:60|gte:capacity_base',
             'bedrooms' => 'required|integer|min:0|max:30', 'beds' => 'required|integer|min:1|max:60', 'bathrooms' => 'required|integer|min:0|max:30',
             'area' => 'nullable|integer|min:1|max:100000', 'land_area' => 'nullable|integer|min:1|max:1000000',

@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
@@ -21,6 +23,15 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return ['password' => 'hashed', 'is_active' => 'boolean', 'host_verified' => 'boolean', 'phone_verified_at' => 'datetime'];
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (User $u) {
+            do {
+                $u->referral_code = strtoupper(Str::random(6));
+            } while (static::where('referral_code', $u->referral_code)->exists());
+        });
     }
 
     public function isAdmin(): bool { return $this->role === 'admin'; }
@@ -39,6 +50,95 @@ class User extends Authenticatable
     public function notices(): HasMany { return $this->hasMany(Notice::class)->latest('id'); }
     public function payouts(): HasMany { return $this->hasMany(Payout::class, 'host_id')->latest('id'); }
     public function favorites(): BelongsToMany { return $this->belongsToMany(Property::class, 'favorites')->withTimestamps(); }
+
+    public function roleLabel(): string
+    {
+        return ['guest' => 'مهمان', 'host' => 'میزبان', 'admin' => 'مدیر سایت'][$this->role] ?? $this->role;
+    }
+
+    /** نام ویژگی رنگی نقش: blue / orange / dark */
+    public function roleColor(): string
+    {
+        return ['guest' => 'blue', 'host' => 'orange', 'admin' => 'dark'][$this->role] ?? 'gray';
+    }
+
+    public function referredBy(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(User::class, 'referred_by');
+    }
+
+    /* ---------- مهمان: سطح وفاداری ---------- */
+
+    public function completedNights(): int
+    {
+        return (int) $this->bookings()->where('status', 'completed')->sum('nights');
+    }
+
+    /** @return array{level: array, next: ?array, progress: int, nights: int} */
+    public function level(): array
+    {
+        $nights = $this->completedNights();
+        $levels = config('mija.levels');
+        $cur = $levels[0];
+        $next = null;
+        foreach ($levels as $i => $l) {
+            if ($nights >= $l['nights']) {
+                $cur = $l;
+                $next = $levels[$i + 1] ?? null;
+            }
+        }
+        $progress = $next ? (int) min(100, round(($nights - $cur['nights']) / ($next['nights'] - $cur['nights']) * 100)) : 100;
+
+        return ['level' => $cur, 'next' => $next, 'progress' => $progress, 'nights' => $nights];
+    }
+
+    /* ---------- میزبان: آمار، نرخ پاسخ، میزبان برتر ---------- */
+
+    /** @return array{rating: float, reviews: int, completed: int, requests: int, response_rate: ?int, response_hours: ?float, accept_rate: ?int, superhost: bool} */
+    public function hostStats(): array
+    {
+        return Cache::remember("mija.host.{$this->id}", 600, function () {
+            $props = $this->properties()->where('status', 'approved');
+            $reviews = (int) $props->sum('reviews_count');
+            $rating = $reviews ? round((float) $this->properties()->where('reviews_count', '>', 0)->selectRaw('sum(rating_avg*reviews_count)/sum(reviews_count) as r')->value('r'), 2) : 0;
+            $completed = $this->hostBookings()->where('status', 'completed')->count();
+
+            $req = $this->hostBookings()->where(fn ($q) => $q->whereNotNull('respond_by')->orWhereNotNull('responded_at'));
+            $requests = (clone $req)->count();
+            $responded = (clone $req)->whereNotNull('responded_at')->get(['created_at', 'responded_at', 'status']);
+            $rate = $requests ? (int) round($responded->count() / $requests * 100) : null;
+            $hours = $responded->count() ? round($responded->avg(fn ($b) => $b->created_at->diffInMinutes($b->responded_at)) / 60, 1) : null;
+            $accepted = $responded->filter(fn ($b) => $b->status !== 'rejected')->count();
+            $acceptRate = $responded->count() ? (int) round($accepted / $responded->count() * 100) : null;
+
+            return [
+                'rating' => $rating, 'reviews' => $reviews, 'completed' => $completed, 'requests' => $requests,
+                'response_rate' => $rate, 'response_hours' => $hours, 'accept_rate' => $acceptRate,
+                'superhost' => $reviews >= 1 && $rating >= 4.7 && $completed >= 3 && ($acceptRate === null || $acceptRate >= 80),
+            ];
+        });
+    }
+
+    public function isSuperhost(): bool
+    {
+        return $this->isHost() && $this->hostStats()['superhost'];
+    }
+
+    /** چک‌لیست راه‌اندازی میزبان: [عنوان، انجام‌شده؟، لینک] */
+    public function hostChecklist(): array
+    {
+        $props = $this->properties();
+        $first = $props->first();
+
+        return [
+            ['تکمیل پروفایل (عکس و معرفی)', (bool) ($this->avatar && $this->bio), route('profile')],
+            ['ثبت اطلاعات حساب بانکی (شبا)', (bool) $this->sheba, route('profile')],
+            ['ثبت اولین اقامتگاه', (bool) $first, route('host.properties.create')],
+            ['افزودن حداقل ۵ عکس', $this->properties()->withCount('images')->get()->contains(fn ($p) => $p->images_count >= 5), $first ? route('host.properties.edit', $first) : route('host.properties.create')],
+            ['ارسال برای بررسی و تأیید', $this->properties()->where('status', 'approved')->exists(), route('host.properties.index')],
+            ['تنظیم تقویم و قیمت ویژه', $first ? $first->days()->exists() : false, $first ? route('host.calendar', $first) : route('host.properties.create')],
+        ];
+    }
 
     public function avatarUrl(): string
     {

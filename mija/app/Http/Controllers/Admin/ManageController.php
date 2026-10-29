@@ -37,7 +37,7 @@ class ManageController extends Controller
     {
         $d = $r->validate(['status' => 'required|in:approved,rejected,suspended,pending', 'reason' => 'nullable|string|max:200']);
         $property->update(['status' => $d['status'], 'reject_reason' => $d['status'] === 'approved' ? null : ($d['reason'] ?? null)]);
-        $label = ['approved' => 'تأیید شد ✅', 'rejected' => 'نیاز به اصلاح دارد', 'suspended' => 'تعلیق شد', 'pending' => 'در انتظار بررسی'][$d['status']];
+        $label = ['approved' => 'تأیید شد', 'rejected' => 'نیاز به اصلاح دارد', 'suspended' => 'تعلیق شد', 'pending' => 'در انتظار بررسی'][$d['status']];
         $property->host->notify("اقامتگاه «{$property->title}» $label", $d['reason'] ?? null, route('host.properties.edit', $property));
 
         return back()->with('ok', 'وضعیت اقامتگاه به‌روز شد.');
@@ -138,8 +138,8 @@ class ManageController extends Controller
 
     public function amenityStore(Request $r)
     {
-        $d = $r->validate(['name' => 'required|string|max:60', 'icon' => 'nullable|string|max:10', 'grp' => 'required|in:feature,basic,rules,service']);
-        Amenity::create($d + ['key' => 'c'.time().random_int(10, 99), 'sort' => (int) Amenity::max('sort') + 1, 'icon' => $d['icon'] ?? '✦']);
+        $d = $r->validate(['name' => 'required|string|max:60', 'icon' => 'nullable|string|max:20', 'grp' => 'required|in:feature,basic,rules,service']);
+        Amenity::create($d + ['key' => 'c'.time().random_int(10, 99), 'sort' => (int) Amenity::max('sort') + 1, 'icon' => $d['icon'] ?? 'sparkle']);
 
         return back()->with('ok', 'امکانات اضافه شد.');
     }

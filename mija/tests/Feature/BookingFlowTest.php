@@ -102,6 +102,55 @@ class BookingFlowTest extends TestCase
         $this->assertSame($b->total, $g->fresh()->wallet);
     }
 
+
+    public function test_referral_bonus_on_first_payment(): void
+    {
+        $p = $this->property(true);
+        $ref = User::factory()->create(['role' => 'guest', 'phone' => '09120003333']);
+        $g = User::factory()->create(['role' => 'guest', 'phone' => '09120004444', 'referred_by' => $ref->id]);
+        $b = BookingService::create($g, $p, today()->addDays(10), today()->addDays(11), 2, 0, null, null);
+        $pay = Payment::create(['user_id' => $g->id, 'booking_id' => $b->id, 'amount' => $b->total, 'authority' => 'r1']);
+        BookingService::markPaid($b->fresh(), $pay, 'R1');
+
+        $this->assertSame(config('mija.referral_bonus'), $g->fresh()->wallet);
+        $this->assertSame(config('mija.referral_bonus'), $ref->fresh()->wallet);
+    }
+
+    public function test_loyalty_level_and_cashback(): void
+    {
+        $p = $this->property(true);
+        $g = $this->guest();
+        $this->assertSame('bronze', $g->level()['level']['key']);
+        $old = BookingService::create($g, $p, today()->addDays(40), today()->addDays(46), 2, 0, null, null);
+        $old->update(['status' => 'completed']);
+        $this->assertSame('silver', $g->fresh()->level()['level']['key']);
+
+        $b = BookingService::create($g, $p, today()->addDays(10), today()->addDays(11), 2, 0, null, null);
+        $b->update(['status' => 'confirmed', 'check_in' => today()->subDays(3), 'check_out' => today()->subDay(), 'settled_at' => now()]);
+        BookingService::tick();
+        $this->assertSame(intdiv($b->total * 1, 100), $g->fresh()->wallet);
+    }
+
+    public function test_role_profiles_ics_invoice_and_public_host(): void
+    {
+        $p = $this->property(true);
+        $g = $this->guest();
+        $b = BookingService::create($g, $p, today()->addDays(10), today()->addDays(12), 2, 0, null, null);
+
+        $this->actingAs($g)->get('/profile')->assertOk()->assertSee('سطح وفاداری');
+        $this->actingAs($g)->get(route('booking.ics', $b))->assertOk()->assertHeader('Content-Type', 'text/calendar; charset=utf-8');
+        $this->actingAs($g)->get(route('booking.invoice', $b))->assertOk()->assertSee($b->code);
+        $this->actingAs($p->host)->get('/profile')->assertOk()->assertSee('نرخ پاسخ');
+        $this->actingAs($p->host)->get('/host')->assertOk();
+        $admin = User::factory()->create(['role' => 'admin', 'phone' => '09120005555']);
+        $this->actingAs($admin)->get('/profile')->assertOk()->assertSee('امنیت حساب');
+        $this->actingAs($admin)->get('/admin')->assertOk();
+        $this->get(route('host.public', $p->host))->assertOk()->assertSee($p->host->name);
+        // دیگران به فاکتور دسترسی ندارند
+        $other = User::factory()->create(['role' => 'guest', 'phone' => '09120006666']);
+        $this->actingAs($other)->get(route('booking.invoice', $b))->assertNotFound();
+    }
+
     public function test_panels_are_role_protected(): void
     {
         $g = $this->guest();

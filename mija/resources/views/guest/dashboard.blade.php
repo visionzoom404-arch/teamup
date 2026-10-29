@@ -1,7 +1,7 @@
 @extends('layouts.panel')
 @section('title', 'داشبورد مهمان')
 @section('content')
-<div class="page-h"><div><h1>سلام {{ \Illuminate\Support\Str::before(auth()->user()->name, ' ') }} 👋</h1><div class="muted">سفر بعدی‌ات را برنامه‌ریزی کن.</div></div><a class="btn" href="{{ route('search') }}"><x-icon name="search"/> جستجوی اقامتگاه</a></div>
+<div class="page-h"><div><h1>سلام {{ \Illuminate\Support\Str::before(auth()->user()->name, ' ') }} <x-i3 name="wave" class="lg h-i3"/></h1><div class="muted">سفر بعدی‌ات را برنامه‌ریزی کن.</div></div><a class="btn" href="{{ route('search') }}"><x-icon name="search"/> جستجوی اقامتگاه</a></div>
 
 <div class="tiles">
   <div class="tile card"><div class="ic"><x-icon name="calendar"/></div><b>{{ fa($stats['total']) }}</b><span>کل رزروها</span></div>

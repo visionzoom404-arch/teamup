@@ -33,13 +33,14 @@ $quick = array_slice($menus, 0, 4);
 <html lang="fa" dir="rtl">
 <head>@include('partials.head')@stack('head')</head>
 <body>
+@include('partials.i3-defs')
 @include('partials.topbar')
 <div class="container">
   <div class="panel">
-    <aside class="sidebar card">
+    <aside class="sidebar card role-{{ $u->role }}">
       <div class="me">
         <img class="avatar" src="{{ $u->avatarUrl() }}" alt="">
-        <div class="grow"><b>{{ $u->name }}</b><div class="xs muted">{{ $roleName }} @if($u->isHost() && $u->host_verified)<span class="badge green" style="padding:0 7px">تأییدشده</span>@endif</div></div>
+        <div class="grow"><b>{{ $u->name }}</b><div class="mt-1"><span class="role-pill {{ $u->roleColor() }}" style="padding:2px 10px 2px 8px;font-size:11.5px">{{ $roleName }}</span>@if($u->isHost() && $u->host_verified)<span class="badge green" style="padding:0 7px;margin-inline-start:4px">تأییدشده</span>@endif</div></div>
       </div>
       @foreach($menus as $m)
         <a href="{{ route($m[0]) }}" class="item {{ $isOn($m[0]) ? 'on' : '' }}"><x-icon name="{{ $m[2] }}"/>{{ $m[1] }}@if(!empty($m[3]))<span class="badge red">{{ fa($m[3]) }}</span>@endif</a>
@@ -49,6 +50,7 @@ $quick = array_slice($menus, 0, 4);
       <form method="post" action="{{ route('logout') }}">@csrf<button class="item" style="width:100%;background:none;border:0;font:inherit;cursor:pointer;display:flex;align-items:center;gap:12px;padding:11px 14px;font-weight:600;color:var(--red-d)"><x-icon name="logout"/>خروج</button></form>
     </aside>
     <section>
+      <div class="ctx-strip {{ $u->role }}"><x-i3 name="{{ ['guest' => 'user', 'host' => 'key', 'admin' => 'shield'][$u->role] }}" class="sm"/> شما در <b>پنل {{ $roleName }}</b> هستید @if($u->isAdmin())· دسترسی کامل مدیریتی @endif</div>
       @include('partials.flash')
       @yield('content')
     </section>

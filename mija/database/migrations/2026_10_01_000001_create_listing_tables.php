@@ -54,7 +54,7 @@ return new class extends Migration
             $t->id();
             $t->string('key', 40)->unique();
             $t->string('name');
-            $t->string('icon', 10)->default('✦');
+            $t->string('icon', 24)->default('sparkle');
             $t->string('grp', 30)->default('general');
             $t->unsignedSmallInteger('sort')->default(0);
         });

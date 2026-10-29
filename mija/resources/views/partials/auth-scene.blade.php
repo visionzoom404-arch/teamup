@@ -47,11 +47,12 @@
   <g class="flies">@for($i = 0; $i < 18; $i++)<circle class="fly" cx="{{ 60 + ($i * 47) % 800 }}" cy="{{ 430 + ($i * 71) % 260 }}" r="{{ 1.6 + ($i % 3) * .6 }}" fill="#ffe08a" style="animation-delay:-{{ $i * .7 }}s;animation-duration:{{ 5 + $i % 5 }}s"/>@endfor</g>
 </svg>
 
+@unless($bare ?? false)
 <div class="pin-float"><span class="ring"></span><span class="ring r2"></span><img src="{{ asset('img/mija-mark.svg') }}" alt=""></div>
 
-<div class="chip chip-a glass-dark"><b>۴٫۹</b><span class="stars-mini">★★★★★</span><small>رضایت مهمانان</small></div>
-<div class="chip chip-b glass-dark"><span class="ci">⚡</span><div><b>رزرو فوری</b><small>بدون انتظار تأیید</small></div></div>
-<div class="chip chip-c glass-dark"><span class="ci">🛡️</span><div><b>پرداخت امن</b><small>ضمانت بازگشت وجه</small></div></div>
+<div class="chip chip-a glass-dark"><b>۴٫۹</b><span class="stars-mini">@for($i=0;$i<5;$i++)<x-i3 name="star" class="sm"/>@endfor</span><small>رضایت مهمانان</small></div>
+<div class="chip chip-b glass-dark"><x-i3 name="bolt" class="lg"/><div><b>رزرو فوری</b><small>بدون انتظار تأیید</small></div></div>
+<div class="chip chip-c glass-dark"><x-i3 name="shield" class="lg"/><div><b>پرداخت امن</b><small>ضمانت بازگشت وجه</small></div></div>
 
 <div class="scene-copy">
   <div class="rot" id="rot">
@@ -61,4 +62,5 @@
   </div>
   <div class="dots" id="rot-dots"><i class="on"></i><i></i><i></i></div>
 </div>
+@endunless
 </div>

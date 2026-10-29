@@ -18,6 +18,10 @@
   $('#install-btn') && $('#install-btn').addEventListener('click', async () => {
     if (!deferred) return; deferred.prompt(); await deferred.userChoice; deferred = null; bar.classList.remove('show');
   });
+  $$('[data-install]').forEach(b => b.addEventListener('click', async () => {
+    if (deferred) { deferred.prompt(); await deferred.userChoice; deferred = null; return; }
+    alert('برای نصب: در مرورگر موبایل از منوی ⋮ (اندروید) یا دکمه‌ی اشتراک‌گذاری (آیفون) گزینه‌ی «افزودن به صفحه اصلی» را بزنید.');
+  }));
   $('#install-x') && $('#install-x').addEventListener('click', () => {
     bar.classList.remove('show'); try { localStorage.setItem('mija-install-x', '1'); } catch (_) {}
   });
@@ -78,6 +82,8 @@
     const inIn = $('[data-in]', root), inOut = $('[data-out]', root), pop = $('.rp-pop', root);
     const labelIn = $('[data-label-in]', root), labelOut = $('[data-label-out]', root);
     const unavail = new Set(JSON.parse(root.dataset.unavailable || '[]'));
+    const prices = JSON.parse(root.dataset.prices || '{}'), base = +root.dataset.base || 0;
+    const short = p => p >= 1e6 ? Jalali.fa((p / 1e6).toFixed(1)).replace('.', '٫') + 'م' : Jalali.fa(Math.round(p / 1000)) + 'ه';
     const today = Jalali.todayISO();
     let [vy, vm] = Jalali.todayJ();
     let start = null, end = null;
@@ -108,7 +114,8 @@
         const cls = ['rp-day']; if (col === 6) cls.push('fri'); if (iso === today) cls.push('today');
         if (iso === start) cls.push('start'); if (iso === end) cls.push('end');
         if (start && end && iso > start && iso < end) cls.push('range');
-        h += '<button type="button" class="' + cls.join(' ') + '" data-iso="' + iso + '"' + (dis ? ' disabled' : '') + '>' + Jalali.fa(d) + '</button>';
+        const pr = prices[iso]; if (pr && base && pr > base * 1.05) cls.push('hot');
+        h += '<button type="button" class="' + cls.join(' ') + '" data-iso="' + iso + '"' + (dis ? ' disabled' : '') + '>' + Jalali.fa(d) + (pr ? '<small>' + short(pr) + '</small>' : '') + '</button>';
       }
       return '<div><div class="rp-head"><span>' + Jalali.months[jm - 1] + ' ' + Jalali.fa(jy) + '</span></div>' + h + '</div></div>';
     }
@@ -136,9 +143,28 @@
     });
     document.addEventListener('click', e => { if (!e.composedPath().includes(root)) close(); });
     window.addEventListener('resize', () => pop.classList.contains('open') && render());
+    root._rp = { set(a, b) { start = a; end = b; if (a) [vy, vm] = Jalali.parseISO(a).slice(0, 2); sync(); if (pop.classList.contains('open')) render(); } };
     sync();
   }
   $$('[data-rangepicker]').forEach(RangePicker);
+
+  /* ---------- پیش‌تنظیم‌های تاریخ و پاسخ‌های سریع ---------- */
+  document.addEventListener('click', e => {
+    const p = e.target.closest('[data-preset]'); if (p) {
+      const form = p.closest('form'), rp = form && form.querySelector('[data-rangepicker]'); if (!rp || !rp._rp) return;
+      const d = new Date(); d.setHours(12, 0, 0, 0); const dow = d.getDay(); // 0=یکشنبه
+      const toThu = (4 - dow + 7) % 7; const add = n => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+      const iso = x => x.getFullYear() + '-' + Jalali.pad(x.getMonth() + 1) + '-' + Jalali.pad(x.getDate());
+      const k = p.dataset.preset; let a, b;
+      if (k === 'weekend') { a = add(toThu === 0 && dow === 4 ? 0 : toThu); b = new Date(a); b.setDate(b.getDate() + 2); }
+      else if (k === 'weekend2') { a = add((toThu || 7) + 7 - (dow === 4 ? 7 : 0)); b = new Date(a); b.setDate(b.getDate() + 2); }
+      else if (k === 'midweek') { a = add(((6 - dow + 7) % 7) || 7); b = new Date(a); b.setDate(b.getDate() + 3); }
+      else { a = add(1); b = add(4); }
+      rp._rp.set(iso(a), iso(b));
+      document.querySelectorAll('[data-preset]').forEach(x => x.classList.toggle('on', x === p));
+    }
+    const q = e.target.closest('[data-qr]'); if (q) { const f = q.closest('.card').querySelector('input[name=body]'); if (f) { f.value = q.dataset.qr; f.focus(); } }
+  });
 
   /* ---------- ویجت رزرو (محاسبه‌ی قیمت زنده) ---------- */
   const bw = $('#booking-form');
@@ -190,4 +216,12 @@ document.addEventListener('pointerdown', e => {
   const r = b.getBoundingClientRect(), s = Math.max(r.width, r.height), o = document.createElement('span');
   o.className = 'btn-ripple'; o.style.cssText = `width:${s}px;height:${s}px;left:${e.clientX - r.left - s / 2}px;top:${e.clientY - r.top - s / 2}px`;
   b.appendChild(o); setTimeout(() => o.remove(), 650);
+});
+
+/* ---------- کپی در کلیپ‌بورد ---------- */
+document.addEventListener('click', async e => {
+  const b = e.target.closest('[data-copy]'); if (!b) return;
+  const el = document.querySelector(b.dataset.copy); if (!el) return;
+  try { await navigator.clipboard.writeText(el.textContent.trim()); } catch (_) { const r = document.createRange(); r.selectNode(el); getSelection().removeAllRanges(); getSelection().addRange(r); document.execCommand('copy'); }
+  const t = b.innerHTML; b.textContent = 'کپی شد'; setTimeout(() => b.innerHTML = t, 1600);
 });

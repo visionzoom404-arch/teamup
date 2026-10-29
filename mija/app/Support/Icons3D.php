@@ -1,0 +1,185 @@
+<?php
+
+namespace App\Support;
+
+/**
+ * مجموعه آیکن‌های سه‌بعدی برداری می‌جا (۶۴×۶۴).
+ * سبک: بدنه‌ی گرادیانی + سایه‌ی عمق + براق‌کننده‌ی نور + سایه‌ی زمین.
+ * گرادیان‌ها در partials/i3-defs تعریف می‌شوند.
+ */
+class Icons3D
+{
+    private const G = '<ellipse cx="32" cy="58" rx="18" ry="3.4" fill="#1b1030" opacity=".17"/>';
+
+
+    /* ---------- کیت ساخت: طاق جناقی، گنبد، جعبه‌ی سه‌بعدی، ستاره‌ی خاتم ---------- */
+
+    /** طاق جناقی ایرانی (پنجره/در) */
+    private static function arch(float $x, float $y, float $w, float $h, string $g): string
+    {
+        $r = $w / 2;
+        $sp = $y + $w * .62;
+
+        return "<path d='M$x ".($y + $h)." V$sp Q$x ".($y + $w * .22)." ".($x + $r)." $y Q".($x + $w)." ".($y + $w * .22)." ".($x + $w)." $sp V".($y + $h)."Z' fill='url(#$g)'/>";
+    }
+
+    /** گنبد پیازی با کلاهک */
+    private static function dome(float $cx, float $by, float $r, string $g): string
+    {
+        $t = $by - $r * 1.5;
+
+        return "<path d='M".($cx - $r)." $by C".($cx - $r)." ".($by - $r * 1.25)." ".($cx - $r * .3)." ".($by - $r * 1.2)." $cx $t C".($cx + $r * .3)." ".($by - $r * 1.2)." ".($cx + $r)." ".($by - $r * 1.25)." ".($cx + $r)." {$by}Z' fill='url(#$g)'/>"
+            ."<path d='M".($cx - $r * .55)." ".($by - $r * .55)." Q".($cx - $r * .5)." ".($by - $r * 1.05)." ".($cx - $r * .05)." ".($by - $r * 1.32)."' stroke='#fff' stroke-width='1.8' stroke-linecap='round' fill='none' opacity='.55'/>"
+            ."<rect x='".($cx - $r * .55)."' y='".($by - 1.2)."' width='".($r * 1.1)."' height='2.6' rx='1.3' fill='url(#gG)'/>"
+            ."<path d='M$cx $t v-".($r * .5)."' stroke='url(#gG)' stroke-width='2.2' stroke-linecap='round'/><circle cx='$cx' cy='".($t - $r * .55)."' r='1.7' fill='url(#gG)'/>";
+    }
+
+    /** جعبه‌ی سه‌بعدی (نمای مایل): روبه‌رو + سقف روشن + پهلو تیره */
+    private static function box(float $x, float $y, float $w, float $h, float $dx, float $dy, string $g): string
+    {
+        $top = "M$x $y L".($x + $dx)." ".($y - $dy)." L".($x + $w + $dx)." ".($y - $dy)." L".($x + $w)." {$y}Z";
+        $side = "M".($x + $w)." $y L".($x + $w + $dx)." ".($y - $dy)." V".($y + $h - $dy)." L".($x + $w)." ".($y + $h)."Z";
+
+        return "<path d='$side' fill='url(#$g)'/><path d='$side' fill='#1a0a20' opacity='.2'/>"
+            ."<path d='$top' fill='url(#$g)'/><path d='$top' fill='#fff' opacity='.42'/>"
+            ."<rect x='$x' y='$y' width='$w' height='$h' rx='1.4' fill='url(#$g)'/>";
+    }
+
+    /** ستاره‌ی هشت‌پر خاتم */
+    private static function khatam(float $cx, float $cy, float $r, string $g, string $inner = 'gT'): string
+    {
+        $a = $r * .7071;
+
+        return "<g><rect x='".($cx - $a)."' y='".($cy - $a)."' width='".($a * 2)."' height='".($a * 2)."' fill='url(#$g)'/><rect x='".($cx - $a)."' y='".($cy - $a)."' width='".($a * 2)."' height='".($a * 2)."' fill='url(#$g)' transform='rotate(45 $cx $cy)'/></g>"
+            ."<circle cx='$cx' cy='$cy' r='".($r * .38)."' fill='url(#$inner)'/>";
+    }
+
+    public static function names(): array
+    {
+        return array_keys(self::all());
+    }
+
+    public static function svg(string $name, ?string $class = null): string
+    {
+        $inner = self::all()[$name] ?? self::all()['sparkle'];
+
+        return '<svg class="i3'.($class ? ' '.$class : '').'" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><g filter="url(#i3s)">'.$inner.'</g></svg>';
+    }
+
+    /** نگاشت کلید امکانات → آیکن */
+    public static function amenity(string $key): string
+    {
+        return ['pool' => 'pool', 'jacuzzi' => 'jacuzzi', 'sauna' => 'sauna', 'bbq' => 'bbq', 'fireplace' => 'fireplace', 'garden' => 'garden', 'view' => 'view', 'playground' => 'playground',
+            'wifi' => 'wifi', 'parking' => 'parking', 'ac' => 'ac', 'heating' => 'heating', 'kitchen' => 'kitchen', 'fridge' => 'fridge', 'tv' => 'tv', 'washer' => 'washer', 'bedding' => 'bedding',
+            'pet' => 'pet', 'family' => 'family', 'breakfast' => 'cup', 'host_onsite' => 'host', 'ev' => 'ev'][$key] ?? 'sparkle';
+    }
+
+    public static function all(): array
+    {
+        $G = self::G;
+        $hi = fn (string $d) => '<path d="'.$d.'" fill="#fff" opacity=".42"/>';
+
+        $base = [
+            /* ---------- نوع اقامتگاه ---------- */
+            'villa' => $G.'<rect x="9" y="30" width="46" height="26" rx="4" fill="url(#gW)"/><path d="M41 30h10a4 4 0 014 4v18a4 4 0 01-4 4H41z" fill="#000" opacity=".07"/><rect x="17" y="14" width="30" height="16" rx="3" fill="url(#gW)"/><rect x="5" y="24" width="54" height="8" rx="3" fill="url(#gK)"/><rect x="13" y="8" width="38" height="7" rx="3" fill="url(#gK)"/><rect x="13" y="36" width="12" height="10" rx="2" fill="url(#gB)"/><rect x="39" y="36" width="12" height="10" rx="2" fill="url(#gB)"/><rect x="27" y="38" width="10" height="18" rx="2" fill="url(#gWood)"/><rect x="22" y="17" width="9" height="8" rx="1.5" fill="url(#gB)"/><rect x="33" y="17" width="9" height="8" rx="1.5" fill="url(#gB)"/>'.$hi('M10 31h44v4H10z'),
+            'cabin' => $G.'<path d="M8 32L32 10l24 22z" fill="url(#gK)"/><path d="M32 10l24 22H32z" fill="#000" opacity=".18"/><rect x="12" y="32" width="40" height="24" rx="3" fill="url(#gWood)"/><path d="M12 40h40M12 48h40" stroke="#5a3216" stroke-width="1.6" opacity=".55"/><rect x="38" y="12" width="7" height="14" rx="1.5" fill="url(#gK)"/><rect x="17" y="38" width="12" height="10" rx="2" fill="url(#gG)"/><rect x="35" y="40" width="11" height="16" rx="2" fill="#4a2c14"/><circle cx="43" cy="49" r="1.2" fill="#ffd36a"/>'.$hi('M12 33h40v4H12z'),
+            'garden_villa' => $G.'<rect x="6" y="30" width="32" height="26" rx="3" fill="url(#gW)"/><path d="M3 32L22 14l19 18z" fill="url(#gR)"/><path d="M22 14l19 18H22z" fill="#000" opacity=".14"/><rect x="11" y="37" width="9" height="9" rx="1.5" fill="url(#gB)"/><rect x="25" y="40" width="8" height="16" rx="1.5" fill="url(#gWood)"/><rect x="50" y="40" width="4" height="16" rx="2" fill="url(#gWood)"/><circle cx="52" cy="32" r="10" fill="url(#gL)"/><circle cx="46" cy="38" r="6" fill="url(#gL)"/><circle cx="57" cy="38" r="5" fill="url(#gL)"/><circle cx="49" cy="28" r="3" fill="#fff" opacity=".35"/>',
+            'tiny' => $G.'<path d="M10 34L32 12l22 22z" fill="url(#gK)"/><path d="M32 12l22 22H32z" fill="#000" opacity=".2"/><rect x="14" y="34" width="36" height="6" rx="3" fill="url(#gWood)"/><rect x="14" y="40" width="36" height="6" rx="3" fill="#b9733f"/><rect x="14" y="46" width="36" height="8" rx="3" fill="url(#gWood)"/><rect x="26" y="38" width="12" height="16" rx="2" fill="#3f2310"/><circle cx="35" cy="47" r="1.1" fill="#ffd36a"/><circle cx="32" cy="24" r="4" fill="url(#gG)"/>',
+            'eco' => $G.'<path d="M4 54L32 12l28 42z" fill="url(#gO)"/><path d="M32 12l28 42H32z" fill="#000" opacity=".16"/><path d="M32 30l-11 24h22z" fill="url(#gK)"/><path d="M32 30l11 24H32z" fill="#000" opacity=".25"/><path d="M32 12v-5" stroke="#6f3f1E" stroke-width="2.4" stroke-linecap="round"/><path d="M32 7l9 3-9 3z" fill="url(#gR)"/>'.$hi('M32 12L10 46l-4 8 26-38z'),
+            'suite' => $G.'<rect x="6" y="20" width="6" height="34" rx="3" fill="url(#gR)"/><rect x="8" y="34" width="50" height="14" rx="5" fill="url(#gW)"/><rect x="8" y="34" width="50" height="5" rx="2.5" fill="url(#gB)"/><rect x="12" y="26" width="14" height="9" rx="4" fill="url(#gW)"/><rect x="8" y="46" width="4" height="9" rx="2" fill="url(#gWood)"/><rect x="52" y="46" width="4" height="9" rx="2" fill="url(#gWood)"/><path d="M30 39h26v9H30z" fill="url(#gB)"/>'.$hi('M12 27h12v3H12z'),
+            'farm' => $G.'<path d="M6 30L32 10l26 20v26H6z" fill="url(#gR)"/><path d="M32 10l26 20v26H32z" fill="#000" opacity=".14"/><path d="M4 31L32 8l28 23" fill="none" stroke="url(#gK)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><rect x="20" y="34" width="24" height="22" rx="2" fill="url(#gW)"/><path d="M20 34l24 22M44 34L20 56" stroke="#c23" stroke-width="2.4"/><circle cx="32" cy="24" r="3.4" fill="url(#gW)"/>',
+            'apartment' => $G.'<rect x="14" y="8" width="30" height="48" rx="4" fill="url(#gB)"/><path d="M34 8h6a4 4 0 014 4v40a4 4 0 01-4 4h-6z" fill="#000" opacity=".12"/><rect x="40" y="22" width="14" height="34" rx="3" fill="url(#gW)"/><g fill="url(#gG)"><rect x="19" y="13" width="7" height="7" rx="1.6"/><rect x="31" y="13" width="7" height="7" rx="1.6"/><rect x="19" y="24" width="7" height="7" rx="1.6"/><rect x="31" y="24" width="7" height="7" rx="1.6"/><rect x="19" y="35" width="7" height="7" rx="1.6"/><rect x="31" y="35" width="7" height="7" rx="1.6"/></g><rect x="24" y="46" width="10" height="10" rx="2" fill="url(#gK)"/><rect x="43" y="27" width="8" height="5" rx="1.4" fill="url(#gB)"/><rect x="43" y="36" width="8" height="5" rx="1.4" fill="url(#gB)"/>'.$hi('M16 10h12v3H16z'),
+
+            /* ---------- امکانات ---------- */
+            'pool' => $G.'<rect x="6" y="28" width="52" height="26" rx="9" fill="url(#gW)"/><rect x="10" y="32" width="44" height="18" rx="6" fill="url(#gWater)"/><path d="M13 40q4-4 8 0t8 0 8 0 8 0" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round" opacity=".85"/><path d="M40 8v22" stroke="#cfd6e4" stroke-width="3.4" stroke-linecap="round"/><path d="M48 8v22" stroke="#cfd6e4" stroke-width="3.4" stroke-linecap="round"/><path d="M40 12h8M40 20h8" stroke="#aeb7ca" stroke-width="3" stroke-linecap="round"/>',
+            'jacuzzi' => $G.'<path d="M7 30h50l-4 22a5 5 0 01-5 4H16a5 5 0 01-5-4z" fill="url(#gW)"/><rect x="5" y="26" width="54" height="8" rx="4" fill="url(#gW)"/><rect x="9" y="29" width="46" height="4" rx="2" fill="url(#gWater)"/><circle cx="20" cy="22" r="3.4" fill="url(#gWater)"/><circle cx="31" cy="16" r="4.6" fill="url(#gWater)"/><circle cx="43" cy="21" r="3" fill="url(#gWater)"/><circle cx="37" cy="9" r="2.2" fill="url(#gWater)"/>'.$hi('M12 38h16v3H12z'),
+            'sauna' => $G.'<rect x="8" y="26" width="48" height="30" rx="6" fill="url(#gWood)"/><path d="M8 36h48M8 46h48" stroke="#5a3216" stroke-width="1.6" opacity=".55"/><rect x="26" y="34" width="12" height="22" rx="2" fill="#4a2c14"/><path d="M18 10q-4 5 0 9t0 7M32 8q-4 5 0 9t0 7M46 10q-4 5 0 9t0 7" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" opacity=".85"/>'.$hi('M8 27h48v4H8z'),
+            'bbq' => $G.'<path d="M10 30a22 14 0 0144 0z" fill="url(#gK)"/><rect x="8" y="29" width="48" height="5" rx="2.5" fill="url(#gW)"/><path d="M20 34l-6 22M44 34l6 22" stroke="#2a2c33" stroke-width="3.4" stroke-linecap="round"/><path d="M26 34h12v10c0 3-2 5-6 5s-6-2-6-5z" fill="url(#gO)"/><path d="M32 36c-2 3-1 5 0 6 2-1 3-3 0-6z" fill="url(#gG)"/>'.$hi('M16 26a16 10 0 0120-7'),
+            'fireplace' => $G.'<rect x="8" y="12" width="48" height="44" rx="5" fill="url(#gR)"/><path d="M8 24h48M8 36h48M8 48h48M22 12v12M36 24v12M22 36v12M46 36v12" stroke="#7a1020" stroke-width="1.4" opacity=".5"/><path d="M18 56V34a14 14 0 0128 0v22z" fill="url(#gK)"/><path d="M32 52c-8 0-9-8-4-13 0 4 3 5 4 5-1-5 2-8 4-10 1 6 7 8 5 14-1 3-4 4-9 4z" fill="url(#gO)"/><path d="M32 52c-4 0-5-4-2-7 0 2 2 3 2 3 0-3 1-4 2-5 1 3 3 4 2 7-1 1-2 2-4 2z" fill="url(#gG)"/>',
+            'garden' => $G.'<rect x="29" y="34" width="6" height="22" rx="3" fill="url(#gWood)"/><circle cx="32" cy="22" r="14" fill="url(#gL)"/><circle cx="20" cy="32" r="9" fill="url(#gL)"/><circle cx="44" cy="32" r="9" fill="url(#gL)"/><circle cx="27" cy="17" r="4" fill="#fff" opacity=".35"/><circle cx="40" cy="26" r="2.4" fill="url(#gR)"/><circle cx="24" cy="28" r="2.4" fill="url(#gG)"/>',
+            'view' => $G.'<rect x="5" y="8" width="54" height="46" rx="9" fill="url(#gB)"/><circle cx="44" cy="22" r="6.5" fill="url(#gG)"/><path d="M5 46l16-20 12 14 8-9 18 17v6a8 8 0 01-8 8H13a8 8 0 01-8-8z" fill="url(#gN)"/><path d="M21 26l7 9-7 4-6-6z" fill="#fff" opacity=".7"/>'.$hi('M10 12h30a4 4 0 014 4v2H10z'),
+            'playground' => $G.'<path d="M10 56V16" stroke="url(#gWood)" stroke-width="5" stroke-linecap="round"/><path d="M34 56V16" stroke="url(#gWood)" stroke-width="5" stroke-linecap="round"/><path d="M10 16h24" stroke="url(#gWood)" stroke-width="5" stroke-linecap="round"/><path d="M30 18c8 2 14 12 26 38h-9C40 40 36 36 30 34z" fill="url(#gR)"/><path d="M14 24h16M14 34h16M14 44h16" stroke="#cfd6e4" stroke-width="3" stroke-linecap="round"/>',
+            'wifi' => $G.'<circle cx="32" cy="32" r="26" fill="url(#gB)"/><path d="M16 29a23 23 0 0132 0M21 36a15 15 0 0122 0M26 43a7 7 0 0112 0" stroke="#fff" stroke-width="4.4" fill="none" stroke-linecap="round"/><circle cx="32" cy="49" r="3.2" fill="#fff"/>'.$hi('M12 24a22 22 0 0140-6'),
+            'parking' => $G.'<rect x="8" y="8" width="48" height="48" rx="12" fill="url(#gB)"/><path d="M26 44V20h9a8 8 0 010 16h-9" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'.$hi('M12 14a8 8 0 018-6h24v6z'),
+            'ac' => $G.'<rect x="6" y="12" width="52" height="24" rx="7" fill="url(#gW)"/><rect x="10" y="28" width="44" height="4" rx="2" fill="#cfd6e4"/><circle cx="48" cy="19" r="2.2" fill="url(#gN)"/><path d="M16 44v8M28 44v12M40 44v8M52 44v10" stroke="url(#gB)" stroke-width="4" stroke-linecap="round"/>'.$hi('M10 14h30v3H10z'),
+            'heating' => $G.'<rect x="8" y="14" width="48" height="34" rx="7" fill="url(#gO)"/><g fill="#fff" opacity=".45"><rect x="14" y="19" width="5" height="24" rx="2.5"/><rect x="23" y="19" width="5" height="24" rx="2.5"/><rect x="32" y="19" width="5" height="24" rx="2.5"/><rect x="41" y="19" width="5" height="24" rx="2.5"/></g><path d="M16 52v4M48 52v4" stroke="#6f3f1E" stroke-width="4" stroke-linecap="round"/><path d="M20 6q-3 3 0 6M32 5q-3 3 0 6M44 6q-3 3 0 6" stroke="#ff7a1a" stroke-width="2.6" fill="none" stroke-linecap="round"/>',
+            'kitchen' => $G.'<path d="M10 28h44l-3 22a6 6 0 01-6 5H19a6 6 0 01-6-5z" fill="url(#gK)"/><rect x="7" y="24" width="50" height="7" rx="3.5" fill="url(#gW)"/><path d="M3 38h7M54 38h7" stroke="#2a2c33" stroke-width="4" stroke-linecap="round"/><path d="M22 9q-3 4 0 8t0 5M32 7q-3 4 0 8t0 7M42 9q-3 4 0 8t0 5" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" opacity=".85"/>'.$hi('M15 33h8v14h-5z'),
+            'fridge' => $G.'<rect x="14" y="5" width="36" height="52" rx="7" fill="url(#gW)"/><path d="M14 26h36" stroke="#b7bfd0" stroke-width="2.4"/><rect x="40" y="12" width="3.4" height="10" rx="1.7" fill="#9aa3b8"/><rect x="40" y="32" width="3.4" height="14" rx="1.7" fill="#9aa3b8"/>'.$hi('M17 8h6v46h-3a3 3 0 01-3-3z'),
+            'tv' => $G.'<rect x="5" y="10" width="54" height="36" rx="8" fill="url(#gK)"/><rect x="9" y="14" width="46" height="28" rx="5" fill="url(#gB)"/><path d="M9 34l12-10 10 8 8-7 16 14v3a5 5 0 01-5 5H14a5 5 0 01-5-5z" fill="#fff" opacity=".28"/><rect x="24" y="48" width="16" height="4" rx="2" fill="#2a2c33"/><rect x="18" y="52" width="28" height="4" rx="2" fill="#2a2c33"/>',
+            'washer' => $G.'<rect x="9" y="6" width="46" height="52" rx="8" fill="url(#gW)"/><path d="M9 18h46" stroke="#cfd6e4" stroke-width="2.4"/><circle cx="17" cy="12" r="2.3" fill="url(#gR)"/><circle cx="25" cy="12" r="2.3" fill="url(#gB)"/><circle cx="32" cy="38" r="15" fill="#2a2c33"/><circle cx="32" cy="38" r="11.5" fill="url(#gB)"/><path d="M23 39q5-5 9 0t9 0" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" opacity=".85"/>',
+            'bedding' => $G.'<rect x="8" y="26" width="48" height="26" rx="9" fill="url(#gB)"/><rect x="14" y="14" width="24" height="16" rx="8" fill="url(#gW)"/><path d="M8 40h48" stroke="#fff" stroke-width="3" opacity=".6"/><path d="M42 20q7 0 7 6" stroke="url(#gG)" stroke-width="5" stroke-linecap="round" fill="none"/>'.$hi('M12 30h18v3H12z'),
+            'pet' => $G.'<ellipse cx="32" cy="40" rx="13" ry="12" fill="url(#gO)"/><ellipse cx="14" cy="26" rx="6" ry="8" fill="url(#gO)" transform="rotate(-20 14 26)"/><ellipse cx="25" cy="14" rx="6" ry="8.5" fill="url(#gO)" transform="rotate(-6 25 14)"/><ellipse cx="39" cy="14" rx="6" ry="8.5" fill="url(#gO)" transform="rotate(6 39 14)"/><ellipse cx="50" cy="26" rx="6" ry="8" fill="url(#gO)" transform="rotate(20 50 26)"/><ellipse cx="28" cy="35" rx="5" ry="3.4" fill="#fff" opacity=".4"/>',
+            'family' => $G.'<circle cx="20" cy="20" r="8" fill="url(#gO)"/><path d="M6 52c0-10 6-17 14-17s14 7 14 17z" fill="url(#gO)"/><circle cx="44" cy="22" r="7" fill="url(#gB)"/><path d="M31 52c0-9 5-15 13-15s13 6 13 15z" fill="url(#gB)"/><circle cx="32" cy="34" r="5.4" fill="url(#gR)"/><path d="M23 56c0-7 4-11 9-11s9 4 9 11z" fill="url(#gR)"/>',
+            'cup' => $G.'<path d="M10 22h34v18a14 14 0 01-14 14h-6a14 14 0 01-14-14z" fill="url(#gW)"/><path d="M44 26h5a6 6 0 010 14h-5" stroke="url(#gR)" stroke-width="5" fill="none" stroke-linecap="round"/><rect x="12" y="22" width="30" height="6" rx="3" fill="url(#gWood)"/><path d="M18 8q-3 4 0 8M28 6q-3 4 0 8M38 8q-3 4 0 8" stroke="#ff7a1a" stroke-width="3" fill="none" stroke-linecap="round" opacity=".85"/>'.$hi('M14 30h6v14l-3-3z'),
+            'host' => $G.'<circle cx="32" cy="20" r="11" fill="url(#gG)"/><path d="M9 56c0-13 10-22 23-22s23 9 23 22z" fill="url(#gO)"/><path d="M28 34l4 8 4-8" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M27 18h0M37 18h0" stroke="#4a2c14" stroke-width="3.2" stroke-linecap="round"/><path d="M27 24q5 4 10 0" stroke="#4a2c14" stroke-width="2.4" fill="none" stroke-linecap="round"/>'.$hi('M24 12a9 9 0 019-5'),
+            'ev' => $G.'<rect x="14" y="14" width="36" height="42" rx="10" fill="url(#gN)"/><path d="M28 6v12M36 6v12" stroke="#cfd6e4" stroke-width="4.4" stroke-linecap="round"/><path d="M34 22l-9 14h7l-3 12 11-16h-7z" fill="url(#gG)"/>'.$hi('M18 20a6 6 0 016-6h10v4H22z'),
+
+            /* ---------- ویژگی‌ها و عمومی ---------- */
+            'shield' => $G.'<path d="M32 5l22 8v16c0 14-9 24-22 29C19 53 10 43 10 29V13z" fill="url(#gN)"/><path d="M32 5l22 8v16c0 14-9 24-22 29z" fill="#000" opacity=".13"/><path d="M21 31l8 8 15-17" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'.$hi('M14 15l18-6v8z'),
+            'bolt' => $G.'<path d="M36 4L12 36h15l-5 24 28-34H34z" fill="url(#gG)"/><path d="M36 4L12 36h15z" fill="#fff" opacity=".35"/><path d="M34 26h16L22 60l5-24z" fill="#000" opacity=".1"/>',
+            'tag' => $G.'<path d="M6 30V10a4 4 0 014-4h20l28 28a4 4 0 010 6L40 58a4 4 0 01-6 0z" fill="url(#gO)"/><path d="M30 6l28 28a4 4 0 010 6L40 58z" fill="#000" opacity=".12"/><circle cx="19" cy="19" r="5" fill="#fff"/><circle cx="19" cy="19" r="2.2" fill="url(#gK)"/>'.$hi('M10 8h18l-4 5H11z'),
+            'star' => $G.'<path d="M32 4l8.5 17.3 19 2.8-13.8 13.4 3.3 19-17-9-17 9 3.3-19L4.5 24.1l19-2.8z" fill="url(#gG)"/><path d="M32 4l8.5 17.3 19 2.8-13.8 13.4L32 4z" fill="#fff" opacity=".28"/>',
+            'search' => $G.'<circle cx="27" cy="27" r="17" fill="url(#gB)"/><circle cx="27" cy="27" r="11" fill="#fff" opacity=".55"/><path d="M41 41l14 14" stroke="url(#gK)" stroke-width="8" stroke-linecap="round"/>'.$hi('M14 20a14 14 0 0112-9'),
+            'key' => $G.'<circle cx="20" cy="22" r="15" fill="url(#gG)"/><circle cx="20" cy="22" r="6" fill="#fff" opacity=".9"/><path d="M30 33l22 22M44 47l7-7M50 53l6-6" stroke="url(#gG)" stroke-width="7" stroke-linecap="round"/>'.$hi('M9 15a12 12 0 0112-8'),
+            'wallet' => $G.'<rect x="5" y="12" width="52" height="42" rx="9" fill="url(#gO)"/><rect x="8" y="8" width="42" height="14" rx="6" fill="url(#gG)"/><rect x="36" y="28" width="24" height="16" rx="8" fill="url(#gR)"/><circle cx="46" cy="36" r="3.4" fill="#fff"/>'.$hi('M9 18h34v3H9z'),
+            'calendar' => $G.'<rect x="6" y="10" width="52" height="46" rx="9" fill="url(#gW)"/><path d="M6 19a9 9 0 019-9h34a9 9 0 019 9v8H6z" fill="url(#gR)"/><rect x="17" y="4" width="6" height="12" rx="3" fill="url(#gK)"/><rect x="41" y="4" width="6" height="12" rx="3" fill="url(#gK)"/><g fill="url(#gB)"><rect x="13" y="33" width="8" height="7" rx="2"/><rect x="28" y="33" width="8" height="7" rx="2"/><rect x="43" y="33" width="8" height="7" rx="2" fill="url(#gO)"/><rect x="13" y="45" width="8" height="7" rx="2"/><rect x="28" y="45" width="8" height="7" rx="2"/></g>',
+            'coins' => $G.'<ellipse cx="26" cy="46" rx="20" ry="8" fill="url(#gG)"/><path d="M6 46v-8c0 4 9 8 20 8s20-4 20-8v8c0 4-9 8-20 8S6 50 6 46z" fill="#E09A00"/><ellipse cx="38" cy="26" rx="20" ry="8" fill="url(#gG)"/><path d="M18 26v-8c0 4 9 8 20 8s20-4 20-8v8c0 4-9 8-20 8s-20-4-20-8z" fill="#E09A00"/><ellipse cx="38" cy="18" rx="20" ry="8" fill="#FFE9A0"/><text x="38" y="22" text-anchor="middle" font-size="11" font-weight="800" fill="#B87400" font-family="sans-serif">$</text>',
+            'chat' => $G.'<path d="M8 12a8 8 0 018-8h32a8 8 0 018 8v24a8 8 0 01-8 8H28L14 56V44a8 8 0 01-6-8z" fill="url(#gB)"/><circle cx="21" cy="24" r="3.6" fill="#fff"/><circle cx="32" cy="24" r="3.6" fill="#fff"/><circle cx="43" cy="24" r="3.6" fill="#fff"/>'.$hi('M12 10a5 5 0 015-4h20v5H14z'),
+            'bell' => $G.'<path d="M14 42V28a18 18 0 0136 0v14l5 7H9z" fill="url(#gG)"/><path d="M32 10a18 18 0 0118 18v14l5 7H32z" fill="#000" opacity=".1"/><circle cx="32" cy="8" r="3.4" fill="url(#gO)"/><path d="M26 52a6 6 0 0012 0z" fill="url(#gO)"/>'.$hi('M17 22a15 15 0 0110-10'),
+            'gift' => $G.'<rect x="7" y="26" width="50" height="30" rx="6" fill="url(#gR)"/><rect x="5" y="18" width="54" height="12" rx="5" fill="url(#gO)"/><rect x="28" y="18" width="8" height="38" fill="url(#gG)"/><path d="M32 18c-8-12-18-4-10 0M32 18c8-12 18-4 10 0" stroke="url(#gG)" stroke-width="5" fill="none" stroke-linecap="round"/>',
+            'heart' => $G.'<path d="M32 56S6 40 6 22c0-8 6-14 13-14 6 0 10 3 13 8 3-5 7-8 13-8 7 0 13 6 13 14 0 18-26 34-26 34z" fill="url(#gR)"/><path d="M32 16c3-5 7-8 13-8 7 0 13 6 13 14 0 18-26 34-26 34z" fill="#000" opacity=".1"/>'.$hi('M12 18c0-5 3-8 8-8 3 0 6 2 8 5-4 0-9 2-12 7z'),
+            'trophy' => $G.'<path d="M16 6h32v18a16 16 0 01-32 0z" fill="url(#gG)"/><path d="M16 12H6c0 12 4 18 12 20M48 12h10c0 12-4 18-12 20" stroke="url(#gG)" stroke-width="4.5" fill="none" stroke-linecap="round"/><rect x="28" y="38" width="8" height="10" fill="url(#gO)"/><rect x="18" y="48" width="28" height="9" rx="3.5" fill="url(#gK)"/><path d="M32 12l3 6 6 1-4.5 4 1 6-5.5-3-5.5 3 1-6-4.5-4 6-1z" fill="#fff" opacity=".7"/>',
+            'pin' => $G.'<path d="M32 60S12 40 12 25a20 20 0 0140 0c0 15-20 35-20 35z" fill="url(#gR)"/><path d="M32 5a20 20 0 0120 20c0 15-20 35-20 35z" fill="#000" opacity=".13"/><circle cx="32" cy="25" r="8.4" fill="#fff"/><circle cx="32" cy="25" r="3.6" fill="url(#gO)"/>'.$hi('M17 18a15 15 0 019-9'),
+            'sun' => $G.'<circle cx="32" cy="32" r="14" fill="url(#gG)"/><g stroke="url(#gO)" stroke-width="5" stroke-linecap="round"><path d="M32 6v6M32 52v6M6 32h6M52 32h6M13.6 13.6l4.2 4.2M46.2 46.2l4.2 4.2M13.6 50.4l4.2-4.2M46.2 17.8l4.2-4.2"/></g>'.$hi('M22 26a11 11 0 0110-8'),
+            'trend' => $G.'<rect x="8" y="34" width="12" height="22" rx="4" fill="url(#gB)"/><rect x="26" y="22" width="12" height="34" rx="4" fill="url(#gG)"/><rect x="44" y="8" width="12" height="48" rx="4" fill="url(#gN)"/><path d="M10 24l16-10 12 6 18-14" stroke="url(#gR)" stroke-width="3.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+            'home' => $G.'<path d="M6 32L32 8l26 24z" fill="url(#gR)"/><path d="M32 8l26 24H32z" fill="#000" opacity=".14"/><rect x="12" y="30" width="40" height="26" rx="4" fill="url(#gW)"/><rect x="26" y="38" width="12" height="18" rx="2.5" fill="url(#gO)"/><rect x="15" y="36" width="8" height="8" rx="1.6" fill="url(#gB)"/><rect x="41" y="36" width="8" height="8" rx="1.6" fill="url(#gB)"/>',
+            'user' => $G.'<circle cx="32" cy="19" r="12" fill="url(#gB)"/><path d="M8 57c0-14 11-24 24-24s24 10 24 24z" fill="url(#gB)"/><path d="M32 7a12 12 0 010 24zM32 33c13 0 24 10 24 24H32z" fill="#000" opacity=".1"/>'.$hi('M23 13a10 10 0 018-5'),
+            'lock' => $G.'<path d="M19 28V20a13 13 0 0126 0v8" stroke="url(#gK)" stroke-width="6.5" fill="none" stroke-linecap="round"/><rect x="9" y="26" width="46" height="32" rx="8" fill="url(#gG)"/><circle cx="32" cy="40" r="5" fill="#8a5a00"/><rect x="30" y="42" width="4" height="9" rx="2" fill="#8a5a00"/>'.$hi('M12 32h40v3H12z'),
+            'card' => $G.'<rect x="4" y="12" width="56" height="40" rx="8" fill="url(#gB)"/><rect x="4" y="20" width="56" height="9" fill="url(#gK)"/><rect x="10" y="38" width="16" height="6" rx="3" fill="#fff" opacity=".9"/><circle cx="48" cy="40" r="6" fill="url(#gG)"/><circle cx="42" cy="40" r="6" fill="url(#gR)" opacity=".9"/>',
+            'phone' => $G.'<rect x="16" y="4" width="32" height="54" rx="8" fill="url(#gK)"/><rect x="19" y="10" width="26" height="40" rx="3.5" fill="url(#gB)"/><circle cx="32" cy="54" r="2" fill="#6a6e7b"/><path d="M24 24h16M24 31h10" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".8"/>',
+            'camera' => $G.'<path d="M22 14l4-6h12l4 6h10a6 6 0 016 6v28a6 6 0 01-6 6H12a6 6 0 01-6-6V20a6 6 0 016-6z" fill="url(#gK)"/><circle cx="32" cy="34" r="13" fill="url(#gW)"/><circle cx="32" cy="34" r="9" fill="url(#gB)"/><circle cx="28" cy="30" r="3" fill="#fff" opacity=".7"/><circle cx="50" cy="22" r="2.4" fill="url(#gO)"/>',
+            'wave' => $G.'<path d="M22 30l-5-12a4 4 0 017-2l5 10M29 28l-3-17a4 4 0 018-1l3 15M37 27l-1-14a4 4 0 018 0l1 14M45 30l1-9a4 4 0 018 1l-2 17c-1 11-9 18-19 18-9 0-15-5-19-13l-5-10a4 4 0 017-3l5 7" fill="url(#gG)" stroke="#E09A00" stroke-width="1.2" stroke-linejoin="round"/>'.$hi('M30 14l3 12h-5z'),
+            'sparkle' => '<path d="M28 6l5 17 17 5-17 5-5 17-5-17-17-5 17-5z" fill="url(#gG)"/><path d="M48 34l2.4 8 8 2.4-8 2.4-2.4 8-2.4-8-8-2.4 8-2.4z" fill="url(#gO)"/><path d="M12 38l1.8 5 5 1.8-5 1.8L12 52l-1.8-5.4-5-1.8 5-1.8z" fill="url(#gB)"/>',
+            'party' => $G.'<path d="M6 58L18 20l26 26z" fill="url(#gO)"/><path d="M18 20l26 26-14 4z" fill="#000" opacity=".12"/><path d="M14 40l12 12M10 50l8 8" stroke="#fff" stroke-width="3" opacity=".6" stroke-linecap="round"/><circle cx="40" cy="14" r="3.4" fill="url(#gR)"/><circle cx="52" cy="26" r="3" fill="url(#gB)"/><path d="M30 10l4 5M50 12l-4 4M56 38l-5-2" stroke="url(#gG)" stroke-width="3.4" stroke-linecap="round"/><rect x="42" y="30" width="6" height="3" rx="1.5" fill="url(#gN)" transform="rotate(30 45 31)"/>',
+            'clock' => $G.'<circle cx="32" cy="32" r="26" fill="url(#gW)"/><circle cx="32" cy="32" r="21" fill="url(#gB)"/><path d="M32 18v15l10 6" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'.$hi('M12 24a22 22 0 0120-14'),
+            'check' => $G.'<circle cx="32" cy="32" r="26" fill="url(#gN)"/><path d="M19 33l9 9 18-20" stroke="#fff" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'.$hi('M10 26a24 24 0 0120-16'),
+            'map' => $G.'<path d="M6 14l16-6 20 6 16-6v36l-16 6-20-6-16 6z" fill="url(#gN)"/><path d="M22 8v36M42 14v36" stroke="#fff" stroke-width="2" opacity=".5"/><path d="M42 14l16-6v36l-16 6z" fill="#000" opacity=".12"/><path d="M32 40s-8-7-8-13a8 8 0 0116 0c0 6-8 13-8 13z" fill="url(#gR)"/><circle cx="32" cy="27" r="3" fill="#fff"/>',
+            'receipt' => $G.'<path d="M12 6h40v50l-6-4-7 4-7-4-7 4-7-4-6 4z" fill="url(#gW)"/><path d="M20 18h24M20 27h24M20 36h14" stroke="url(#gB)" stroke-width="4" stroke-linecap="round"/><circle cx="43" cy="38" r="5" fill="url(#gG)"/>',
+            'crown' => $G.'<path d="M6 20l14 14 12-20 12 20 14-14-5 32H11z" fill="url(#gG)"/><rect x="11" y="50" width="42" height="7" rx="3" fill="url(#gO)"/><circle cx="6" cy="19" r="3.4" fill="url(#gO)"/><circle cx="32" cy="12" r="3.4" fill="url(#gO)"/><circle cx="58" cy="19" r="3.4" fill="url(#gO)"/><circle cx="32" cy="44" r="3.4" fill="url(#gR)"/>',
+        ];
+
+        $arch = fn (...$a) => self::arch(...$a);
+        $dome = fn (...$a) => self::dome(...$a);
+        $box = fn (...$a) => self::box(...$a);
+        $kh = fn (...$a) => self::khatam(...$a);
+
+        $v2 = [
+            /* نوع اقامتگاه — مینیمال ایرانی */
+            'villa' => $G.$box(8, 34, 34, 20, 10, 7, 'gW').self::dome(30, 30, 9, 'gT').'<rect x="8" y="34" width="34" height="3.4" fill="url(#gG)"/>'.$arch(12, 40, 7, 11, 'gL2').$arch(31, 40, 7, 11, 'gL2').$arch(21, 41, 9, 13, 'gG'),
+            'cabin' => $G.$box(12, 36, 30, 18, 8, 6, 'gWood').'<path d="M9 37L27 19l18 18z" fill="url(#gR)"/><path d="M27 19l8-6 18 18-8 6z" fill="url(#gR)"/><path d="M27 19l8-6 18 18-8 6z" fill="#1a0a20" opacity=".18"/>'.'<path d="M12 44h30M12 49h30" stroke="#4a2a12" stroke-width="1.2" opacity=".5"/>'.$arch(23, 42, 8, 12, 'gG').$arch(14, 41, 5, 7, 'gG'),
+            'garden_villa' => $G.$box(6, 36, 26, 18, 7, 5, 'gW').self::dome(19, 32, 6.5, 'gT').$arch(15, 42, 7, 12, 'gG').$arch(8, 40, 4.4, 6.5, 'gL2').'<rect x="47.4" y="50" width="3.4" height="6" rx="1.7" fill="url(#gWood)"/><path d="M49 8C58 22 58 40 49 51 40 40 40 22 49 8z" fill="url(#gL)"/><path d="M47 16c-4 9-3 20 0 30" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" opacity=".4"/>',
+            'tiny' => $G.'<path d="M9 34L28 15l19 19z" fill="url(#gR)"/><path d="M28 15l8-5 19 19-8 5z" fill="url(#gR)"/><path d="M28 15l8-5 19 19-8 5z" fill="#1a0a20" opacity=".18"/><rect x="11" y="34" width="34" height="7" rx="3.5" fill="url(#gWood)"/><rect x="11" y="41" width="34" height="7" rx="3.5" fill="#BF7C48"/><rect x="11" y="48" width="34" height="7" rx="3.5" fill="url(#gWood)"/><ellipse cx="45" cy="37.5" rx="2.4" ry="3.5" fill="#E8B07C"/><ellipse cx="45" cy="44.5" rx="2.4" ry="3.5" fill="#E8B07C"/><ellipse cx="45" cy="51.5" rx="2.4" ry="3.5" fill="#E8B07C"/>'.$arch(22, 38, 8, 17, 'gG'),
+            'eco' => $G.$box(9, 40, 30, 15, 9, 6, 'gClay').self::dome(25, 36, 10, 'gClay').$box(42, 22, 9, 28, 4, 3, 'gClay').'<rect x="44" y="27" width="2.4" height="13" rx="1.2" fill="#3a1f0e"/><rect x="48" y="27" width="2.4" height="13" rx="1.2" fill="#3a1f0e"/><path d="M42 22l4-3h9l-4 3z" fill="#fff" opacity=".35"/>'.$arch(20, 42, 8, 13, 'gK'),
+            'suite' => $G.self::arch(5, 12, 17, 36, 'gT').'<path d="M9 20q4-5 9 0" stroke="#fff" stroke-width="1.6" fill="none" opacity=".6"/>'.$box(6, 46, 46, 8, 8, 5, 'gWood').$box(6, 37, 46, 10, 8, 5, 'gW').$box(24, 34, 28, 11, 8, 5, 'gR').'<rect x="9" y="30" width="14" height="8" rx="4" fill="url(#gW)"/><path d="M12 32h8" stroke="#fff" stroke-width="2" opacity=".7" stroke-linecap="round"/>',
+            'farm' => $G.'<circle cx="32" cy="38" r="19" fill="url(#gR)"/><path d="M18 22L20 10l5 8 4-10 3 9 4-9 3 9 5-8 2 12z" fill="url(#gR)"/><path d="M18 22L20 10l5 8 4-10 3 9 4-9 3 9 5-8 2 12z" fill="#fff" opacity=".15"/><path d="M42 18c8-6 15-4 17 2-7 3-13 3-17-2z" fill="url(#gL)"/><ellipse cx="25" cy="31" rx="6" ry="9" fill="#fff" opacity=".38" transform="rotate(25 25 31)"/><circle cx="32" cy="41" r="2.2" fill="url(#gG)"/><circle cx="39" cy="46" r="1.8" fill="url(#gG)"/><circle cx="26" cy="47" r="1.8" fill="url(#gG)"/>',
+            'apartment' => $G.$box(12, 12, 28, 42, 11, 8, 'gW').'<rect x="12" y="12" width="28" height="4" fill="url(#gG)"/>'.implode('', array_map(fn ($p) => $arch($p[0], $p[1], 6.4, 9, 'gL2'), [[16, 20], [28, 20], [16, 33], [28, 33]])).$arch(22, 44, 8, 10, 'gG').'<rect x="44" y="30" width="3" height="20" fill="url(#gL2)" opacity=".0"/>',
+
+            /* امکانات */
+            'pool' => $G.'<rect x="6" y="30" width="52" height="26" rx="9" fill="url(#gW)"/><rect x="10" y="34" width="44" height="17" rx="6" fill="url(#gT)"/><path d="M13 42q4-4 8 0t8 0 8 0 8 0" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round" opacity=".85"/><path d="M44 8v24M52 8v24" stroke="#d3d9e6" stroke-width="3.4" stroke-linecap="round"/><path d="M44 14h8M44 22h8" stroke="#aab3c8" stroke-width="3" stroke-linecap="round"/>'.$kh(18, 24, 6, 'gG'),
+            'bbq' => $G.$box(7, 42, 44, 10, 7, 5, 'gK').'<path d="M10 42h38l7-5H17z" fill="url(#gR)"/><path d="M12 41c2-4 4-4 5 0M22 41c2-5 4-5 5 0M32 41c2-4 4-4 5 0M41 41c2-4 4-4 5 0" stroke="url(#gG)" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M5 30L58 20M5 36L58 26" stroke="#cdd3e0" stroke-width="2.2" stroke-linecap="round"/><rect x="13" y="24" width="8" height="9" rx="3" fill="url(#gWood)" transform="rotate(-10 17 28)"/><rect x="24" y="22" width="8" height="9" rx="3" fill="url(#gR)" transform="rotate(-10 28 26)"/><rect x="35" y="20" width="8" height="9" rx="3" fill="url(#gWood)" transform="rotate(-10 39 24)"/><path d="M26 12q-3 3 0 6M38 9q-3 3 0 6" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" opacity=".7"/>',
+            'garden' => $G.'<rect x="29.6" y="48" width="4.8" height="8" rx="2.4" fill="url(#gWood)"/><path d="M32 4C44 20 44 40 32 50 20 40 20 20 32 4z" fill="url(#gL)"/><path d="M29 14c-5 11-4 24 0 32" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round" opacity=".4"/><circle cx="14" cy="46" r="8" fill="url(#gL)"/><circle cx="50" cy="47" r="7" fill="url(#gL)"/><circle cx="12" cy="43" r="2.6" fill="url(#gR)"/><circle cx="52" cy="45" r="2.4" fill="url(#gG)"/>',
+            'view' => $G.'<rect x="5" y="8" width="54" height="46" rx="10" fill="url(#gB)"/><circle cx="46" cy="21" r="6" fill="url(#gG)"/><path d="M5 50L24 14l10 16 6-8 19 28v4a8 8 0 01-8 8H13a8 8 0 01-8-8z" fill="url(#gN)"/><path d="M24 14l-8 15 5-3 3 4 4-4z" fill="#fff" opacity=".95"/><path d="M36 28l4-6 6 9z" fill="#fff" opacity=".8"/>',
+            'cup' => $G.'<ellipse cx="32" cy="54" rx="19" ry="4.5" fill="url(#gG)"/><ellipse cx="32" cy="53" rx="14" ry="2.6" fill="url(#gT)"/><path d="M15 16h34c0 8-3 12-7 16-2 2-2 6 0 10l1 6H21l1-6c2-4 2-8 0-10-4-4-7-8-7-16z" fill="#fff" opacity=".55"/><path d="M17 24h30c-1 7-4 10-7 14-2 3-2 6-1 10H25c1-4 1-7-1-10-3-4-6-7-7-14z" fill="url(#gTea)"/><path d="M15 16h34" stroke="#fff" stroke-width="2.4" stroke-linecap="round" opacity=".8"/><path d="M21 26c0 6 2 9 4 12" stroke="#fff" stroke-width="2.2" stroke-linecap="round" fill="none" opacity=".6"/><path d="M26 8q-3 3 0 6M38 6q-3 3 0 6" stroke="#ff9a3d" stroke-width="2.4" fill="none" stroke-linecap="round" opacity=".8"/>',
+            'kitchen' => $G.'<ellipse cx="30" cy="40" rx="19" ry="15" fill="url(#gT)"/><path d="M14 38q16 6 32 0" stroke="url(#gG)" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M46 36c8-2 11-9 14-14-1 7-2 14-9 22z" fill="url(#gT)"/><path d="M12 36C6 36 4 28 8 25" stroke="url(#gG)" stroke-width="3.4" fill="none" stroke-linecap="round"/><path d="M19 27a11 6 0 0122 0z" fill="url(#gG)"/><circle cx="30" cy="20" r="3" fill="url(#gG)"/><ellipse cx="24" cy="36" rx="5" ry="8" fill="#fff" opacity=".28" transform="rotate(20 24 36)"/>',
+            'host' => $G.'<path d="M8 56c0-14 10-22 24-22s24 8 24 22z" fill="url(#gT)"/><path d="M32 34l-7 10 7 12 7-12z" fill="#fff" opacity=".9"/><circle cx="32" cy="20" r="12" fill="url(#gSkin)"/><path d="M20 18c0-9 5-12 12-12s12 3 12 12c-4-5-8-6-12-6s-8 1-12 6z" fill="url(#gK)"/><path d="M27 21h0M37 21h0" stroke="#3a2210" stroke-width="3" stroke-linecap="round"/><path d="M28 27q4 3 8 0" stroke="#b5583a" stroke-width="2.2" fill="none" stroke-linecap="round"/><circle cx="42" cy="48" r="5" fill="url(#gSkin)"/>',
+            'sparkle' => $kh(30, 30, 20, 'gG').'<path d="M30 14l2.4 11.6L44 30l-11.6 2.4L30 44l-2.4-11.6L16 30l11.6-2.4z" fill="#fff" opacity=".55"/>'.$kh(52, 12, 7, 'gO', 'gG').$kh(10, 52, 6, 'gT', 'gG'),
+
+            'playground' => $G.$box(6, 28, 14, 26, 6, 4, 'gWood').'<path d="M4 29L13 17l9 12z" fill="url(#gR)"/><path d="M13 17l6-4 9 12-6 4z" fill="url(#gR)"/><path d="M13 17l6-4 9 12-6 4z" fill="#1a0a20" opacity=".18"/><path d="M26 32C36 32 44 44 58 52v5C44 53 36 44 24 41z" fill="url(#gT)"/><path d="M26 32C36 32 44 44 58 52" stroke="#fff" stroke-width="2" fill="none" opacity=".55" stroke-linecap="round"/><path d="M9 38h8M9 45h8M9 52h8" stroke="#6A3A1A" stroke-width="2" opacity=".6" stroke-linecap="round"/>',
+            'bedding' => $G.$box(8, 40, 46, 11, 7, 5, 'gT').$box(8, 31, 38, 10, 7, 5, 'gW').'<path d="M12 36h26" stroke="#cfd6e4" stroke-width="2" stroke-linecap="round"/><rect x="8" y="40" width="46" height="3" fill="url(#gG)" opacity=".9"/>'.$kh(41, 46, 3.2, 'gG', 'gR'),
+            'khatam' => $kh(32, 32, 26, 'gG').'<circle cx="32" cy="32" r="6" fill="url(#gR)"/>',
+            'calendar' => $G.self::box(7, 14, 44, 40, 7, 5, 'gW').'<path d="M7 20a4 4 0 014-4h36a4 4 0 014 4v8H7z" fill="url(#gR)"/><rect x="17" y="8" width="5" height="12" rx="2.5" fill="url(#gK)"/><rect x="37" y="8" width="5" height="12" rx="2.5" fill="url(#gK)"/>'.implode('', array_map(fn ($p) => '<rect x="'.$p[0].'" y="'.$p[1].'" width="8" height="7" rx="2" fill="url(#'.($p[2] ?? 'gT').')"/>', [[13, 34], [26, 34], [39, 34, 'gG'], [13, 45], [26, 45]])),
+        ];
+        $v2 += [];
+        return array_merge($base, $v2);
+    }
+}

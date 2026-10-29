@@ -20,7 +20,13 @@ class PublicController extends Controller
             'latest' => (clone $base)->latest('id')->take(8)->get(),
             'top' => (clone $base)->where('reviews_count', '>', 0)->orderByDesc('rating_avg')->take(4)->get(),
             'destinations' => Property::approved()->selectRaw('city, province, count(*) as c, min(price_weekday) as p')->groupBy('city', 'province')->orderByDesc('c')->take(8)->get(),
-            'stats' => ['properties' => Property::approved()->count(), 'cities' => Property::approved()->distinct('city')->count('city')],
+            'stats' => [
+                'properties' => Property::approved()->count(),
+                'cities' => Property::approved()->distinct('city')->count('city'),
+                'guests' => \App\Models\Booking::whereIn('status', ['confirmed', 'completed'])->distinct('guest_id')->count('guest_id'),
+                'rating' => round((float) Review::where('is_published', true)->avg('rating'), 1),
+            ],
+            'reviews' => Review::with(['guest', 'property'])->where('is_published', true)->whereNotNull('comment')->where('comment', '!=', '')->latest('id')->take(9)->get(),
         ]);
     }
 
@@ -43,7 +49,7 @@ class PublicController extends Controller
 
     public function search(Request $r)
     {
-        $q = Property::approved()->with('images');
+        $q = Property::approved()->with(['images', 'host']);
         $in = self::parseDate($r->check_in);
         $out = self::parseDate($r->check_out);
 
@@ -74,8 +80,20 @@ class PublicController extends Controller
             default => $q->orderByDesc('featured')->orderByDesc('rating_avg')->latest('id'),
         };
 
+        $items = $q->paginate(12)->withQueryString();
+        if ($in && $out && $out->gt($in)) {
+            $g = max(1, (int) $r->guests);
+            $items->getCollection()->each(function ($p) use ($in, $out, $g) {
+                $qt = $p->quote($in, $out, min($g, $p->capacity_max));
+                if ($qt['ok']) {
+                    $p->quote_total = $qt['total'];
+                    $p->quote_nights = $qt['nights'];
+                }
+            });
+        }
+
         return view('search', [
-            'items' => $q->paginate(12)->withQueryString(),
+            'items' => $items,
             'amenities' => Amenity::orderBy('sort')->get(),
             'in' => $in, 'out' => $out,
         ]);
@@ -101,8 +119,19 @@ class PublicController extends Controller
             }
         }
 
+        // قیمت هر شب برای نمایش روی تقویم
+        $overrides = $property->days()->whereBetween('date', [$from, $to])->get()->keyBy(fn ($d) => $d->date->toDateString());
+        $peaks = \App\Models\PeakPeriod::where('ends_on', '>=', $from)->where('starts_on', '<=', $to)->get();
+        $prices = [];
+        for ($d = $from->copy(); $d->lte($to); $d->addDay()) {
+            $prices[$d->toDateString()] = \App\Support\Pricing::nightPrice($property, $d, $overrides, $peaks);
+        }
+
+        $rv = $property->reviews()->selectRaw('avg(r_clean) c, avg(r_accuracy) a, avg(r_location) l, avg(r_host) h, avg(r_value) v')->first();
+        $breakdown = $property->reviews_count && $rv ? ['پاکیزگی' => $rv->c, 'مطابقت با آگهی' => $rv->a, 'موقعیت' => $rv->l, 'برخورد میزبان' => $rv->h, 'ارزش نسبت به قیمت' => $rv->v] : [];
+
         return view('property', [
-            'p' => $property, 'similar' => $similar,
+            'p' => $property, 'similar' => $similar, 'prices' => $prices, 'breakdown' => $breakdown, 'hs' => $property->host->hostStats(),
             'unavailable' => array_values(array_unique(array_merge($blocked, $booked))),
             'isFav' => auth()->check() && auth()->user()->favorites()->whereKey($property->id)->exists(),
         ]);

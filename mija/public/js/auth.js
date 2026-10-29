@@ -19,7 +19,7 @@
   const scene = $('#auth-scene');
   if (scene && !reduce) {
     const layers = $$('.layer', scene).map(l => ({ el: l, d: +l.dataset.depth || 10 }));
-    const move = (x, y) => layers.forEach(({ el, d }) => { el.style.transform = `translate(${x * d}px,${y * d * .5}px)`; });
+    const move = (x, y) => layers.forEach(({ el, d }) => { el.style.translate = `${x * d}px ${y * d * .5}px`; });
     scene.addEventListener('mousemove', e => { const r = scene.getBoundingClientRect(); move(-((e.clientX - r.left) / r.width - .5) * .8, -((e.clientY - r.top) / r.height - .5) * .8); });
     scene.addEventListener('mouseleave', () => move(0, 0));
     window.addEventListener('deviceorientation', e => { if (e.gamma == null) return; move(-Math.max(-30, Math.min(30, e.gamma)) / 40, -Math.max(-30, Math.min(30, (e.beta || 0) - 45)) / 60); });

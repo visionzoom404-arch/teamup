@@ -1,6 +1,14 @@
 @extends('layouts.panel')
 @section('title', 'پنل مدیریت')
+@push('vendor')<script src="{{ asset('vendor/chart.umd.min.js') }}"></script>@endpush
 @section('content')
+@php
+$stl = ['draft' => 'پیش‌نویس', 'pending' => 'در انتظار', 'approved' => 'منتشر', 'rejected' => 'ردشده', 'suspended' => 'تعلیق'];
+$c1 = ['type' => 'bar', 'labels' => collect($days)->pluck('label')->all(), 'data' => collect($days)->pluck('count')->all(), 'unit' => ' رزرو'];
+$c2 = ['type' => 'line', 'labels' => collect($days)->pluck('label')->all(), 'data' => collect($days)->pluck('gmv')->all(), 'unit' => 'toman', 'color' => 'rgba(229,32,46,.5)', 'border' => '#E5202E'];
+$d1 = ['labels' => ['مهمان', 'میزبان'], 'data' => [$kpi['users'], $kpi['hosts']]];
+$d2 = ['labels' => collect($propStatus)->keys()->map(fn ($k) => $stl[$k] ?? $k)->values()->all(), 'data' => collect($propStatus)->values()->all()];
+@endphp
 @php $mx = max(1, collect($days)->max('gmv')); $mc = max(1, collect($days)->max('count')); @endphp
 <div class="page-h"><div><h1>پنل مدیریت می‌جا</h1><div class="muted">نمای کلی پلتفرم</div></div>
   <form method="post" action="{{ route('admin.tick') }}">@csrf<button class="btn btn-sm btn-light"><x-icon name="bolt" class="sm"/> اجرای تسویه و انقضا</button></form></div>
@@ -23,12 +31,16 @@
 @endif
 
 <div class="grid2" style="gap:18px;align-items:start">
-  <div class="card"><h3>رزرو ۱۴ روز اخیر</h3><div class="bars" style="height:130px">@foreach($days as $d)<div class="bar"><i style="height:{{ max(3, $d['count'] / $mc * 100) }}%"></i><span>{{ $d['label'] }}</span></div>@endforeach</div></div>
-  <div class="card"><h3>پرداخت‌های ۱۴ روز اخیر</h3><div class="bars" style="height:130px">@foreach($days as $d)<div class="bar"><i style="height:{{ max(3, $d['gmv'] / $mx * 100) }}%;background:var(--grad-red)"></i><span>{{ $d['label'] }}</span></div>@endforeach</div></div>
+  <div class="card"><h3><x-i3 name="trend" class="sm"/> رزروهای ۱۴ روز اخیر</h3><div class="chart-box"><canvas data-chart="{{ json_encode($c1, JSON_UNESCAPED_UNICODE) }}"></canvas></div></div>
+  <div class="card"><h3><x-i3 name="coins" class="sm"/> پرداخت‌های ۱۴ روز اخیر</h3><div class="chart-box"><canvas data-chart="{{ json_encode($c2, JSON_UNESCAPED_UNICODE) }}", 'border' => '#E5202E'])'></canvas></div></div>
+</div>
+<div class="grid2 mt" style="gap:18px;align-items:start">
+  <div class="card"><h3><x-i3 name="user" class="sm"/> ترکیب کاربران</h3><div class="chart-box"><canvas data-donut="{{ json_encode($d1, JSON_UNESCAPED_UNICODE) }}"></canvas></div></div>
+  <div class="card"><h3><x-i3 name="home" class="sm"/> وضعیت اقامتگاه‌ها</h3><div class="chart-box"><canvas data-donut="{{ json_encode($d2, JSON_UNESCAPED_UNICODE) }}"></canvas></div></div>
 </div>
 
 <div class="grid2 mt" style="gap:18px;align-items:start">
-  <div class="card"><h3>اقامتگاه‌های در انتظار تأیید</h3>@forelse($pendingProps as $p)<a class="row between" href="{{ route('admin.properties.show', $p) }}" style="padding:9px 0;border-bottom:1px solid var(--line)"><div><b>{{ $p->title }}</b><div class="xs muted">{{ $p->host->name }} · {{ $p->city }}</div></div><x-icon name="chev-l" class="sm"/></a>@empty<div class="empty" style="padding:20px">موردی نیست 🎉</div>@endforelse</div>
+  <div class="card"><h3>اقامتگاه‌های در انتظار تأیید</h3>@forelse($pendingProps as $p)<a class="row between" href="{{ route('admin.properties.show', $p) }}" style="padding:9px 0;border-bottom:1px solid var(--line)"><div><b>{{ $p->title }}</b><div class="xs muted">{{ $p->host->name }} · {{ $p->city }}</div></div><x-icon name="chev-l" class="sm"/></a>@empty<div class="empty" style="padding:20px"><x-i3 name="party" class="lg"/><div>موردی نیست</div></div>@endforelse</div>
   <div class="card"><h3>آخرین رزروها</h3>@foreach($recent as $b)<a class="row between" href="{{ route('admin.bookings.show', $b) }}" style="padding:9px 0;border-bottom:1px solid var(--line)"><div><b class="small">{{ $b->property->title }}</b><div class="xs muted">{{ $b->guest->name }} · {{ toman($b->total) }}</div></div><span class="badge {{ $b->statusColor() }}">{{ $b->statusLabel() }}</span></a>@endforeach</div>
 </div>
 @endsection

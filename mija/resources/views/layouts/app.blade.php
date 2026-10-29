@@ -2,6 +2,7 @@
 <html lang="fa" dir="rtl">
 <head>@include('partials.head')@stack('head')</head>
 <body>
+@include('partials.i3-defs')
 @include('partials.topbar')
 <main>
   @hasSection('bare')@yield('bare')@else<div class="container" style="padding-top:20px">@include('partials.flash')</div>@yield('content')@endif
@@ -10,7 +11,7 @@
 <footer class="footer">
   <div class="container">
     <div class="cols">
-      <div><img src="{{ asset('img/mija-logo-stacked.svg') }}" alt="می‌جا" width="150" style="filter:brightness(0) invert(1);opacity:.95"><p class="small" style="margin-top:10px">{{ config('mija.tagline') }}. از ویلای شمال تا کلبه‌ی جنگلی؛ مستقیم از میزبان، با پرداخت امن و ضمانت بازگشت وجه.</p></div>
+      <div><div class="row" style="gap:12px"><img src="{{ asset('img/mija-mark.svg') }}" alt="" width="52" height="52"><div style="color:#fff"><b style="font-size:22px;line-height:1.2;display:block">می‌جا</b><span style="letter-spacing:4px;font-size:11px;font-weight:700;color:var(--gold-l)">MIJA</span></div></div><p class="small" style="margin-top:10px">{{ config('mija.tagline') }}. از ویلای شمال تا کلبه‌ی جنگلی؛ مستقیم از میزبان، با پرداخت امن و ضمانت بازگشت وجه.</p></div>
       <div><h4>می‌جا</h4><a href="{{ route('page', 'about') }}">درباره ما</a><a href="{{ route('page', 'rules') }}">قوانین و سیاست‌های لغو</a><a href="{{ route('page', 'contact') }}">تماس با ما</a></div>
       <div><h4>مهمانان</h4><a href="{{ route('search') }}">جستجوی اقامتگاه</a><a href="{{ route('register') }}">ثبت‌نام مهمان</a><a href="{{ route('login') }}">ورود</a></div>
       <div><h4>میزبانان</h4><a href="{{ route('page', 'become-host') }}">میزبان شوید</a><a href="{{ route('register', ['as' => 'host']) }}">ثبت اقامتگاه</a></div>

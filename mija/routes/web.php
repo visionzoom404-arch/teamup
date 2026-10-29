@@ -16,6 +16,7 @@ Route::get('/search', [PublicController::class, 'search'])->name('search');
 Route::get('/p/{property}', [PublicController::class, 'show'])->name('property');
 Route::get('/p/{property}/quote', [PublicController::class, 'quote'])->name('property.quote');
 Route::get('/page/{slug}', [PublicController::class, 'page'])->name('page');
+Route::get('/hosts/{user}', [ProfileController::class, 'publicHost'])->name('host.public');
 Route::get('/offline', fn () => view('offline'))->name('offline');
 
 Route::middleware('guest')->group(function () {
@@ -31,6 +32,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/favorite/{property}', [PublicController::class, 'toggleFavorite'])->name('favorite');
     Route::get('/notices', [NoticeController::class, 'index'])->name('notices');
     Route::post('/bookings/{booking}/message', [NoticeController::class, 'message'])->name('booking.message');
+    Route::get('/bookings/{booking}/ics', [NoticeController::class, 'ics'])->name('booking.ics');
+    Route::get('/bookings/{booking}/invoice', [NoticeController::class, 'invoice'])->name('booking.invoice');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile');
     Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::post('/profile/password', [ProfileController::class, 'password'])->name('profile.password');

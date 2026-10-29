@@ -12,7 +12,7 @@
     <div class="qrow"><span>سیاست لغو</span><b>{{ $p->policy()['name'] }}</b></div>
     <div class="qrow"><span>رزرو فوری</span><b>{{ $p->instant_booking ? 'بله' : 'خیر' }}</b></div>
     <hr class="divider" style="margin:12px 0"><p class="small" style="white-space:pre-line">{{ $p->description }}</p>
-    <div class="chips">@foreach($p->amenities as $a)<span class="badge">{{ $a->icon }} {{ $a->name }}</span>@endforeach</div>
+    <div class="chips">@foreach($p->amenities as $a)<span class="badge"><x-i3 :name="$a->i3()" class="sm"/> {{ $a->name }}</span>@endforeach</div>
   </div>
   <div class="stack">
     <div class="card"><h3>تصمیم بررسی</h3><p class="small muted">وضعیت فعلی: <b>{{ ['draft'=>'پیش‌نویس','pending'=>'در انتظار بررسی','approved'=>'منتشر','rejected'=>'ردشده','suspended'=>'تعلیق'][$p->status] }}</b></p>

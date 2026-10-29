@@ -1,7 +1,7 @@
 @extends('layouts.auth')
 @section('title', 'ورود')
 @section('card')
-<h1 data-a>خوش برگشتی 👋</h1>
+<h1 data-a>خوش برگشتی <x-i3 name="wave" class="lg h-i3"/></h1>
 <p class="lead" data-a>برای ادامه وارد حساب کاربری‌ات شو.</p>
 @if(session('ok'))<div class="alert ok" data-a><x-icon name="check"/>{{ session('ok') }}</div>@endif
 <form method="post" action="{{ route('login') }}" id="auth-form" novalidate>
@@ -22,7 +22,7 @@
 </form>
 <div class="divider-t" data-a>حساب نداری؟</div>
 <div class="alt-link" data-a>
-  <a class="btn btn-light" href="{{ route('register') }}">🧳 ثبت‌نام مهمان</a>
-  <a class="btn btn-gold" href="{{ route('register', ['as' => 'host']) }}">🔑 میزبان شو</a>
+  <a class="btn btn-light" href="{{ route('register') }}"><x-i3 name="user" class="sm"/> ثبت‌نام مهمان</a>
+  <a class="btn btn-gold" href="{{ route('register', ['as' => 'host']) }}"><x-i3 name="key" class="sm"/> میزبان شو</a>
 </div>
 @endsection

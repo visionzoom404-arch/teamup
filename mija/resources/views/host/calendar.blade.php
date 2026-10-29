@@ -21,7 +21,7 @@
       </div>
     @endforeach
   </div>
-  <div class="row wrap xs muted" style="gap:14px;margin-top:14px"><span>🟧 رزرو شده</span><span>▨ بسته</span><span style="color:var(--orange)">● قیمت دلخواه (هزار تومان)</span></div>
+  <div class="row wrap xs muted" style="gap:14px;margin-top:14px"><span><i style="display:inline-block;width:12px;height:12px;border-radius:4px;background:linear-gradient(135deg,#FF8A5A,#FFB21A);vertical-align:-2px"></i> رزرو شده</span><span><i style="display:inline-block;width:12px;height:12px;border-radius:4px;background:repeating-linear-gradient(45deg,#bbb 0 3px,#eee 3px 6px);vertical-align:-2px"></i> بسته</span><span style="color:var(--orange)">● قیمت دلخواه (هزار تومان)</span></div>
 </div>
 
 <form method="post" action="{{ route('host.calendar.update', $p) }}" class="cal-bar card glass" id="cal-bar">

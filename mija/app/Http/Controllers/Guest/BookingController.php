@@ -63,7 +63,7 @@ class BookingController extends Controller
             $pay = Payment::create(['user_id' => $user->id, 'booking_id' => $b->id, 'amount' => $b->total, 'gateway' => 'wallet', 'authority' => Str::random(24)]);
             BookingService::markPaid($b, $pay, 'W'.$pay->id);
 
-            return redirect()->route('guest.bookings.show', $b)->with('ok', 'پرداخت از کیف پول انجام شد و رزرو قطعی شد.');
+            return redirect()->route('guest.bookings.show', $b)->with('ok', 'پرداخت از کیف پول انجام شد و رزرو قطعی شد.')->with('celebrate', 1);
         }
 
         $pay = Payment::create(['user_id' => auth()->id(), 'booking_id' => $b->id, 'amount' => $b->total, 'gateway' => config('mija.gateway'), 'authority' => Str::random(32)]);

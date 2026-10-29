@@ -29,7 +29,23 @@ class PanelController extends Controller
             $months[] = ['label' => Jalali::MONTHS[$jm - 1], 'sum' => (int) $paid()->whereBetween('check_in', [$from->toDateString(), $to->toDateString()])->sum('host_payout')];
         }
 
+        // درصد اشغال ۳۰ روز آینده و سهم رزروها به تفکیک اقامتگاه
+        $props = $u->properties()->where('status', 'approved')->get();
+        $occ = [];
+        $from = today();
+        $to = today()->addDays(30);
+        foreach ($props as $p) {
+            $nights = 0;
+            foreach ($p->bookings()->whereIn('status', ['confirmed', 'completed'])->where('check_out', '>', $from)->where('check_in', '<', $to)->get() as $b) {
+                $nights += max(0, min($b->check_out->timestamp, $to->timestamp) - max($b->check_in->timestamp, $from->timestamp)) / 86400;
+            }
+            $occ[$p->id] = (int) round($nights / 30 * 100);
+        }
+        $share = $u->hostBookings()->whereIn('status', ['confirmed', 'completed'])->with('property:id,title')->get()->groupBy('property_id')->map(fn ($g) => ['t' => $g->first()->property->title, 'n' => $g->count()])->values();
+        $check = $u->hostChecklist();
+
         return view('host.dashboard', [
+            'occ' => $occ, 'props' => $props, 'share' => $share, 'check' => $check, 'percent' => (int) round(collect($check)->where(1, true)->count() / count($check) * 100), 'hs' => $u->hostStats(),
             'u' => $u,
             'pendingRequests' => $u->hostBookings()->with(['property', 'guest'])->where('status', 'pending_host')->orderBy('respond_by')->get(),
             'upcoming' => $u->hostBookings()->with(['property', 'guest'])->where('status', 'confirmed')->whereDate('check_out', '>=', today())->orderBy('check_in')->take(5)->get(),

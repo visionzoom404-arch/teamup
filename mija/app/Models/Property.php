@@ -33,7 +33,7 @@ class Property extends Model
 
     public static function uniqueSlug(string $title): string
     {
-        $base = Str::slug(Str::limit($title, 50, ''), '-', 'fa') ?: 'villa';
+        $base = trim(mb_strtolower(preg_replace('/[^\p{L}\p{N}]+/u', '-', Str::limit($title, 60, ''))), '-') ?: 'villa';
         $slug = $base;
         $i = 1;
         while (static::where('slug', $slug)->exists()) {

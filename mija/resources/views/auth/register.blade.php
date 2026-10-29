@@ -2,20 +2,22 @@
 @section('title', 'ثبت‌نام')
 @section('card')
 @php $r = old('role', $role) === 'host' ? 'host' : 'guest'; @endphp
-<h1 data-a>ساخت حساب جدید ✨</h1>
+<h1 data-a>ساخت حساب جدید <x-i3 name="sparkle" class="lg h-i3"/></h1>
 <p class="lead" data-a>کمتر از یک دقیقه طول می‌کشد.</p>
 <form method="post" action="{{ route('register') }}" id="auth-form" novalidate>
   @csrf
+  <input type="hidden" name="ref" value="{{ old('ref', $ref) }}">
+  @if(old('ref', $ref))<div class="alert ok" data-a><x-i3 name="gift" class="sm"/> با کد دعوت <b class="ltr">{{ old('ref', $ref) }}</b> ثبت‌نام می‌کنید؛ پس از اولین رزرو هدیه می‌گیرید.</div>@endif
   <div class="role-seg" data-r="{{ $r }}" id="role-seg" data-a>
     <span class="pill"></span>
-    <label><input type="radio" name="role" value="guest" @checked($r === 'guest')>🧳 مهمان<small>می‌خواهم رزرو کنم</small></label>
-    <label><input type="radio" name="role" value="host" @checked($r === 'host')>🔑 میزبان<small>ملک دارم</small></label>
+    <label><input type="radio" name="role" value="guest" @checked($r === 'guest')><x-i3 name="user" class="sm"/> مهمان<small>می‌خواهم رزرو کنم</small></label>
+    <label><input type="radio" name="role" value="host" @checked($r === 'host')><x-i3 name="key" class="sm"/> میزبان<small>ملک دارم</small></label>
   </div>
   <ul class="perks" id="perks" data-a>
-    <li data-for="guest"><i>🏡</i>هزاران ویلا و کلبه با قیمت شفاف</li>
-    <li data-for="guest"><i>🛡️</i>پرداخت امن و ضمانت بازگشت وجه</li>
-    <li data-for="host" hidden><i>💰</i>ثبت رایگان؛ فقط پس از رزرو موفق کمیسیون کسر می‌شود</li>
-    <li data-for="host" hidden><i>📅</i>تقویم، قیمت و رزرو فوری را خودت مدیریت کن</li>
+    <li data-for="guest"><i><x-i3 name="villa" class="sm"/></i>هزاران ویلا و کلبه با قیمت شفاف</li>
+    <li data-for="guest"><i><x-i3 name="shield" class="sm"/></i>پرداخت امن و ضمانت بازگشت وجه</li>
+    <li data-for="host" hidden><i><x-i3 name="coins" class="sm"/></i>ثبت رایگان؛ فقط پس از رزرو موفق کمیسیون کسر می‌شود</li>
+    <li data-for="host" hidden><i><x-i3 name="calendar" class="sm"/></i>تقویم، قیمت و رزرو فوری را خودت مدیریت کن</li>
   </ul>
   <div class="fl {{ $errors->has('name') ? 'has-err' : '' }}" data-a>
     <input id="name" name="name" autocomplete="name" placeholder=" " value="{{ old('name') }}" required>
