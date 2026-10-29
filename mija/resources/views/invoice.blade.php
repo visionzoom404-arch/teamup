@@ -8,6 +8,7 @@ body{background:#f4f5f8!important;animation:none}body::before{display:none}
 .stamp{position:absolute;inset-inline-start:36px;top:120px;transform:rotate(-12deg);border:3px solid var(--green);color:var(--green);padding:4px 18px;border-radius:12px;font-weight:800;font-size:20px;opacity:.8}
 @media print{body{background:#fff!important}.inv{box-shadow:none;margin:0}.noprint{display:none!important}}
 </style></head><body>
+@include('partials.i3-defs')
 <div class="inv">
   <div class="row between" style="margin-top:8px"><div class="row"><img src="{{ asset('img/mija-mark.svg') }}" width="54" alt=""><div><h1>فاکتور رزرو</h1><div class="muted small">می‌جا — پلتفرم رزرو ویلا و کلبه</div></div></div><div class="center"><div class="muted small">شماره رزرو</div><b class="ltr" style="font-size:20px">{{ $b->code }}</b></div></div>
   @if(in_array($b->status, ['confirmed','completed']))<div class="stamp">پرداخت‌شده</div>@endif

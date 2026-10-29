@@ -3,17 +3,18 @@
   <defs>
     <filter id="i3s" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="1.6" stdDeviation="1.1" flood-color="#2a1030" flood-opacity=".28"/></filter>
     @foreach([
-      'gR' => ['#FFA262', '#EA580C', '#B8420A'], 'gS' => ['#FF8383', '#E5202E', '#A50F22'], 'gO' => ['#FFC27A', '#FF7A1A', '#D9520A'], 'gG' => ['#FFF0B0', '#FFC83D', '#E39A00'],
-      'gB' => ['#C6EDFF', '#5BBDF0', '#2A86C4'], 'gN' => ['#9DF0C0', '#2FAE6B', '#177746'], 'gK' => ['#6A6E7C', '#2A2C33', '#101116'],
-      'gW' => ['#FFFFFF', '#F1F3F9', '#C9D0DF'], 'gWood' => ['#E0A46C', '#A8693F', '#6A3A1A'], 'gT' => ['#8CF0E2', '#1FBBB0', '#0B7F88'], 'gClay' => ['#F7C998', '#E0904F', '#B2652B'], 'gL2' => ['#6F90E6', '#2B4AA6', '#16296A'], 'gTea' => ['#FFC074', '#E8741E', '#A63E0F'], 'gSkin' => ['#FFE0C2', '#F2B48A', '#D98A5E'], 'gWater' => ['#C4F4FF', '#4CC9F0', '#1D8CCF'], 'gL' => ['#B6F5A8', '#3FBF5A', '#1B8638'],
+      'gR' => ['#FFD58A', '#F39C1E', '#C9700A'], 'gS' => ['#FF8D86', '#D92D20', '#8F1A12'], 'gO' => ['#FFE0A0', '#F7A92F', '#D9770A'], 'gG' => ['#FFF3C8', '#FFCB55', '#E39A12'],
+      'gB' => ['#FFFFFF', '#FFF1D6', '#F6D79C'], 'gN' => ['#E7B96A', '#C98A25', '#8F5A10'], 'gK' => ['#5A5A62', '#2A2A2F', '#121214'],
+      'gW' => ['#FFFFFF', '#FFF8EA', '#EDDCB8'], 'gWood' => ['#E7B96A', '#B97A1C', '#7A4A08'], 'gWater' => ['#FFF3D6', '#FFD98F', '#F0A83A'], 'gL' => ['#F7CF72', '#D9921E', '#9A5F0A'],
+      'gT' => ['#FFE7B0', '#F9B440', '#D9800C'], 'gClay' => ['#F4CE8A', '#D99A3C', '#A9690F'], 'gL2' => ['#6A6A74', '#34343B', '#17171A'], 'gTea' => ['#FFD58A', '#F08C14', '#B8620A'], 'gSkin' => ['#FFE9CC', '#F4C089', '#DB9558'],
     ] as $id => [$a, $b, $c])
     <linearGradient id="{{ $id }}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="{{ $a }}"/><stop offset=".55" stop-color="{{ $b }}"/><stop offset="1" stop-color="{{ $c }}"/></linearGradient>
     @endforeach
     <filter id="i3b" x="-30%" y="-100%" width="160%" height="300%"><feGaussianBlur stdDeviation="2.6"/></filter>
     @foreach([
-      'pO' => ['#FFD9A0', '#FFA23D', '#F26B0F', '#A9430A'], 'pY' => ['#FFF7C8', '#FFD84F', '#FFB21A', '#B87400'], 'pC' => ['#FFFFFF', '#FFF4E4', '#F2DDBF', '#CDB085'],
-      'pR' => ['#FFC0B5', '#FF6552', '#E5202E', '#85101A'], 'pT' => ['#C2FFF6', '#45DACB', '#12A89E', '#06626A'], 'pB' => ['#DDF4FF', '#82CFF6', '#3A9AD6', '#1B5A92'],
-      'pK' => ['#9A9EAC', '#555967', '#272A32', '#0B0C10'], 'pG' => ['#DAFFC8', '#84DC5C', '#3FA83A', '#1B6528'], 'pW' => ['#FFFFFF', '#F6F8FC', '#DCE2EE', '#AAB4C8'],
+      'pO' => ['#FFE2A8', '#FFB347', '#F0901A', '#A9600A'], 'pY' => ['#FFF6D0', '#FFD763', '#F5AE2A', '#B87608'], 'pC' => ['#FFFFFF', '#FFF9EC', '#F4E3BF', '#CDAF72'],
+      'pR' => ['#FFDCA0', '#F9A83A', '#E6850E', '#8A4A06'], 'pT' => ['#FFEBC0', '#FFC25C', '#EE9418', '#9A5A08'], 'pB' => ['#FFFFFF', '#FFF2D8', '#F7D9A0', '#C79A4C'],
+      'pK' => ['#8B8B94', '#4C4C54', '#25252A', '#0C0C0E'], 'pG' => ['#EFC77A', '#D39A35', '#A8701A', '#6A430A'], 'pW' => ['#FFFFFF', '#FBF8F2', '#E6DFD0', '#B5AB96'],
     ] as $id => [$a, $b, $c, $d])
     <radialGradient id="{{ $id }}" cx=".34" cy=".28" r=".85"><stop offset="0" stop-color="{{ $a }}"/><stop offset=".32" stop-color="{{ $b }}"/><stop offset=".68" stop-color="{{ $c }}"/><stop offset="1" stop-color="{{ $d }}"/></radialGradient>
     @endforeach

@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#14110E">
+<meta name="theme-color" content="#E8860C">
 <meta name="description" content="@yield('desc', 'می‌جا — جای خوب، سفر خوب. رزرو آنلاین ویلا، کلبه و اقامتگاه در سراسر ایران؛ مستقیم از میزبان')">
 <title>@yield('title', 'رزرو ویلا و کلبه') | می‌جا</title>
 <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">

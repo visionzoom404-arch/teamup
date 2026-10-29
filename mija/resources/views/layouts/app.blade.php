@@ -2,6 +2,7 @@
 <html lang="fa" dir="rtl">
 <head>@include('partials.head')@stack('head')</head>
 <body class="@yield('bodyclass')">
+@include('partials.i3-defs')
 @include('partials.topbar')
 <main>
   @hasSection('bare')@yield('bare')@else<div class="container" style="padding-top:20px">@include('partials.flash')</div>@yield('content')@endif

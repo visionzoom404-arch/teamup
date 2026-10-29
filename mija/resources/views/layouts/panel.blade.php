@@ -33,6 +33,7 @@ $quick = array_slice($menus, 0, 4);
 <html lang="fa" dir="rtl">
 <head>@include('partials.head')@stack('head')</head>
 <body>
+@include('partials.i3-defs')
 @include('partials.topbar')
 <div class="container">
   <div class="panel">

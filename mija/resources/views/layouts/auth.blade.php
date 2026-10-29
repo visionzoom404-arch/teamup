@@ -2,6 +2,7 @@
 <html lang="fa" dir="rtl">
 <head>@include('partials.head')</head>
 <body class="auth-body">
+@include('partials.i3-defs')
 <div class="auth-wrap">
   <main class="auth-side">
     <div class="auth-box">
@@ -15,8 +16,8 @@
       </section>
     </div>
   </main>
-  <aside class="auth-scene" id="auth-scene" data-parallax>
-    @if($lg = site_image('login'))<img class="stage-photo" src="{{ $lg }}" alt="">@else @include('partials.hero-art') @endif
+  <aside class="auth-scene" id="auth-scene">
+    @if($lg = site_image('login'))<img class="stage-photo" src="{{ $lg }}" alt="">@endif
     <div class="scene-copy"><div class="mk">MIJA · جای خوب، سفر خوب</div><p class="q">اقامتی که فقط یک‌بار تجربه نمی‌کنی؛ هر بار دوباره می‌خواهی‌اش.</p><small>ویلا، کلبه و اقامتگاه‌های تأییدشده؛ مستقیم از میزبان.</small></div>
   </aside>
 </div>

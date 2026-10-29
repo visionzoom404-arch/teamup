@@ -515,3 +515,125 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 
 @media (min-width:861px){.sheet,.sheet-back:not(.open){display:none}}
 .tile b{font-size:22px}
+
+/* ==========================================================
+   نسخه‌ی نهایی: سفید + نارنجیِ طلایی — ریز، فشرده و دسته‌بندی‌شده
+   ========================================================== */
+:root{--bg:#fff;--surface:#fff;--ink:#1B1B1F;--ink-2:#3D4048;--muted:#6F7480;--line:#ECEEF1;--line-2:#DDE0E5;
+  --brand:#E08A12;--brand-2:#F2A93B;--brand-d:#A85F05;--brand-t:#FFF5E3;--gold:#E9A23B;--gold-l:#F7C777;--dark:#1B1B1F;--dark-2:#26262B;
+  --r:12px;--r-l:18px;--header-h:60px;--nav-h:62px;--grad:linear-gradient(135deg,#F9C05A 0%,#EE9B1E 55%,#E8860C 100%);
+  --shadow:0 1px 2px rgba(27,27,31,.04),0 6px 20px -10px rgba(27,27,31,.12)}
+body{font-size:14px;line-height:1.8;background:#fff}
+h1{font-size:clamp(25px,3vw,36px)}h2{font-size:clamp(17px,1.8vw,21px)}h3{font-size:15px}
+.container{max-width:1200px;padding:0 20px}
+.accent,.grad-text{color:var(--brand-d)}
+/* دکمه‌ها: طلایی با متن تیره (کنتراست بالا) */
+.btn{background:var(--grad);border:0;color:#1B1B1F;min-height:42px;padding:0 20px;font-size:13.5px;font-weight:700;border-radius:10px}
+.btn:hover{background:var(--grad);filter:brightness(1.06);box-shadow:0 12px 24px -12px rgba(232,134,12,.75);transform:translateY(-1px)}
+.btn .icon{stroke-width:2}
+.btn-gold,.btn-orange{background:var(--grad);color:#1B1B1F}
+.btn-dark{background:var(--ink);color:#fff}.btn-dark:hover{background:#000;filter:none}
+.btn-green{background:#2F6F55;color:#fff}.btn-danger{background:var(--sale);color:#fff}
+.btn-light,.btn-blue{background:#fff;border:1px solid var(--line-2);color:var(--ink)}.btn-light:hover,.btn-blue:hover{background:#fff;border-color:var(--gold);color:var(--ink);box-shadow:none;filter:none}
+.btn-ghost{background:transparent;border:1px solid var(--line-2);color:var(--ink-2)}.btn-ghost:hover{background:#fff;border-color:var(--ink);color:var(--ink);filter:none}
+.btn-light .icon{color:var(--brand)}
+.btn-sm{min-height:34px;padding:0 14px;font-size:12.5px;border-radius:8px}.btn-lg{min-height:48px;padding:0 28px;font-size:14.5px}
+/* هدر و منو */
+.topbar{background:rgba(255,255,255,.92);border-bottom:1px solid var(--line)}
+.topnav a{font-size:13.5px;padding:8px 13px}.topnav a.on{color:var(--brand-d)}
+.top-btn{height:36px;padding:0 14px;font-size:13px;border-radius:9px}
+.top-btn.solid{background:var(--grad);border:0;color:#1B1B1F}
+.brand{font-size:19px}.brand img{width:30px;height:30px}
+.bottomnav{background:rgba(255,255,255,.94)}.bottomnav a.on{color:var(--ink)}.bottomnav a.on::before{background:var(--grad)}
+.fab-ic{background:var(--grad);color:#1B1B1F;box-shadow:0 10px 22px -8px rgba(232,134,12,.8),0 0 0 4px #fff}.fab-ic .icon{stroke:#1B1B1F}
+/* بخش‌ها و کارت‌ها فشرده */
+.sec{padding:38px 0 0}.sec-h{margin-bottom:16px}.sec-h p{font-size:12.5px;margin:3px 0 0}
+.eyebrow-s{display:none}
+.grid-cards{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:22px 16px}
+.pcard .ph{aspect-ratio:3/2.2;border-radius:12px}.pcard .pb{padding:10px 2px 0}.pcard h3{font-size:14.5px}.pcard .meta{font-size:12px;gap:10px;margin:4px 0 6px}.pcard .price b{font-size:15px}
+.tag-glass,.tag-sale{font-size:10.5px;padding:2px 9px}
+.badge{font-size:11.5px;padding:1px 10px}
+.card{padding:18px;border-radius:12px}.tile{padding:16px}.tile b{font-size:20px}.tile .ic,.tile .ic3{width:34px;height:34px;margin-bottom:12px}
+.item-row{padding:12px;border-radius:12px}.item-row .thumb{width:90px;height:72px}
+.page-h{margin-bottom:18px}.page-h h1{font-size:clamp(20px,2.4vw,27px)}
+.sidebar a.item{padding:9px 12px;font-size:13.5px}
+.sidebar a.item.on{background:var(--brand-t);color:var(--brand-d);box-shadow:inset 3px 0 0 var(--brand-2)}.sidebar a.item.on .icon{color:var(--brand-d)}
+.tabs a.on,.qchip.on,.pager .active,.chk.done i,.tline .st.done i{background:var(--ink)}
+/* هیرو فشرده و روشن */
+.hero-c{padding:30px 0 6px}
+.hero-c .kicker{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--brand-d);font-weight:700;background:var(--brand-t);padding:3px 12px;border-radius:99px;margin-bottom:12px}
+.hero-c h1{margin:0 0 6px}.hero-c p{color:var(--muted);margin:0;max-width:560px}
+.hero-top{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.hero-stats{display:flex;gap:26px}.hero-stats b{display:block;font-family:var(--font-display);font-size:20px;line-height:1.2}.hero-stats small{color:var(--muted);font-size:11.5px}
+.stage-search{margin:18px 0 0!important;max-width:none;border:1px solid var(--line-2)!important;border-radius:14px;padding:8px!important;box-shadow:var(--shadow)!important}
+.searchbar{grid-template-columns:1.2fr 1.4fr 1fr auto}
+.searchbar>div:not(.presets):not(.sp-head){padding:4px 14px}
+.presets .muted{font-size:11.5px}.qchip{padding:4px 12px;font-size:12px}
+/* مرکز دسته‌بندی‌ها */
+.hub{margin-top:26px;display:grid;gap:12px}
+.hub-g{display:flex;align-items:flex-start;gap:14px;padding:12px 14px;border:1px solid var(--line);border-radius:12px}
+.hub-g>b{width:92px;flex:none;font-size:12.5px;color:var(--ink-2);padding-top:6px;font-family:var(--font-display)}
+.hub-chips{display:flex;gap:7px;flex-wrap:wrap}
+.chip-s{display:inline-flex;align-items:center;gap:7px;padding:6px 13px;border:1px solid var(--line-2);border-radius:99px;font-size:12.5px;font-weight:500;background:#fff;color:var(--ink-2);transition:.2s;white-space:nowrap}
+.chip-s .icon{width:15px;height:15px;color:var(--brand);stroke-width:1.6}
+.chip-s i{font-style:normal;font-size:10.5px;color:var(--muted);background:#F5F6F8;border-radius:99px;padding:0 7px}
+.chip-s:hover{border-color:var(--gold);background:var(--brand-t);color:var(--ink)}
+.tstrip{display:grid;grid-template-columns:repeat(8,1fr);gap:10px;margin-top:22px}
+.tcell{display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 6px;border:1px solid var(--line);border-radius:12px;font-size:12.5px;font-weight:600;transition:.25s;text-align:center}
+.tcell .icon{width:24px;height:24px;color:var(--brand);stroke-width:1.4}
+.tcell small{display:block;font-weight:400;color:var(--muted);font-size:11px;margin-top:-4px}
+.tcell:hover{border-color:var(--gold);background:var(--brand-t);transform:translateY(-2px)}
+.sec-h .more{font-size:12.5px;color:var(--brand-d);font-weight:600;display:inline-flex;align-items:center;gap:4px}
+.cats,.bento{display:none}
+.mini-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.ms{display:flex;gap:12px;padding:16px;border:1px solid var(--line);border-radius:12px}.ms .n{width:30px;height:30px;border-radius:50%;background:var(--grad);display:grid;place-items:center;font-weight:800;font-size:13px;flex:none}.ms b{font-size:14px;display:block}.ms p{margin:2px 0 0;color:var(--muted);font-size:12.5px}
+.feat{border-radius:12px}.feat .card{padding:18px}.feat .ico{width:36px;height:36px;margin-bottom:12px}.feat b{font-size:14.5px}
+.cta{border-radius:16px;padding:30px 32px;background:var(--grad);color:#1B1B1F}.cta::before{background:repeating-linear-gradient(135deg,rgba(255,255,255,.12) 0 1px,transparent 1px 22px)}
+.cta h2{color:#1B1B1F}.cta p{color:#4a3510}.cta .btn-gold{background:#1B1B1F;color:#fff}.cta .btn-light{background:#fff}
+.footer{background:#fff;color:var(--muted);border-top:1px solid var(--line);padding:44px 0 110px;margin-top:60px}
+.footer h4{color:var(--ink)}.footer a{color:var(--muted)}.footer a:hover{color:var(--brand-d)}.footer .copy{border-color:var(--line)}
+.faq summary{padding:15px 2px;font-size:14px}
+.testi{padding:20px}
+.sp-pill i{background:var(--grad);color:#1B1B1F}
+.prof-hero.host,.prof-hero.guest,.prof-hero.admin{background:linear-gradient(120deg,#1B1B1F,#2c2c33)}
+.rp-day.start,.rp-day.end{background:var(--ink)}
+/* ورود/ثبت‌نام: پنل روشن طلایی */
+.auth-scene{background:linear-gradient(155deg,#FFF8EA 0%,#FCE2B0 55%,#F2A93B 100%)}
+.auth-scene::after{display:none}
+.auth-scene::before{content:"";position:absolute;inset:0;background:radial-gradient(500px 360px at 85% 12%,rgba(255,255,255,.7),transparent 70%),repeating-linear-gradient(135deg,rgba(255,255,255,.18) 0 1px,transparent 1px 26px)}
+.scene-copy{color:#1B1B1F}.scene-copy .mk{color:#9a5a05}.scene-copy .mk::before{background:#9a5a05}.scene-copy small{color:#5b4220}
+.auth-card h1{font-size:28px}
+.btn-auth{min-height:50px}
+.fl input{height:54px;border-radius:10px}
+.role-seg .pill{border-radius:8px}
+/* واکنش‌گرایی */
+@media (max-width:1020px){.searchbar{grid-template-columns:1fr 1fr}.tstrip{grid-template-columns:repeat(4,1fr)}.mini-steps{grid-template-columns:1fr}.hub-g{flex-direction:column;gap:8px}.hub-g>b{width:auto}}
+@media (max-width:860px){
+  :root{--header-h:56px}
+  body{font-size:13.5px}.container{padding:0 16px}
+  .hero-c{padding:20px 0 4px}.hero-stats{display:none}
+  .stage-search{margin:14px 0 0!important;padding:6px!important}
+  .stage-search.sheet-open{margin:0!important}
+  .tstrip{grid-template-columns:repeat(4,1fr);gap:8px}.tcell{padding:10px 4px;font-size:11px}.tcell .icon{width:21px;height:21px}.tcell small{display:none}
+  .hub-g{padding:10px 12px}.hub-chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-inline:-2px;padding-bottom:2px}.hub-chips::-webkit-scrollbar{display:none}
+  .grid-cards{grid-template-columns:1fr 1fr;gap:18px 12px}
+  .pcard .ph{aspect-ratio:1/1}.pcard h3{font-size:13.5px}.pcard .meta span:nth-child(n+3){display:none}.pcard .price b{font-size:14px}
+  .sec{padding:30px 0 0}
+  .cta{padding:22px 20px}
+  .mobile-book{background:#fff!important}
+}
+
+/* آیکن‌های سه‌بعدی هم‌رنگ تم */
+.i3{width:28px;height:28px;display:inline-block;vertical-align:middle;flex:none;overflow:visible}
+.i3.sm{width:20px;height:20px}.i3.lg{width:40px;height:40px}.i3.xl{width:60px;height:60px}
+.tcell .i3{width:34px;height:34px}.tcell{gap:6px}
+.chip-s .i3{width:20px;height:20px}
+.amen i .i3{width:26px;height:26px}
+.check .i3{width:22px;height:22px}
+.tile .ic3 .i3{width:26px;height:26px}.tile .ic3{background:var(--brand-t)}
+.fact .i3,.hub-g .i3{width:20px}
+.empty .i3{width:56px;height:56px;margin-bottom:10px}
+.cb-ic .i3{width:28px;height:28px}
+.role-pill .i3,.badge .i3{width:16px;height:16px}
+.h-i3{vertical-align:-4px}
+a:hover>.i3,.tcell:hover .i3{transform:translateY(-2px);transition:transform .35s cubic-bezier(.22,.8,.24,1)}

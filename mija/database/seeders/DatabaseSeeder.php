@@ -63,7 +63,7 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ([['villa', 0], ['sea', 2], ['mountain', 1], ['cabin', 3]] as $k => [$kind, $v]) {
-            Storage::disk('public')->put("seed/art-$k.svg", LuxArt::svg($kind, 90 + $k, $v));
+            Storage::disk('public')->put("seed/art-$k.svg", LogoArt::svg($kind, 90 + $k, $v));
         }
 
         $created = [];
@@ -88,7 +88,7 @@ class DatabaseSeeder extends Seeder
             $p->amenities()->sync(collect($am)->map(fn ($k) => $amen[$k])->all());
             foreach (range(0, 4) as $n) {
                 $path = "seed/{$p->id}-$n.svg";
-                Storage::disk('public')->put($path, LuxArt::svg($art, $i * 7 + $n, $n));
+                Storage::disk('public')->put($path, LogoArt::svg($art, $i * 7 + $n, $n));
                 $p->images()->create(['path' => $path, 'sort' => $n]);
             }
             $created[] = $p;
