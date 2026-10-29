@@ -346,3 +346,19 @@ table.tbl{border-collapse:separate;border-spacing:0 6px}
 .tiles{grid-template-columns:repeat(auto-fit,minmax(128px,1fr))}
 .mobile-book{bottom:calc(var(--nav-h) + 6px + var(--safe-b))}
 .hub{grid-template-columns:minmax(0,1fr)}.hub-g,.hub-chips{min-width:0}
+
+/* ---------- لوگوی اصلی می‌جا (بدون هیچ تغییری در طرح) ---------- */
+.brand-logo{height:35px;width:auto;display:block}
+.brand{padding:0}
+.foot-logo{height:42px;width:auto;display:block}
+.auth-logo img{width:auto;height:42px}
+.au-logo{position:relative;width:min(300px,78%);margin:14px auto 0;padding:16px 22px;border-radius:22px;background:linear-gradient(145deg,rgba(255,255,255,.92),rgba(255,255,255,.7));border:1px solid #fff;box-shadow:0 26px 40px -22px rgba(142,79,4,.65),inset 0 1px 0 #fff;animation:flt 6s ease-in-out infinite alternate;filter:none}
+.au-logo img{display:block;width:100%;height:auto}
+@media (max-width:860px){.brand-logo{height:30px}}
+.brand .brand-logo{width:auto;height:35px;max-width:none}
+.au-show{min-height:540px}
+.au-logo{margin-top:76px}
+.au-chip.c1{top:14px;inset-inline-start:16px;inset-inline-end:auto}
+.au-chip.c2{top:14px;inset-inline-end:16px;inset-inline-start:auto}
+.au-chip.c3{top:262px;inset-inline-end:24px;inset-inline-start:auto}
+@media (max-width:860px){.brand .brand-logo{height:30px}}

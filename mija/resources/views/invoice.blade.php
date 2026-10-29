@@ -10,7 +10,7 @@ body{background:#f4f5f8!important;animation:none}body::before{display:none}
 </style></head><body>
 @include('partials.i3-defs')
 <div class="inv">
-  <div class="row between" style="margin-top:8px"><div class="row"><img src="{{ asset('img/mija-mark.svg') }}" width="54" alt=""><div><h1>فاکتور رزرو</h1><div class="muted small">می‌جا — پلتفرم رزرو ویلا و کلبه</div></div></div><div class="center"><div class="muted small">شماره رزرو</div><b class="ltr" style="font-size:20px">{{ $b->code }}</b></div></div>
+  <div class="row between" style="margin-top:8px"><div class="row"><img src="{{ asset('img/mija-logo-h.png') }}" width="130" alt="می‌جا"><div><h1>فاکتور رزرو</h1><div class="muted small">می‌جا — پلتفرم رزرو ویلا و کلبه</div></div></div><div class="center"><div class="muted small">شماره رزرو</div><b class="ltr" style="font-size:20px">{{ $b->code }}</b></div></div>
   @if(in_array($b->status, ['confirmed','completed']))<div class="stamp">پرداخت‌شده</div>@endif
   <hr class="divider">
   <div class="grid2"><div><div class="muted small">مهمان</div><b>{{ $b->guest->name }}</b><div class="small ltr">{{ fa($b->guest->phone) }}</div></div><div><div class="muted small">میزبان</div><b>{{ $b->property->host->name }}</b></div></div>

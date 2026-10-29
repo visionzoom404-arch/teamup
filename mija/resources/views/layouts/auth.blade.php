@@ -11,12 +11,12 @@
   </div>
   <div class="au-shell" id="auth-card">
     <section class="au-form">
-      <div class="auth-logo"><img src="{{ asset('img/mija-mark.svg') }}" alt="می‌جا"><div><b>می‌جا</b><small>MIJA</small></div></div>
+      <div class="auth-logo"><img src="{{ asset('img/mija-logo-h.png') }}" alt="می‌جا" width="103" height="42"></div>
       @yield('card')
     </section>
     <aside class="au-show" aria-hidden="true">
       <div class="au-orb"></div>
-      <img class="au-logo" src="{{ asset('img/mija-logo-stacked.svg') }}" alt="">
+      <div class="au-logo"><img src="{{ asset('img/mija-logo-m.png') }}" alt=""></div>
       <div class="au-copy"><h2>جای خوب، سفر خوب.</h2><p>ویلا، کلبه و اقامتگاه‌های تأییدشده؛ مستقیم از میزبان.</p></div>
       <div class="au-chip c1"><x-i3 name="p_bolt" class="sm"/><span><b>رزرو فوری</b><small>بدون انتظار تأیید</small></span></div>
       <div class="au-chip c2"><x-i3 name="p_shield" class="sm"/><span><b>پرداخت امن</b><small>ضمانت بازگشت وجه</small></span></div>

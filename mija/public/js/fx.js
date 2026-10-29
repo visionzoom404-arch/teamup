@@ -127,7 +127,7 @@
     const m = L.map(el, { scrollWheelZoom: false, zoomControl: true }).setView([lat, lng], 12);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '© OpenStreetMap' }).addTo(m);
     L.circle([lat, lng], { radius: 700, color: '#F26B0F', fillColor: '#FF7A00', fillOpacity: .25, weight: 2 }).addTo(m);
-    L.marker([lat, lng], { icon: L.divIcon({ className: '', html: '<img src="/img/mija-mark.svg" width="40" height="40" style="filter:drop-shadow(0 6px 8px rgba(0,0,0,.35))">', iconSize: [40, 40], iconAnchor: [20, 36] }) }).addTo(m);
+    L.marker([lat, lng], { icon: L.divIcon({ className: '', html: '<img src="/img/mija-mark-sm.png" width="40" height="40" style="filter:drop-shadow(0 6px 8px rgba(0,0,0,.35))">', iconSize: [40, 40], iconAnchor: [20, 36] }) }).addTo(m);
   });
 
   /* ---------- شیت رزرو در موبایل ---------- */

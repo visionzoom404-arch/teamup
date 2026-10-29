@@ -1,7 +1,7 @@
 @php $u = auth()->user(); $unread = $u ? $u->notices()->whereNull('read_at')->count() : 0; @endphp
 <header class="topbar">
   <div class="container">
-    <a href="{{ route('home') }}" class="brand" aria-label="می‌جا"><img src="{{ asset('img/mija-mark.svg') }}" alt=""><span>می‌جا<small>MIJA</small></span></a>
+    <a href="{{ route('home') }}" class="brand" aria-label="می‌جا"><img class="brand-logo" src="{{ asset('img/mija-logo-h.png') }}" alt="می‌جا" width="86" height="35"></a>
     <nav class="topnav">
       <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'on' : '' }}">خانه</a>
       <a href="{{ route('search') }}" class="{{ request()->routeIs('search') && ! request('type') ? 'on' : '' }}">جستجوی اقامتگاه</a>
