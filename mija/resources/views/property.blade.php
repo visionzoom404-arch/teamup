@@ -70,7 +70,7 @@
       <div class="grid2">
         <div class="card flat"><h3><x-icon name="clock" class="sm"/> ورود و خروج</h3><p class="small">ورود از ساعت {{ fa($p->check_in_time) }} · خروج تا ساعت {{ fa($p->check_out_time) }}</p><p class="small">حداقل اقامت {{ fa($p->min_nights) }} شب، حداکثر {{ fa($p->max_nights) }} شب</p>@if($p->extra_guest_fee)<p class="small">هزینه‌ی هر نفر اضافه (بالای {{ fa($p->capacity_base) }} نفر): {{ toman($p->extra_guest_fee) }} در شب</p>@endif</div>
         <div class="card flat"><h3><x-icon name="shield" class="sm"/> سیاست لغو: {{ $p->policy()['name'] }}</h3>@php $tiers = $p->policy()['tiers']; $d0 = $tiers[0][0]; @endphp
-        <div class="cx"><div class="cx-bar">@foreach($tiers as $i => [$days, $pct])<span style="flex:1;--c:{{ $pct >= 100 ? 'var(--green)' : '#F5B301' }}"><b>{{ fa($pct) }}٪</b></span>@endforeach<span style="flex:1;--c:var(--red)"><b>۰٪</b></span></div>
+        <div class="cx"><div class="cx-bar">@foreach($tiers as $i => [$days, $pct])<span style="flex:1;--c:{{ $pct >= 100 ? 'var(--green)' : '#F5B301' }}"><b>{{ fa($pct) }}٪</b></span>@endforeach<span style="flex:1;--c:var(--sale)"><b>۰٪</b></span></div>
           <div class="cx-lbl">@foreach($tiers as [$days, $pct])<span>تا {{ fa($days) }} روز مانده</span>@endforeach<span>کمتر</span></div></div>
         <p class="small" style="margin-top:8px">{{ $p->policy()['desc'] }}</p><a class="small" style="color:var(--red-d);font-weight:700" href="{{ route('page', 'rules') }}">جزئیات قوانین</a></div>
       </div>

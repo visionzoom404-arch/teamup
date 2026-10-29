@@ -133,7 +133,7 @@
     });
     $$('canvas[data-donut]').forEach(cv => {
       const d = JSON.parse(cv.dataset.donut);
-      new Chart(cv, { type: 'doughnut', data: { labels: d.labels, datasets: [{ data: d.data, backgroundColor: ['#E5202E', '#FF9A1F', '#F5B301', '#7CC8F0', '#2FAE6B', '#111216'], borderWidth: 4, borderColor: '#fff', hoverOffset: 10 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '68%', animation: { duration: reduce ? 0 : 1400 }, plugins: { legend: { position: 'bottom', rtl: true, labels: { usePointStyle: true, padding: 14 } }, tooltip: { rtl: true, callbacks: { label: c => ' ' + c.label + ': ' + fa(c.parsed) } } } } });
+      new Chart(cv, { type: 'doughnut', data: { labels: d.labels, datasets: [{ data: d.data, backgroundColor: ['#F26B0F', '#FFB21A', '#19B5AC', '#2A2C33', '#7CC8F0', '#2FAE6B'], borderWidth: 4, borderColor: '#fff', hoverOffset: 10 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '68%', animation: { duration: reduce ? 0 : 1400 }, plugins: { legend: { position: 'bottom', rtl: true, labels: { usePointStyle: true, padding: 14 } }, tooltip: { rtl: true, callbacks: { label: c => ' ' + c.label + ': ' + fa(c.parsed) } } } } });
     });
   }
 
@@ -142,7 +142,7 @@
     if (!window.L) return; const lat = +el.dataset.lat, lng = +el.dataset.lng;
     const m = L.map(el, { scrollWheelZoom: false, zoomControl: true }).setView([lat, lng], 12);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '© OpenStreetMap' }).addTo(m);
-    L.circle([lat, lng], { radius: 700, color: '#E5202E', fillColor: '#FF7A00', fillOpacity: .25, weight: 2 }).addTo(m);
+    L.circle([lat, lng], { radius: 700, color: '#F26B0F', fillColor: '#FF7A00', fillOpacity: .25, weight: 2 }).addTo(m);
     L.marker([lat, lng], { icon: L.divIcon({ className: '', html: '<img src="/img/mija-mark.svg" width="40" height="40" style="filter:drop-shadow(0 6px 8px rgba(0,0,0,.35))">', iconSize: [40, 40], iconAnchor: [20, 36] }) }).addTo(m);
   });
 
@@ -187,7 +187,7 @@
 
   /* ---------- جشن رزرو موفق ---------- */
   if ($('[data-confetti]') && window.confetti && !reduce) {
-    const end = Date.now() + 1600, colors = ['#E5202E', '#FF9A1F', '#FFD76A', '#7CC8F0', '#2FAE6B'];
+    const end = Date.now() + 1600, colors = ['#F26B0F', '#FF9A1F', '#FFD76A', '#7CC8F0', '#2FAE6B'];
     (function f() { confetti({ particleCount: 5, angle: 60, spread: 70, origin: { x: 0, y: .7 }, colors }); confetti({ particleCount: 5, angle: 120, spread: 70, origin: { x: 1, y: .7 }, colors }); if (Date.now() < end) requestAnimationFrame(f); })();
   }
 })();

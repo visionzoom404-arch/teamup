@@ -143,7 +143,7 @@ class User extends Authenticatable
     public function avatarUrl(): string
     {
         return $this->avatar ? asset('storage/'.$this->avatar) : 'data:image/svg+xml;utf8,'.rawurlencode(
-            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF3B3B"/><stop offset="1" stop-color="#FF9A1F"/></linearGradient></defs><rect width="80" height="80" fill="url(#g)"/><text x="40" y="53" font-size="36" text-anchor="middle" fill="#fff" font-family="sans-serif">'.e(mb_substr($this->name, 0, 1)).'</text></svg>'
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF8A2A"/><stop offset="1" stop-color="#FF9A1F"/></linearGradient></defs><rect width="80" height="80" fill="url(#g)"/><text x="40" y="53" font-size="36" text-anchor="middle" fill="#fff" font-family="sans-serif">'.e(mb_substr($this->name, 0, 1)).'</text></svg>'
         );
     }
 

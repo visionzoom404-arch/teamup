@@ -19,6 +19,10 @@ class PublicController extends Controller
             'featured' => (clone $base)->where('featured', true)->latest('id')->take(8)->get(),
             'latest' => (clone $base)->latest('id')->take(8)->get(),
             'top' => (clone $base)->where('reviews_count', '>', 0)->orderByDesc('rating_avg')->take(4)->get(),
+            'discounted' => (clone $base)->where(fn ($w) => $w->where('weekly_discount', '>', 0)->orWhere('monthly_discount', '>', 0))->orderByDesc('monthly_discount')->take(8)->get(),
+            'instant' => (clone $base)->where('instant_booking', true)->latest('id')->take(8)->get(),
+            'regionCounts' => collect(config('mija.regions'))->map(fn ($rg) => Property::approved()->whereIn('province', $rg['provinces'])->count()),
+            'cities' => Property::approved()->select('city')->distinct()->pluck('city'),
             'destinations' => Property::approved()->selectRaw('city, province, count(*) as c, min(price_weekday) as p')->groupBy('city', 'province')->orderByDesc('c')->take(8)->get(),
             'stats' => [
                 'properties' => Property::approved()->count(),
@@ -58,6 +62,10 @@ class PublicController extends Controller
             $q->where(fn ($w) => $w->where('title', 'like', $term)->orWhere('city', 'like', $term)->orWhere('province', 'like', $term));
         }
         $r->filled('province') && $q->where('province', $r->province);
+        if ($r->filled('region') && ($rg = config('mija.regions.'.$r->region))) {
+            $q->whereIn('province', $rg['provinces']);
+        }
+        $r->boolean('discount') && $q->where(fn ($w) => $w->where('weekly_discount', '>', 0)->orWhere('monthly_discount', '>', 0));
         $r->filled('city') && $q->where('city', $r->city);
         $r->filled('type') && $q->whereIn('type', (array) $r->type);
         $r->filled('guests') && $q->where('capacity_max', '>=', (int) $r->guests);

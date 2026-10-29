@@ -5,7 +5,7 @@
 @php
 $stl = ['draft' => 'پیش‌نویس', 'pending' => 'در انتظار', 'approved' => 'منتشر', 'rejected' => 'ردشده', 'suspended' => 'تعلیق'];
 $c1 = ['type' => 'bar', 'labels' => collect($days)->pluck('label')->all(), 'data' => collect($days)->pluck('count')->all(), 'unit' => ' رزرو'];
-$c2 = ['type' => 'line', 'labels' => collect($days)->pluck('label')->all(), 'data' => collect($days)->pluck('gmv')->all(), 'unit' => 'toman', 'color' => 'rgba(229,32,46,.5)', 'border' => '#E5202E'];
+$c2 = ['type' => 'line', 'labels' => collect($days)->pluck('label')->all(), 'data' => collect($days)->pluck('gmv')->all(), 'unit' => 'toman', 'color' => 'rgba(242,107,15,.5)', 'border' => '#F26B0F'];
 $d1 = ['labels' => ['مهمان', 'میزبان'], 'data' => [$kpi['users'], $kpi['hosts']]];
 $d2 = ['labels' => collect($propStatus)->keys()->map(fn ($k) => $stl[$k] ?? $k)->values()->all(), 'data' => collect($propStatus)->values()->all()];
 @endphp
@@ -32,7 +32,7 @@ $d2 = ['labels' => collect($propStatus)->keys()->map(fn ($k) => $stl[$k] ?? $k)-
 
 <div class="grid2" style="gap:18px;align-items:start">
   <div class="card"><h3><x-i3 name="trend" class="sm"/> رزروهای ۱۴ روز اخیر</h3><div class="chart-box"><canvas data-chart="{{ json_encode($c1, JSON_UNESCAPED_UNICODE) }}"></canvas></div></div>
-  <div class="card"><h3><x-i3 name="coins" class="sm"/> پرداخت‌های ۱۴ روز اخیر</h3><div class="chart-box"><canvas data-chart="{{ json_encode($c2, JSON_UNESCAPED_UNICODE) }}", 'border' => '#E5202E'])'></canvas></div></div>
+  <div class="card"><h3><x-i3 name="coins" class="sm"/> پرداخت‌های ۱۴ روز اخیر</h3><div class="chart-box"><canvas data-chart="{{ json_encode($c2, JSON_UNESCAPED_UNICODE) }}", 'border' => '#F26B0F'])'></canvas></div></div>
 </div>
 <div class="grid2 mt" style="gap:18px;align-items:start">
   <div class="card"><h3><x-i3 name="user" class="sm"/> ترکیب کاربران</h3><div class="chart-box"><canvas data-donut="{{ json_encode($d1, JSON_UNESCAPED_UNICODE) }}"></canvas></div></div>

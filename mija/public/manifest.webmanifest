@@ -2,7 +2,7 @@
   "id": "/?source=pwa",
   "name": "می‌جا — رزرو ویلا و کلبه",
   "short_name": "می‌جا",
-  "description": "رزرو آنلاین ویلا، کلبه و اقامتگاه در سراسر ایران",
+  "description": "جای خوب، سفر خوب — رزرو ویلا، کلبه و اقامتگاه در سراسر ایران",
   "lang": "fa",
   "dir": "rtl",
   "start_url": "/?source=pwa",
@@ -11,7 +11,7 @@
   "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait",
   "background_color": "#ffffff",
-  "theme_color": "#D61628",
+  "theme_color": "#F26B0F",
   "categories": ["travel", "lifestyle"],
   "icons": [
     { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },

@@ -1,22 +1,40 @@
-=== نصب «می‌جا» روی سرور ===
+=== راهنمای نصب «می‌جا» (برای کسی که هیچ‌چیز بلد نیست) ===
 
-نیازمندی: سرور Ubuntu 22/24 یا Debian 12 (خالی)، دسترسی root، و دامنه‌ای که در Cloudflare به IP سرور اشاره می‌کند.
+چی لازم داری؟
+  ۱) سرور (Ubuntu 22/24 یا Debian 12) — «خالی» باشه
+  ۲) آی‌پی سرور و رمز root (از شرکت سرور می‌گیری)
+  ۳) دامنه‌ای که در Cloudflare به آی‌پی سرور وصله
+  ۴) این فایل: mija-installer.tar.gz
 
-۱) فایل mija-installer.tar.gz را روی سرور آپلود کنید (WinSCP / FileZilla / scp):
-     scp mija-installer.tar.gz root@IP_SERVER:/root/
+گام ۱ — آپلود فایل روی سرور
+  ویندوز: برنامه‌ی WinSCP رو نصب کن، با آی‌پی و رمز وصل شو (پروتکل SFTP)، فایل mija-installer.tar.gz رو بکش داخل پوشه‌ی /root
+  مک/لینوکس: در ترمینال بزن
+      scp mija-installer.tar.gz root@آی‌پی-سرور:/root/
 
-۲) روی سرور (SSH):
-     cd /root && tar -xzf mija-installer.tar.gz && cd mija-installer
+گام ۲ — وارد سرور شو
+  ویندوز: برنامه‌ی PuTTY (یا Terminal ویندوز 11) و وصل شو:  ssh root@آی‌پی-سرور
+  بعد این دو دستور رو کپی/پیست کن:
+      cd /root
+      tar -xzf mija-installer.tar.gz && cd mija-installer
 
-۳) (اختیاری ولی مهم) عکس‌های واقعی را داخل پوشه‌ی  photos/  بگذارید (راهنما: photos/README.txt)
+گام ۳ — (اختیاری) عکس‌های واقعی
+  عکس‌های بدون حق‌نشر خودت رو توی پوشه‌ی photos بریز (با WinSCP؛ راهنما: photos/README.txt).
+  عکس صفحه‌ی اول رو با اسم hero.jpg بذار.
 
-۴) نصب — با یک دستور (موبایل و رمز مدیر دلخواه خودتان؛ MIJA_DEMO=1 یعنی چند اقامتگاه نمونه هم ساخته شود):
-     MIJA_DEMO=1 MIJA_ADMIN_PHONE=09xxxxxxxxx MIJA_ADMIN_PASSWORD='رمز-قوی' bash install.sh your-domain.com
+گام ۴ — نصب (یک دستور). موبایل و رمز مدیر رو خودت انتخاب کن:
+      MIJA_DEMO=1 MIJA_ADMIN_PHONE=09xxxxxxxxx MIJA_ADMIN_PASSWORD='رمز-قوی' bash install.sh دامنه-تو.com
+  (MIJA_DEMO=1 یعنی چند اقامتگاه نمونه هم ساخته بشه تا سایت خالی نباشه.)
+  حدود ۳ تا ۸ دقیقه طول می‌کشه. آخرش «نصب شد» می‌نویسه.
 
-۵) در Cloudflare: بخش SSL/TLS را روی «Full» بگذارید. سپس https://your-domain.com را باز کنید.
+گام ۵ — Cloudflare
+  وارد Cloudflare شو → دامنه → SSL/TLS → حالت «Full» رو انتخاب کن. بعد آدرس سایتت رو باز کن.
+  ورود مدیر: همون موبایل و رمزی که در گام ۴ دادی  ← آدرس /login
 
-به‌روزرسانی بعدی: بسته‌ی جدید را باز کنید و دوباره  bash install.sh your-domain.com  بزنید (دیتابیس و عکس‌ها حفظ می‌شود).
-حذف اقامتگاه‌ها و کاربران نمونه قبل از انتشار واقعی:
-     cd /var/www/mija && sudo -u www-data php artisan mija:demo-clear --force
+بعدش:
+  • حذف اقامتگاه‌های نمونه قبل از انتشار واقعی:
+        cd /var/www/mija && sudo -u www-data php artisan mija:demo-clear --force
+  • اضافه کردن عکس بعداً:  cd /var/www/mija && sudo -u www-data php artisan mija:photos --dir=/root/mija-installer/photos
+  • به‌روزرسانی: بسته‌ی جدید رو باز کن و دوباره دستور گام ۴ رو بزن (اطلاعات و عکس‌ها حفظ می‌شه).
 
-⚠️ تا وقتی درگاه پرداخت واقعی (زرین‌پال و...) وصل نشده، پرداخت «آزمایشی» است و هر پرداختی موفق ثبت می‌شود؛ سایت را به کاربران واقعی معرفی نکنید.
+⚠️ پرداخت فعلاً «آزمایشی»ه و هر پرداختی رو موفق حساب می‌کنه؛ تا وقتی درگاه واقعی (زرین‌پال و...) وصل نشده، سایت رو به کاربر واقعی معرفی نکن.
+⚠️ رمز مدیر رو بعد از اولین ورود (پروفایل ← تغییر رمز) عوض کن.
