@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # نصب/به‌روزرسانی «می‌جا» روی سرور Ubuntu/Debian خالی (nginx + PHP 8.3 + SQLite) پشت Cloudflare
-# استفاده (روی سرور، با کاربر root، از داخل پوشه‌ی کلون‌شده‌ی مخزن):
-#   sudo bash mija/deploy/setup-server.sh amirxui.site
+# استفاده (روی سرور، با root، از داخل پوشه‌ی کلون‌شده‌ی مخزن):
+#   MIJA_ADMIN_PHONE=09xxxxxxxxx MIJA_ADMIN_PASSWORD='...' bash mija/deploy/setup-server.sh amirxui.site
 set -euo pipefail
 
 DOMAIN="${1:?دامنه را وارد کنید. مثال: bash setup-server.sh amirxui.site}"
@@ -39,12 +39,10 @@ composer install --no-dev --optimize-autoloader --no-interaction
 FIRST=0
 if [ ! -f .env ]; then
   FIRST=1
-  ADMIN_PASS="$(openssl rand -base64 12 | tr -dc 'A-Za-z0-9' | head -c 12)"
   cp .env.example .env
   sed -i "s|^APP_ENV=.*|APP_ENV=production|; s|^APP_DEBUG=.*|APP_DEBUG=false|; s|^APP_URL=.*|APP_URL=https://${DOMAIN}|" .env
   sed -i "s|^DB_CONNECTION=.*|DB_CONNECTION=sqlite|; s|^# *DB_DATABASE=.*|DB_DATABASE=${APP}/database/database.sqlite|" .env
   grep -q '^DB_DATABASE=' .env || echo "DB_DATABASE=${APP}/database/database.sqlite" >> .env
-  grep -q '^MIJA_ADMIN_PASSWORD=' .env || echo "MIJA_ADMIN_PASSWORD=${ADMIN_PASS}" >> .env
   touch database/database.sqlite
   php artisan key:generate --force
 fi
@@ -52,10 +50,15 @@ fi
 echo "==> مهاجرت دیتابیس"
 php artisan migrate --force
 if [ "$FIRST" = 1 ]; then
-  php artisan db:seed --force      # در production فقط تنظیمات، امکانات و حساب مدیر
-  PASS="$(grep '^MIJA_ADMIN_PASSWORD=' .env | cut -d= -f2)"
-  sed -i '/^MIJA_ADMIN_PASSWORD=/d' .env
-  umask 077; printf 'موبایل مدیر: 09120000000\nرمز: %s\n' "$PASS" > /root/mija-admin.txt
+  php artisan db:seed --force      # در production فقط تنظیمات و امکانات
+fi
+# حساب مدیر: از متغیرهای MIJA_ADMIN_PHONE و MIJA_ADMIN_PASSWORD، وگرنه رمز تصادفی
+if [ -n "${MIJA_ADMIN_PHONE:-}" ] && [ -n "${MIJA_ADMIN_PASSWORD:-}" ]; then
+  php artisan mija:admin "$MIJA_ADMIN_PHONE" "$MIJA_ADMIN_PASSWORD"
+elif [ "$FIRST" = 1 ]; then
+  GEN="$(openssl rand -base64 12 | tr -dc 'A-Za-z0-9' | head -c 12)"
+  php artisan mija:admin 09120000000 "$GEN"
+  umask 077; printf 'موبایل مدیر: 09120000000\nرمز: %s\n' "$GEN" > /root/mija-admin.txt
 fi
 rm -f public/storage; php artisan storage:link
 php artisan config:cache && php artisan route:cache && php artisan view:cache
@@ -101,5 +104,5 @@ systemctl reload nginx
 
 echo
 echo "✅ نصب شد: https://${DOMAIN}"
-[ "$FIRST" = 1 ] && echo "   اطلاعات مدیر: cat /root/mija-admin.txt  (پس از ورود رمز را عوض کنید)"
+[ -f /root/mija-admin.txt ] && echo "   اطلاعات مدیر: cat /root/mija-admin.txt (پس از ورود رمز را عوض کنید)"
 echo "   در Cloudflare: SSL/TLS ← حالت Full"

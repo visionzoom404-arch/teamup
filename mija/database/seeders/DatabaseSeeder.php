@@ -32,8 +32,6 @@ class DatabaseSeeder extends Seeder
             PeakPeriod::firstOrCreate(['title' => "نوروز $y"], ['starts_on' => Jalali::carbon($y, 1, 1), 'ends_on' => Jalali::carbon($y, 1, 13)]);
         }
 
-        User::updateOrCreate(['phone' => '09120000000'], ['name' => 'مدیر می‌جا', 'password' => env('MIJA_ADMIN_PASSWORD', 'admin1234'), 'role' => 'admin']);
-
         if (! app()->environment('production')) {
             $this->demo();
         }
@@ -41,6 +39,7 @@ class DatabaseSeeder extends Seeder
 
     private function demo(): void
     {
+        User::updateOrCreate(['phone' => '09120000000'], ['name' => 'مدیر می‌جا', 'password' => 'admin1234', 'role' => 'admin']);
         $hosts = [
             User::updateOrCreate(['phone' => '09121111111'], ['name' => 'علی رضایی', 'password' => 'host1234', 'role' => 'host', 'host_verified' => true, 'sheba' => 'IR062960000000100324200001', 'bank_owner' => 'علی رضایی', 'city' => 'نوشهر']),
             User::updateOrCreate(['phone' => '09122222222'], ['name' => 'مریم احمدی', 'password' => 'host1234', 'role' => 'host', 'host_verified' => true, 'city' => 'رشت']),

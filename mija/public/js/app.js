@@ -183,3 +183,11 @@
     $$('[data-cal-action]').forEach(b => b.addEventListener('click', () => { $('#cal-action').value = b.dataset.calAction; }));
   }
 })();
+
+/* ---------- موج (ripple) روی دکمه‌های شیشه‌ای ---------- */
+document.addEventListener('pointerdown', e => {
+  const b = e.target.closest('.btn'); if (!b || b.disabled) return;
+  const r = b.getBoundingClientRect(), s = Math.max(r.width, r.height), o = document.createElement('span');
+  o.className = 'btn-ripple'; o.style.cssText = `width:${s}px;height:${s}px;left:${e.clientX - r.left - s / 2}px;top:${e.clientY - r.top - s / 2}px`;
+  b.appendChild(o); setTimeout(() => o.remove(), 650);
+});

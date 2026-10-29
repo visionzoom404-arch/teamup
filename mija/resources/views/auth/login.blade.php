@@ -1,20 +1,28 @@
-@extends('layouts.app')
+@extends('layouts.auth')
 @section('title', 'ورود')
-@section('nofooter', '1')
-@section('bare')
-<div class="auth">
-  <div class="auth-card card">
-    <div class="center" style="margin-bottom:18px"><img src="{{ asset('img/mija-logo-stacked.svg') }}" width="150" alt="می‌جا"></div>
-    <h2 class="center" style="font-size:22px">ورود به حساب کاربری</h2>
-    @include('partials.flash')
-    <form method="post" action="{{ route('login') }}">
-      @csrf
-      <div class="field"><label for="phone">شماره موبایل</label><input id="phone" class="input" dir="ltr" name="phone" value="{{ old('phone') }}" inputmode="numeric" placeholder="09123456789" autocomplete="username" required autofocus></div>
-      <div class="field"><label for="password">رمز عبور</label><input id="password" class="input" dir="ltr" type="password" name="password" autocomplete="current-password" required></div>
-      <label class="check" style="margin-bottom:16px"><input type="checkbox" name="remember" value="1"> مرا به خاطر بسپار</label>
-      <button class="btn btn-lg btn-block">ورود</button>
-    </form>
-    <p class="center small muted" style="margin:18px 0 0">حساب ندارید؟ <a href="{{ route('register') }}" style="color:var(--red-d);font-weight:700">ثبت‌نام</a> · <a href="{{ route('register', ['as' => 'host']) }}" style="color:var(--red-d);font-weight:700">میزبان شوید</a></p>
+@section('card')
+<h1 data-a>خوش برگشتی 👋</h1>
+<p class="lead" data-a>برای ادامه وارد حساب کاربری‌ات شو.</p>
+@if(session('ok'))<div class="alert ok" data-a><x-icon name="check"/>{{ session('ok') }}</div>@endif
+<form method="post" action="{{ route('login') }}" id="auth-form" novalidate>
+  @csrf
+  <div class="fl {{ $errors->has('phone') ? 'has-err' : '' }}" data-a>
+    <input id="phone" name="phone" dir="ltr" inputmode="numeric" autocomplete="username" placeholder=" " value="{{ old('phone') }}" data-phone required>
+    <label for="phone">شماره موبایل</label><span class="ico"><x-icon name="phone"/></span>
+    @error('phone')<div class="msg-e">{{ $message }}</div>@enderror
   </div>
+  <div class="fl {{ $errors->has('password') ? 'has-err' : '' }}" data-a>
+    <input id="password" name="password" type="password" dir="ltr" autocomplete="current-password" placeholder=" " required>
+    <label for="password">رمز عبور</label><span class="ico"><x-icon name="lock"/></span>
+    <button type="button" class="eye" data-eye aria-label="نمایش رمز"><x-icon name="eye"/></button>
+    @error('password')<div class="msg-e">{{ $message }}</div>@enderror
+  </div>
+  <label class="switch" data-a><input type="checkbox" name="remember" value="1"><span class="tr"></span>مرا به خاطر بسپار</label>
+  <button class="btn btn-auth btn-lg" data-a><span class="spin"></span><span class="lbl">ورود به حساب</span><x-icon name="chev-l"/></button>
+</form>
+<div class="divider-t" data-a>حساب نداری؟</div>
+<div class="alt-link" data-a>
+  <a class="btn btn-light" href="{{ route('register') }}">🧳 ثبت‌نام مهمان</a>
+  <a class="btn btn-gold" href="{{ route('register', ['as' => 'host']) }}">🔑 میزبان شو</a>
 </div>
 @endsection

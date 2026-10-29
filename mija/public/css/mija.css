@@ -393,3 +393,7 @@ table.tbl{width:100%;border-collapse:collapse;font-size:13.5px}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 @media print{.topbar,.bottomnav,.footer,.btn{display:none!important}}
+
+/* موج دکمه‌ها */
+.btn-ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.55);transform:scale(0);animation:ripple .6s ease-out forwards;pointer-events:none}
+@keyframes ripple{to{transform:scale(4);opacity:0}}
