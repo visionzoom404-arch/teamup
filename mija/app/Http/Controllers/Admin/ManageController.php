@@ -41,7 +41,7 @@ class ManageController extends Controller
         $d = $r->validate(['status' => 'required|in:approved,rejected,suspended,pending', 'reason' => 'nullable|string|max:200']);
         $property->update(['status' => $d['status'], 'reject_reason' => $d['status'] === 'approved' ? null : ($d['reason'] ?? null)]);
         $label = ['approved' => 'تأیید شد', 'rejected' => 'نیاز به اصلاح دارد', 'suspended' => 'تعلیق شد', 'pending' => 'در انتظار بررسی'][$d['status']];
-        $property->host->notify("اقامتگاه «{$property->title}» $label", $d['reason'] ?? null, route('host.properties.edit', $property));
+        $property->host->notify("اقامتگاه «{$property->title}» $label", $d['reason'] ?? null, route('host.properties.edit', $property), true);
 
         return back()->with('ok', 'وضعیت اقامتگاه به‌روز شد.');
     }
@@ -149,12 +149,17 @@ class ManageController extends Controller
         if ($d['action'] === 'paid' && ! $r->hasFile('receipt') && empty($d['tracking_code'])) {
             return back()->withErrors(['receipt' => 'برای ثبت واریز، رسید را بارگذاری کنید یا کد پیگیری را وارد کنید.']);
         }
-        $payout->update(['status' => $d['action'], 'tracking_code' => $d['tracking_code'] ?? null, 'note' => $d['note'] ?? null, 'processed_at' => now(), 'receipt' => $r->file('receipt')?->store('payouts', 'public')]);
+        $payout->update(['status' => $d['action'], 'tracking_code' => $d['tracking_code'] ?? null, 'note' => $d['note'] ?? null, 'processed_at' => now(), 'receipt' => $r->file('receipt')?->store('payouts', 'public'), 'receipt_sent_at' => $d['action'] === 'paid' ? now() : null]);
         Audit::log('payout.'.$d['action'], "#{$payout->id}");
         if ($d['action'] === 'rejected') {
             $payout->host->walletChange($payout->amount, 'بازگشت درخواست برداشت ردشده');
         }
-        $payout->host->notify($d['action'] === 'paid' ? 'برداشت شما واریز شد' : 'درخواست برداشت رد شد', toman($payout->amount), route('host.wallet'));
+        // رسید واریز برای میزبان (اعلان سایت/اپ + پیامک با لینک رسید)؛ مانده‌ی در انتظار تسویه با تغییر وضعیت صفر می‌شود
+        $payout->host->notify(
+            $d['action'] === 'paid' ? 'مبلغ برداشت شما واریز شد — رسید را ببینید' : 'درخواست برداشت شما رد شد',
+            toman($payout->amount).($d['action'] === 'paid' ? ($payout->tracking_code ? ' · کد پیگیری '.fa($payout->tracking_code) : '') : ' — '.($payout->note ?: 'مبلغ به کیف پول برگشت')),
+            $d['action'] === 'paid' ? route('payout.receipt', $payout) : route('host.wallet'), true
+        );
 
         return back()->with('ok', 'درخواست برداشت به‌روز شد.');
     }
@@ -204,13 +209,14 @@ class ManageController extends Controller
     /* ---------- امکانات ---------- */
     public function amenities()
     {
-        return view('admin.amenities', ['items' => Amenity::orderBy('sort')->get()]);
+        return view('admin.amenities', ['items' => Amenity::orderBy('sort')->get(), 'icons' => \App\Support\Icons3D::names()]);
     }
 
     public function amenityStore(Request $r)
     {
         $d = $r->validate(['name' => 'required|string|max:60', 'icon' => 'nullable|string|max:20', 'grp' => 'required|in:feature,basic,rules,service']);
-        Amenity::create($d + ['key' => 'c'.time().random_int(10, 99), 'sort' => (int) Amenity::max('sort') + 1, 'icon' => $d['icon'] ?? 'sparkle']);
+        $icon = in_array($d['icon'] ?? null, \App\Support\Icons3D::names(), true) ? $d['icon'] : 'sparkle';
+        Amenity::create(['name' => $d['name'], 'grp' => $d['grp'], 'icon' => $icon, 'key' => 'c'.time().random_int(100, 999), 'sort' => (int) Amenity::max('sort') + 1]);
 
         return back()->with('ok', 'امکانات اضافه شد.');
     }
@@ -262,6 +268,20 @@ class ManageController extends Controller
     }
 
     /* ---------- ایام پیک و تنظیمات ---------- */
+    /** بررسی مرحله‌ای پنل پیامک (+ پیامک آزمایشی اختیاری) */
+    public function smsCheck(Request $r)
+    {
+        $test = null;
+        if ($r->input('send') === '1') {
+            $test = preg_replace('/\D/', '', \App\Support\Jalali::latinDigits((string) $r->input('test')));
+            if (! preg_match('/^09\d{9}$/', (string) $test)) {
+                return redirect()->route('admin.settings', ['tab' => 'sms'])->withErrors(['test' => 'شماره‌ی آزمایشی باید مثل 09123456789 باشد.'])->withInput();
+            }
+        }
+
+        return redirect()->route('admin.settings', ['tab' => 'sms'])->with('sms_diag', \App\Support\Sms::diagnose($test));
+    }
+
     public function settings()
     {
         return view('admin.settings', ['peaks' => PeakPeriod::orderBy('starts_on')->get()]);
@@ -274,9 +294,9 @@ class ManageController extends Controller
         'cashback_enabled' => 'boolean', 'cashback_percent' => 'required|integer|between:0,20', 'cashback_days' => 'required|integer|between:1,365',
         'installment_enabled' => 'boolean', 'installment_threshold' => 'required|integer|min:0', 'installment_parts' => 'required|integer|between:2,6', 'installment_first_pct' => 'required|integer|between:10,90', 'installment_min_days' => 'required|integer|between:3,365',
         'ads_enabled' => 'boolean', 'ad_banner_day' => 'required|integer|min:0', 'ad_click_cpc' => 'required|integer|min:0', 'ad_click_min' => 'required|integer|min:0', 'ad_ladder' => 'required|integer|min:0', 'ad_sms_each' => 'required|integer|min:0', 'ad_push_each' => 'required|integer|min:0',
-        'sms_enabled' => 'boolean', 'sms_provider' => 'nullable|string|max:20', 'sms_token' => 'nullable|string|max:300', 'sms_originator' => 'nullable|string|max:30', 'sms_base_url' => 'nullable|url|max:200',
+        'sms_enabled' => 'boolean', 'admin_sms_alerts' => 'boolean', 'sms_provider' => 'nullable|string|max:20', 'sms_token' => 'nullable|string|max:300', 'sms_originator' => 'nullable|string|max:30', 'sms_base_url' => 'nullable|url|max:200',
         'gateway_driver' => 'required|in:sandbox,zibal', 'zibal_merchants' => 'nullable|string|max:1000', 'cards' => 'nullable|string|max:2000', 'card_to_card_enabled' => 'boolean',
-        'enamad_html' => 'nullable|string|max:3000', 'ga4_id' => ['nullable', 'regex:/^G-[A-Z0-9]{4,15}$/'], 'google_verify' => 'nullable|string|max:120', 'bing_verify' => 'nullable|string|max:120', 'support_phone' => 'nullable|string|max:40', 'support_email' => 'nullable|email|max:80', 'footer_about' => 'nullable|string|max:300',
+        'enamad_html' => 'nullable|string|max:3000', 'ga4_id' => ['nullable', 'regex:/^G-[A-Z0-9]{4,15}$/'], 'google_verify' => 'nullable|string|max:120', 'bing_verify' => 'nullable|string|max:120', 'support_phone' => 'nullable|string|max:40', 'contact_phones' => 'nullable|string|max:1500', 'contact_addresses' => 'nullable|string|max:2000', 'support_email' => 'nullable|email|max:80', 'footer_about' => 'nullable|string|max:300',
     ];
 
     public function settingsUpdate(Request $r)

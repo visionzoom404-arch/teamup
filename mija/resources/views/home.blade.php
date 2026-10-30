@@ -69,8 +69,15 @@
   </section>
 
   @if($banners->count())
-  <section class="sec ad-banners"><div class="ab-row">@foreach($banners as $ad)@php $bp = $ad->property; @endphp
-    <a class="ab" href="{{ route('ad.go', $ad) }}"><img src="{{ $bp->cover() }}" alt=""><div><span class="ad-tag">تبلیغ</span><b>{{ $ad->title ?: $bp->title }}</b><small>{{ $bp->province }}، {{ $bp->city }} · از {{ toman($bp->startingPrice(), false) }} تومان</small></div></a>@endforeach</div></section>
+  <section class="sec ad-banners" aria-label="تبلیغات">
+    <div class="bn" data-swiper="banners"><div class="swiper"><div class="swiper-wrapper">
+      @foreach($banners as $ad)@php $bp = $ad->property; @endphp
+      <div class="swiper-slide"><a class="bn-slide" href="{{ route('ad.go', $ad) }}" rel="sponsored nofollow"><img src="{{ $ad->bannerUrl() }}" alt="{{ $ad->title ?: $bp->title }}" @if(! $loop->first) loading="lazy" @endif>
+        <span class="ad-tag">AD</span>
+        <div class="bn-txt"><b>{{ $ad->title ?: $bp->title }}</b><small>{{ $ad->text ?: ($bp->province.'، '.$bp->city) }} · از {{ toman($bp->startingPrice(), false) }} تومان</small></div></a></div>
+      @endforeach
+    </div></div>@if($banners->count() > 1)<div class="swiper-pagination"></div>@endif</div>
+  </section>
   @endif
   @if($flash->count())
   <section class="sec flash-sec"><div class="sec-h"><div><h2><x-i3 name="p_bolt" class="sm"/> تخفیف لحظه‌آخری</h2><p>فقط برای امروز و فردا؛ میزبان‌ها با تخفیف ویژه، سریع رزرو کنید.</p></div></div><div class="grid-cards">@foreach($flash as $p)@include('partials.pcard')@endforeach</div></section>

@@ -91,6 +91,7 @@ class PropertyController extends Controller
         // ویرایش اقامتگاه تأییدشده، آن را دوباره به بررسی می‌فرستد
         if ($property->status === 'approved' && $r->boolean('resubmit')) {
             $property->update(['status' => 'pending']);
+            \App\Models\User::notifyAdmins('اقامتگاه جدید منتظر تأیید است', $property->title, route('admin.properties.show', $property));
         }
         $this->sync($property, $r, $d);
 
@@ -114,6 +115,7 @@ class PropertyController extends Controller
             return back()->withErrors(['images' => 'برای ارسال به بررسی، حداقل ۳ عکس واقعی از اقامتگاه خودتان بارگذاری کنید.']);
         }
         $property->update(['status' => 'pending', 'reject_reason' => null]);
+        \App\Models\User::notifyAdmins('اقامتگاه ارسال‌شده منتظر تأیید است', $property->title, route('admin.properties.show', $property));
 
         return back()->with('ok', 'اقامتگاه برای بررسی تیم می‌جا ارسال شد.');
     }

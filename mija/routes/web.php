@@ -30,6 +30,8 @@ Route::get('/pay/callback', [GatewayController::class, 'callback'])->name('gatew
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
+    Route::post('/login/sms', [AuthController::class, 'smsRequest'])->name('login.sms')->middleware('throttle:8,1');
+    Route::post('/login/sms/verify', [AuthController::class, 'smsVerify'])->name('login.sms.verify')->middleware('throttle:12,1');
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:10,1');
 });
@@ -39,6 +41,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middl
 Route::middleware('auth')->group(function () {
     Route::post('/favorite/{property}', [PublicController::class, 'toggleFavorite'])->name('favorite');
     Route::get('/notices', [NoticeController::class, 'index'])->name('notices');
+    Route::get('/wallet/receipt/{payout}', [NoticeController::class, 'payoutReceipt'])->name('payout.receipt');
     Route::post('/bookings/{booking}/message', [NoticeController::class, 'message'])->name('booking.message');
     Route::get('/bookings/{booking}/ics', [NoticeController::class, 'ics'])->name('booking.ics');
     Route::get('/bookings/{booking}/invoice', [NoticeController::class, 'invoice'])->name('booking.invoice');
@@ -115,6 +118,7 @@ Route::middleware(['auth', 'role:host'])->prefix('host')->name('host.')->group(f
 
 /* ---------- پنل مدیریت ---------- */
 // اپلیکیشن اندروید
+Route::get('/api/notices', [NoticeController::class, 'feed'])->name('notices.feed')->middleware(['auth', 'throttle:120,1']);
 Route::get('/app', [App\Http\Controllers\AppController::class, 'index'])->name('app');
 Route::get('/app/update', [App\Http\Controllers\AppController::class, 'update'])->name('app.update');
 Route::get('/app/download', [App\Http\Controllers\AppController::class, 'download'])->name('app.download')->middleware('throttle:30,1');
@@ -149,6 +153,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/users/{user}/toggle', [Admin\ManageController::class, 'userToggle'])->name('users.toggle');
     Route::post('/users/{user}/verify', [Admin\ManageController::class, 'userVerify'])->name('users.verify');
     Route::post('/users/{user}/wallet', [Admin\UserController::class, 'wallet'])->name('users.wallet');
+    Route::post('/users/{user}/settle', [Admin\UserController::class, 'settle'])->name('users.settle');
     Route::post('/users/{user}/impersonate', [Admin\UserController::class, 'impersonate'])->name('users.impersonate');
     Route::get('/users/{user}/id-photo', [Admin\UserController::class, 'idPhoto'])->name('users.idphoto');
 
@@ -181,6 +186,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // تبلیغات میزبان‌ها
     Route::get('/ads', [Admin\AdsController::class, 'index'])->name('ads');
+    Route::post('/ads/{ad}/image', [Admin\AdsController::class, 'image'])->name('ads.image');
     Route::post('/ads/{ad}/approve', [Admin\AdsController::class, 'approve'])->name('ads.approve');
     Route::post('/ads/{ad}/reject', [Admin\AdsController::class, 'reject'])->name('ads.reject');
 
@@ -193,9 +199,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/words', [Admin\ContentController::class, 'wordStore'])->name('words.store');
     Route::delete('/words/{word}', [Admin\ContentController::class, 'wordDestroy'])->name('words.destroy');
     Route::get('/sms', [Admin\ContentController::class, 'sms'])->name('sms');
+    Route::get('/errors', [Admin\ErrorLogController::class, 'index'])->name('errors');
     Route::get('/activity', [Admin\ContentController::class, 'activity'])->name('activity');
     Route::get('/broadcast', [Admin\ContentController::class, 'broadcast'])->name('broadcast');
     Route::post('/broadcast', [Admin\ContentController::class, 'broadcastSend'])->name('broadcast.send');
+    Route::post('/sms/check', [Admin\ManageController::class, 'smsCheck'])->name('sms.check');
+    Route::get('/broadcast/count', [Admin\ContentController::class, 'broadcastCount'])->name('broadcast.count');
     Route::get('/export/{what}', [Admin\ContentController::class, 'export'])->name('export');
     Route::get('/backup', [Admin\ContentController::class, 'backup'])->name('backup');
     Route::get('/pool', [Admin\ContentController::class, 'pool'])->name('pool');

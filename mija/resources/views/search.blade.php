@@ -45,7 +45,7 @@
           <select name="sort" onchange="this.form.submit()" style="width:auto;min-height:36px;padding-block:5px"><option value="">پیشنهادی</option><option value="cheap" @selected(request('sort')=='cheap')>ارزان‌ترین</option><option value="expensive" @selected(request('sort')=='expensive')>گران‌ترین</option><option value="rating" @selected(request('sort')=='rating')>بالاترین امتیاز</option><option value="new" @selected(request('sort')=='new')>جدیدترین</option></select>
         </div>
       </div>
-      @if($sponsored->count())<div class="sponsored"><div class="sp-lbl"><x-i3 name="p_trophy" class="sm"/> پیشنهادهای ویژه (تبلیغ)</div><div class="grid-cards">@foreach($sponsored as $ad)@php $p = $ad->property; @endphp<a class="ad-wrap" href="{{ route('ad.go', $ad) }}"><span class="ad-tag">تبلیغ</span>@include('partials.pcard', ['p' => $p, 'noLink' => true])</a>@endforeach</div></div>@endif
+      @if($sponsored->count())<div class="sponsored"><div class="sp-lbl"><x-i3 name="p_trophy" class="sm"/> پیشنهادهای ویژه</div><div class="grid-cards">@foreach($sponsored as $ad)@php $p = $ad->property; @endphp<a class="ad-wrap" href="{{ route('ad.go', $ad) }}"><span class="ad-tag">AD</span>@include('partials.pcard', ['p' => $p, 'noLink' => true])</a>@endforeach</div></div>@endif
       @if($items->count())
         <div class="grid-cards">@foreach($items as $p)@include('partials.pcard')@endforeach</div>
         @include('partials.pager', ['paginator' => $items])

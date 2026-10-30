@@ -116,6 +116,32 @@ class UserController extends Controller
         return back()->with('ok', 'موجودی کیف پول به‌روز شد.');
     }
 
+    /** تسویه‌ی مستقیم موجودی میزبان توسط مدیر: کسر از کیف پول، ثبت رسید و ارسال برای میزبان */
+    public function settle(Request $r, User $user)
+    {
+        abort_unless($user->isHost(), 422);
+        $d = $r->validate(['amount' => 'nullable|integer|min:1', 'tracking_code' => 'nullable|string|max:40', 'note' => 'nullable|string|max:200', 'receipt' => 'nullable|image|max:4096']);
+        if (! $r->hasFile('receipt') && empty($d['tracking_code'])) {
+            return back()->withErrors(['receipt' => 'برای ثبت واریز، رسید را بارگذاری کنید یا کد پیگیری را وارد کنید.']);
+        }
+        $po = \Illuminate\Support\Facades\DB::transaction(function () use ($user, $d, $r) {
+            $fresh = User::whereKey($user->id)->lockForUpdate()->first();
+            $amount = (int) ($d['amount'] ?? $fresh->wallet);
+            abort_if($amount < 1 || $amount > $fresh->wallet, 422, 'مبلغ از موجودی کیف پول میزبان بیشتر است.');
+            $fresh->walletChange(-$amount, 'تسویه‌ی مستقیم توسط مدیر');
+
+            return \App\Models\Payout::create([
+                'host_id' => $user->id, 'amount' => $amount, 'sheba' => $user->sheba, 'bank_owner' => $user->bank_owner, 'status' => 'paid', 'by_admin' => true,
+                'tracking_code' => $d['tracking_code'] ?? null, 'note' => $d['note'] ?? null, 'processed_at' => now(), 'receipt_sent_at' => now(),
+                'receipt' => $r->file('receipt')?->store('payouts', 'public'),
+            ]);
+        });
+        Audit::log('payout.settle', "#{$user->id}", ['amount' => $po->amount]);
+        $user->notify('مبلغ کیف پول شما واریز شد — رسید را ببینید', toman($po->amount).($po->tracking_code ? ' · کد پیگیری '.fa($po->tracking_code) : ''), route('payout.receipt', $po), true);
+
+        return back()->with('ok', 'واریز ثبت شد، موجودی میزبان صفر/به‌روز شد و رسید برایش ارسال گردید.');
+    }
+
     /** ورود به پنل کاربر (مهمان/میزبان) به‌جای خود او؛ با «بازگشت به حساب مدیر» برمی‌گردید */
     public function impersonate(User $user)
     {

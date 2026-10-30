@@ -1,0 +1,5 @@
+<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>خطا | می‌جا</title>
+<link rel="stylesheet" href="{{ asset('css/lux.css') }}"><link rel="stylesheet" href="{{ asset('css/glass.css') }}"><link rel="stylesheet" href="{{ asset('css/resp.css') }}"></head>
+<body><main class="container" style="min-height:70vh;display:grid;place-items:center;padding:30px 16px"><div class="card" style="max-width:460px;text-align:center;padding:30px 22px">
+<img src="{{ asset('img/mija-logo-h.png') }}" alt="می‌جا" height="42" style="margin-bottom:14px"><h1 style="font-size:20px">مشکلی پیش آمد</h1><p class="muted">خطایی در سامانه رخ داد و به تیم فنی گزارش شد. لطفاً چند لحظه بعد دوباره تلاش کنید.</p>
+<a class="btn" href="{{ url('/') }}">بازگشت به صفحه‌ی اول</a></div></main></body></html>

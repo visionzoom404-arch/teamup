@@ -47,6 +47,7 @@ class Ads
             $fresh->walletChange(-$cost, 'تبلیغات '.config("mija.ad_types.$type.0").' — '.$prop->title);
             $ad = Ad::create([
                 'host_id' => $host->id, 'property_id' => $prop->id, 'type' => $type, 'title' => $d['title'] ?? $prop->title, 'text' => $d['text'] ?? null,
+                'image' => $d['image'] ?? null, 'support_request' => (bool) ($d['support_request'] ?? false), 'support_text' => $d['support_text'] ?? null,
                 'audience' => $d['audience'] ?? 'all', 'budget' => $cost, 'units' => $units,
                 'starts_on' => $type === 'banner' ? ($d['starts_on'] ?? today()) : today(),
                 'ends_on' => $type === 'banner' ? \Carbon\Carbon::parse($d['starts_on'] ?? today())->addDays(max(1, $units) - 1) : null,
@@ -57,6 +58,10 @@ class Ads
                 $ad->update(['status' => 'active', 'ends_on' => today()->addDay()]);
             }
 
+            if ($ad->status === 'pending') {
+                User::notifyAdmins($ad->support_request ? 'سفارش طراحی بنر از میزبان — نیاز به ساخت بنر' : 'تبلیغ جدید منتظر تأیید است', $ad->typeLabel().' — '.($ad->title ?: $prop->title), route('admin.ads'), true);
+            }
+
             return $ad;
         });
     }
@@ -64,13 +69,16 @@ class Ads
     public static function approve(Ad $ad): void
     {
         abort_unless($ad->status === 'pending', 422);
+        if ($ad->type === 'banner' && $ad->support_request && ! $ad->image) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['ad' => 'این بنر سفارشی است؛ ابتدا تصویر بنر را برای میزبان بارگذاری کنید.']);
+        }
         if (in_array($ad->type, ['sms', 'push'])) {
             self::dispatch($ad);
 
             return;
         }
         $ad->update(['status' => 'active', 'starts_on' => $ad->starts_on ?? today(), 'ends_on' => $ad->type === 'click' ? today()->addDays(30) : $ad->ends_on]);
-        $ad->host->notify('تبلیغ شما تأیید و فعال شد', $ad->typeLabel().' — '.$ad->title, route('host.ads'));
+        $ad->host->notify('تبلیغ شما تأیید و فعال شد', $ad->typeLabel().' — '.$ad->title, route('host.ads'), true);
     }
 
     public static function reject(Ad $ad, ?string $note = null): void
@@ -83,7 +91,7 @@ class Ads
             }
             $ad->update(['status' => 'rejected', 'admin_note' => $note, 'spent' => $ad->budget]);
         });
-        $ad->host->notify('تبلیغ شما تأیید نشد', $note, route('host.ads'));
+        $ad->host->notify('تبلیغ شما تأیید نشد', $note, route('host.ads'), true);
     }
 
     /** توقف تبلیغ توسط خود میزبان؛ باقی‌مانده‌ی بودجه برمی‌گردد */
@@ -126,8 +134,8 @@ class Ads
     /** آگهی‌های بنری فعال امروز */
     public static function banners()
     {
-        return Ad::live()->where('type', 'banner')->where(fn ($w) => $w->whereNull('starts_on')->orWhere('starts_on', '<=', today()->toDateString()))
-            ->with('property.images')->whereHas('property', fn ($p) => $p->approved())->inRandomOrder()->take(5)->get();
+        return Ad::live()->where('type', 'banner')->where(fn ($w) => $w->whereNull('starts_on')->orWhereDate('starts_on', '<=', today()))
+            ->with('property.images')->whereHas('property', fn ($p) => $p->approved())->inRandomOrder()->take(10)->get();
     }
 
     /** اقامتگاه‌های کلیکی (اسپانسر) که هنوز بودجه دارند */
@@ -153,7 +161,7 @@ class Ads
     public static function tick(): int
     {
         $n = 0;
-        foreach (Ad::whereIn('status', ['active'])->whereNotNull('ends_on')->where('ends_on', '<', today())->get() as $ad) {
+        foreach (Ad::whereIn('status', ['active'])->whereNotNull('ends_on')->whereDate('ends_on', '<', today())->get() as $ad) {
             $left = max(0, $ad->budget - $ad->spent);
             if ($ad->type === 'click' && $left > 0) {
                 $ad->host->walletChange($left, 'بازگشت بودجه‌ی مصرف‌نشده‌ی تبلیغ کلیکی');

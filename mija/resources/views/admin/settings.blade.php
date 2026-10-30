@@ -35,9 +35,11 @@
   @php $chk('ads_enabled', 'بخش تبلیغات میزبانان فعال باشد') @endphp
   <div class="grid3 mt">@php $num('ad_banner_day', 'بنری — هر روز') @endphp @php $num('ad_click_cpc', 'کلیکی — هر کلیک') @endphp @php $num('ad_click_min', 'کلیکی — حداقل بودجه') @endphp @php $num('ad_ladder', 'نردبان — هر بار (۲۴ ساعت)') @endphp @php $num('ad_sms_each', 'پیامکی — هر مخاطب') @endphp @php $num('ad_push_each', 'اعلان — هر مخاطب') @endphp</div><button class="btn mt">ذخیره</button></form>
 @elseif($tab === 'sms')
+@include('admin.partials.sms-diag')
 <form class="card mb" method="post" action="{{ route('admin.settings.update') }}">@csrf<input type="hidden" name="group" value="sms"><h3><x-i3 name="p_phone" class="sm"/> پنل پیامک (ippanel)</h3>
   @include('partials.help', ['title' => 'راهنمای اتصال', 'text' => 'از پنل ippanel، «توکن دسترسی (AccessKey)» و شماره‌ی خط ارسال را بردارید و اینجا وارد کنید، سپس «ارسال فعال باشد» را بزنید. تا زمانی که خاموش یا خالی باشد، پیامک‌ها فقط در «گزارش پیامک» ثبت می‌شوند و ارسال واقعی انجام نمی‌شود. در هر پیامک لینک همان موضوع هم قرار می‌گیرد.'])
   @php $chk('sms_enabled', 'ارسال پیامک فعال باشد') @endphp
+  @php $chk('admin_sms_alerts', 'برای رویدادهای مهم، پیامک به مدیران هم برود (درخواست برداشت، پرداخت کارت‌به‌کارت…)') @endphp
   <div class="grid2 mt">@php $txt('sms_token', 'توکن (AccessKey)') @endphp @php $txt('sms_originator', 'شماره خط ارسال', 'مثلاً +983000505') @endphp @php $txt('sms_base_url', 'آدرس API', 'پیش‌فرض: https://rest.ippanel.com/v1/messages') @endphp @php $txt('sms_provider', 'سرویس‌دهنده') @endphp</div>
   <button class="btn mt">ذخیره</button> <a class="btn btn-light mt" href="{{ route('admin.sms') }}">گزارش پیامک‌ها</a></form>
 @elseif($tab === 'gateway')
@@ -51,7 +53,9 @@
   <button class="btn mt">ذخیره</button></form>
 @elseif($tab === 'texts')
 <form class="card mb" method="post" action="{{ route('admin.settings.update') }}">@csrf<input type="hidden" name="group" value="texts"><h3>متن‌های سایت و تماس</h3>
-  <div class="grid2">@php $txt('support_phone', 'تلفن پشتیبانی') @endphp @php $txt('support_email', 'ایمیل پشتیبانی') @endphp</div>
+  <div class="grid2">@php $txt('support_phone', 'تلفن اصلی پشتیبانی (برای پیامک‌ها و تماس سریع)') @endphp @php $txt('support_email', 'ایمیل پشتیبانی') @endphp</div>
+  <input type="hidden" name="keys[]" value="contact_phones"><div class="field"><label>شماره‌های «تماس با ما» (هر خط یک شماره: عنوان | شماره)</label><textarea class="input" name="contact_phones" rows="4" dir="rtl" placeholder="پشتیبانی (موبایل) | 09123456789&#10;تلفن ثابت | 02634430536">{{ setting('contact_phones') }}</textarea><div class="help">هر تعداد شماره بنویسید؛ در صفحه‌ی «تماس با ما» و فوتر نمایش داده می‌شوند.</div></div>
+  <input type="hidden" name="keys[]" value="contact_addresses"><div class="field"><label>آدرس‌ها (هر خط یک آدرس: عنوان | آدرس)</label><textarea class="input" name="contact_addresses" rows="4" dir="rtl" placeholder="دفتر مرکزی | کرج، جهانشهر، میدان سپاه …">{{ setting('contact_addresses') }}</textarea></div>
   @php $txt('footer_about', 'متن کوتاه پایین سایت (فوتر)', null, 'rtl') @endphp
   <hr class="divider"><h3>اینماد و سئو</h3>
   <input type="hidden" name="keys[]" value="enamad_html"><div class="field"><label>کد نماد اعتماد الکترونیکی (اینماد)</label><textarea class="input" dir="ltr" name="enamad_html" rows="3" placeholder="کد HTML نماد را از پنل اینماد کپی و اینجا بچسبانید">{{ setting('enamad_html') }}</textarea><div class="help">پس از دریافت، در پایین همه‌ی صفحه‌ها نمایش داده می‌شود. (کد زرین‌پال/زیبال هم اگر نماد داشت همین‌جا اضافه شود.)</div></div>

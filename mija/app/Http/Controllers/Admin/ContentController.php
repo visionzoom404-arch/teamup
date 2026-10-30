@@ -94,27 +94,82 @@ class ContentController extends Controller
         return view('admin.activity', ['items' => ActivityLog::with('user')->latest('id')->paginate(40)]);
     }
 
-    /* ---------- ارسال همگانی ---------- */
+    /* ---------- ارسال همگانی / تفکیکی ---------- */
+    public const AUDIENCES = [
+        'all' => ['همه‌ی کاربران', 'users'], 'guest' => ['مهمانان', 'user'], 'host' => ['میزبانان', 'key'], 'app' => ['کاربران اپلیکیشن', 'phone'],
+        'host_pending' => ['میزبانانِ تأیید هویت‌نشده', 'shield'], 'no_booking' => ['مهمانانِ بدون رزرو', 'calendar'], 'admin' => ['مدیران سایت', 'settings'], 'phones' => ['افراد مشخص (شماره‌ها)', 'send'],
+    ];
+
+    /** کوئری مخاطبان بر اساس گروه/استان/شماره‌ها */
+    private function audience(Request $r)
+    {
+        $to = $r->input('to', 'all');
+        $q = User::where('is_active', true);
+        match ($to) {
+            'guest' => $q->where('role', 'guest'),
+            'host' => $q->where('role', 'host'),
+            'app' => $q->whereNotNull('app_code')->where('role', '!=', 'admin'),
+            'host_pending' => $q->where('role', 'host')->where('id_status', '!=', 'verified'),
+            'no_booking' => $q->where('role', 'guest')->whereDoesntHave('bookings'),
+            'admin' => $q->where('role', 'admin'),
+            'phones' => $q->whereIn('phone', collect(preg_split('/[\s,،;]+/u', \App\Support\Jalali::latinDigits((string) $r->input('phones'))))->map(fn ($x) => preg_replace('/\D/', '', $x))->filter()->values()->all()),
+            default => $q->where('role', '!=', 'admin'),
+        };
+        if ($prov = $r->input('province')) {
+            in_array($to, ['host', 'host_pending'], true)
+                ? $q->whereHas('properties', fn ($p) => $p->where('province', $prov))
+                : $q->where(fn ($w) => $w->whereHas('favorites', fn ($f) => $f->where('province', $prov))->orWhereHas('bookings', fn ($b) => $b->whereHas('property', fn ($p) => $p->where('province', $prov))));
+        }
+
+        return $q;
+    }
+
     public function broadcast()
     {
-        return view('admin.broadcast', ['counts' => ['guest' => User::where('role', 'guest')->count(), 'host' => User::where('role', 'host')->count()]]);
+        return view('admin.broadcast', [
+            'audiences' => self::AUDIENCES,
+            'counts' => collect(self::AUDIENCES)->map(fn ($a, $k) => $k === 'phones' ? 0 : $this->audience(new Request(['to' => $k]))->count())->all(),
+            'provinces' => \App\Models\Property::approved()->select('province')->distinct()->pluck('province')->filter()->values(),
+            'history' => \App\Models\ActivityLog::where('action', 'broadcast')->latest('id')->limit(8)->get(),
+        ]);
+    }
+
+    public function broadcastCount(Request $r)
+    {
+        return response()->json(['n' => $this->audience($r)->count()]);
     }
 
     public function broadcastSend(Request $r)
     {
-        $d = $r->validate(['to' => 'required|in:guest,host,all', 'title' => 'required|string|max:80', 'body' => 'nullable|string|max:300', 'url' => 'nullable|url', 'sms' => 'nullable|boolean']);
-        $q = User::where('is_active', true)->where('role', '!=', 'admin');
-        $d['to'] !== 'all' && $q->where('role', $d['to']);
+        $d = $r->validate([
+            'to' => 'required|in:'.implode(',', array_keys(self::AUDIENCES)), 'title' => ['required', 'string', 'max:80'], 'body' => 'nullable|string|max:250',
+            'url' => 'nullable|url', 'sms' => 'nullable|boolean', 'province' => 'nullable|string|max:40', 'phones' => 'nullable|string|max:2000',
+        ]);
+        if ($d['to'] === 'phones' && trim((string) ($d['phones'] ?? '')) === '') {
+            return back()->withInput()->withErrors(['phones' => 'شماره‌ی موبایل‌ها را وارد کنید (هر خط یا با ویرگول یک شماره).']);
+        }
         $n = 0;
-        $q->chunkById(200, function ($users) use ($d, $r, &$n) {
+        $sms = $r->boolean('sms');
+        $fail = 0;
+        $this->audience($r)->chunkById(200, function ($users) use ($d, $sms, &$n, &$fail) {
             foreach ($users as $u) {
-                $u->notify($d['title'], $d['body'] ?? null, $d['url'] ?? null, $r->boolean('sms'));
+                $u->notify($d['title'], $d['body'] ?? null, $d['url'] ?? null, $sms, 'promo');
                 $n++;
+                if ($sms && \App\Support\Sms::$lastError) {
+                    $fail++;
+                }
             }
         });
-        Audit::log('broadcast', $d['to'], ['n' => $n, 'title' => $d['title']]);
+        Audit::log('broadcast', $d['to'], ['n' => $n, 'title' => $d['title'], 'sms' => $sms, 'sms_fail' => $fail]);
+        if ($n === 0) {
+            return back()->withInput()->withErrors(['to' => 'مخاطبی با این شرایط پیدا نشد.']);
+        }
+        $msg = 'اعلان برای '.fa($n).' نفر ثبت شد (سایت و اپلیکیشن).';
+        if ($sms && $fail) {
+            $msg .= ' ⚠ ارسال پیامک ناموفق بود: '.(\App\Support\Sms::$lastError ?: 'تنظیمات پیامک را بررسی کنید').' — از «تنظیمات ← پیامک ← بررسی اتصال» استفاده کنید.';
+        }
 
-        return back()->with('ok', 'برای '.fa($n).' نفر ارسال شد.');
+        return back()->with($sms && $fail ? 'warn' : 'ok', $msg);
     }
 
     /* ---------- جستجوی سراسری ---------- */

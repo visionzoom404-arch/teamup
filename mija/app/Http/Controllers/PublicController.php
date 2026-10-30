@@ -196,6 +196,6 @@ class PublicController extends Controller
         $page = \App\Support\DefaultPages::find($slug);
         abort_unless($page, 404);
 
-        return view('pages.show', ['page' => $page]);
+        return $slug === 'contact' ? view('pages.contact', ['page' => $page]) : view('pages.show', ['page' => $page]);
     }
 }

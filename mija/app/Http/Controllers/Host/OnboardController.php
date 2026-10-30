@@ -38,6 +38,7 @@ class OnboardController extends Controller
         if (\App\Models\User::where('national_code', $d['national_code'])->where('id', '!=', $u->id)->exists()) {
             return back()->withInput()->withErrors(['national_code' => 'این کد ملی قبلاً برای حساب دیگری ثبت شده است.']);
         }
+        \App\Models\User::notifyAdmins('مدارک هویتی میزبان منتظر بررسی است', $u->name, route('admin.users.edit', $u));
         $u->fill(['name' => $d['name'], 'national_code' => $d['national_code'], 'birth_date' => $d['birth_date'], 'id_status' => $u->id_status === 'verified' ? 'verified' : 'pending']);
         if ($r->hasFile('id_photo')) {
             $u->id_photo && Storage::disk('local')->delete($u->id_photo);

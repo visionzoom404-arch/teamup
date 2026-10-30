@@ -54,3 +54,21 @@ if (! function_exists('app_client')) {
         return $req->attributes->get('mija.app_client');
     }
 }
+
+if (! function_exists('contact_lines')) {
+    /** تنظیمات چندخطی «عنوان | مقدار» را به آرایه‌ی [[عنوان، مقدار], …] تبدیل می‌کند */
+    function contact_lines(string $key): array
+    {
+        $out = [];
+        foreach (preg_split('/\R/u', (string) setting($key)) as $ln) {
+            $ln = trim($ln);
+            if ($ln === '') {
+                continue;
+            }
+            $p = array_map('trim', explode('|', $ln, 2));
+            $out[] = count($p) === 2 && $p[1] !== '' ? [$p[0], $p[1]] : ['', $p[0]];
+        }
+
+        return $out;
+    }
+}

@@ -171,13 +171,19 @@ class User extends Authenticatable
         });
     }
 
-    /** اعلان داخل سایت؛ با $sms = true همزمان پیامک (همراه لینک همان موضوع) هم ارسال می‌شود */
-    public function notify(string $title, ?string $body = null, ?string $url = null, bool $sms = false): void
+    /** اعلان داخل سایت (و اپ)؛ با $sms = true همزمان پیامک (همراه لینک همان موضوع) هم ارسال می‌شود */
+    public function notify(string $title, ?string $body = null, ?string $url = null, bool $sms = false, string $kind = 'system'): void
     {
-        Notice::create(['user_id' => $this->id, 'title' => $title, 'body' => $body, 'url' => $url]);
+        Notice::create(['user_id' => $this->id, 'title' => mb_substr($title, 0, 250), 'body' => $body ? mb_substr($body, 0, 250) : null, 'url' => $url, 'kind' => $kind]);
         if ($sms) {
             \App\Support\Sms::send($this->phone, $title.($body ? ' — '.$body : ''), $url);
         }
+    }
+
+    /** اعلان برای همه‌ی مدیران سایت (در بخش «اعلان‌ها»ی پنل مدیر) */
+    public static function notifyAdmins(string $title, ?string $body = null, ?string $url = null, bool $sms = false): void
+    {
+        static::where('role', 'admin')->where('is_active', true)->get()->each(fn ($a) => $a->notify($title, $body, $url ?: route('admin.dashboard'), $sms && (int) setting('admin_sms_alerts'), 'admin'));
     }
 
     /* ---------- میزبان: احراز هویت و حساب بانکی ---------- */

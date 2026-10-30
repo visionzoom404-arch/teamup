@@ -72,6 +72,6 @@ class Payments
 
     public static function notifyAdmins(string $title, ?string $body, string $url): void
     {
-        User::where('role', 'admin')->get()->each(fn ($a) => $a->notify($title, $body, $url));
+        User::notifyAdmins($title, $body, $url, true);
     }
 }

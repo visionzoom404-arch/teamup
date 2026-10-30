@@ -226,6 +226,7 @@ class PanelController extends Controller
             'payouts' => $u->payouts()->take(10)->get(),
             'pendingIncome' => (int) $u->hostBookings()->where('status', 'confirmed')->whereNull('settled_at')->sum('host_payout'),
             'locked' => (int) $u->payouts()->where('status', 'pending')->sum('amount'),
+            'totalPaid' => (int) $u->payouts()->where('status', 'paid')->sum('amount'),
         ]);
     }
 
@@ -243,6 +244,7 @@ class PanelController extends Controller
             $fresh->walletChange(-$d['amount'], 'درخواست برداشت');
             Payout::create(['host_id' => $u->id, 'amount' => $d['amount'], 'sheba' => $u->sheba, 'bank_owner' => $u->bank_owner]);
         });
+        \App\Models\User::notifyAdmins('درخواست برداشت جدید', $u->name.' — '.toman($d['amount']), route('admin.payouts'), true);
 
         return back()->with('ok', 'درخواست برداشت ثبت شد؛ پس از بررسی به حساب شما واریز می‌شود.');
     }

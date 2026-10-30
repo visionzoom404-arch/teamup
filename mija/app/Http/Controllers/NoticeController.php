@@ -20,6 +20,21 @@ class NoticeController extends Controller
         return view('notices', ['items' => $items]);
     }
 
+    /** برای سایت و اپ: اعلان‌های جدیدتر از after (نظرسنجی هر چند ثانیه). مرورگر با کوکی، اپ با کوکی WebView */
+    public function feed(Request $r)
+    {
+        $u = $r->user();
+        $after = (int) $r->query('after', 0);
+        $q = $u->notices()->where('id', '>', $after)->orderBy('id')->limit(20);
+        $items = $q->get()->map(fn ($n) => ['id' => $n->id, 'title' => $n->title, 'body' => $n->body, 'url' => $n->url, 'kind' => $n->kind, 'at' => $n->created_at?->toIso8601String()]);
+
+        return response()->json([
+            'ok' => true, 'uid' => $u->id, 'unread' => $u->notices()->whereNull('read_at')->count(),
+            'last_id' => (int) ($items->last()['id'] ?? max($after, (int) $u->notices()->max('id'))),
+            'items' => $items,
+        ])->header('Cache-Control', 'no-store');
+    }
+
     private function related(Booking $b): Booking
     {
         $u = auth()->user();
@@ -44,6 +59,15 @@ class NoticeController extends Controller
             .'DESCRIPTION:'.$esc("کد رزرو {$b->code} — ورود ".$b->property->check_in_time.' — میزبان: '.$b->property->host->name)."\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n";
 
         return response($ics, 200, ['Content-Type' => 'text/calendar; charset=utf-8', 'Content-Disposition' => "attachment; filename=mija-{$b->code}.ics"]);
+    }
+
+    /** رسید واریز تسویه (میزبان صاحب رسید یا مدیر) */
+    public function payoutReceipt(\App\Models\Payout $payout)
+    {
+        $u = auth()->user();
+        abort_unless($u->isAdmin() || $payout->host_id === $u->id, 404);
+
+        return view('payout-receipt', ['po' => $payout->load('host')]);
     }
 
     /** فاکتور قابل چاپ */

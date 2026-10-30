@@ -16,8 +16,8 @@ $menus = [
   ['admin.dashboard', 'داشبورد', 'chart'], ['admin.properties', 'اقامتگاه‌ها', 'home', $adminBadge['props'] ?? 0], ['admin.bookings', 'رزروها', 'calendar'],
   ['admin.users', 'کاربران', 'users'], ['admin.payments', 'پرداخت‌ها', 'coins', $adminBadge['cards'] ?? 0], ['admin.payouts', 'برداشت‌ها', 'wallet', $adminBadge['payouts'] ?? 0],
   ['admin.reviews', 'نظرات', 'star', $adminBadge['reviews'] ?? 0], ['admin.ads', 'تبلیغات', 'megaphone', $adminBadge['ads'] ?? 0], ['admin.amenities', 'امکانات', 'list'], ['admin.coupons', 'کد تخفیف', 'tag'],
-  ['admin.pages', 'صفحه‌ها و متن‌ها', 'file'], ['admin.words', 'کلمات ممنوع', 'ban'], ['admin.broadcast', 'ارسال همگانی', 'mail'], ['admin.sms', 'گزارش پیامک', 'phone'],
-  ['admin.activity', 'گزارش فعالیت', 'activity'], ['admin.pool', 'صندوق اقساط', 'coins'],
+  ['admin.pages', 'صفحه‌ها و متن‌ها', 'file'], ['admin.words', 'کلمات ممنوع', 'ban'], ['notices', 'اعلان‌ها', 'bell'], ['admin.broadcast', 'ارسال اعلان', 'mail'], ['admin.sms', 'گزارش پیامک', 'phone'],
+  ['admin.activity', 'گزارش فعالیت', 'activity'], ['admin.errors', 'گزارش خطاها', 'info'], ['admin.pool', 'صندوق اقساط', 'coins'],
   ['admin.settings', 'تنظیمات و کمیسیون', 'settings'], ['profile', 'پروفایل', 'user'],
  ],
 ][$u->role];
@@ -55,7 +55,7 @@ $quick = array_slice($menus, 0, 4);
     </aside>
     <section>
       @if($u->isAdmin())<form method="get" action="{{ route('admin.search') }}" class="adm-search"><x-icon name="search" class="sm"/><input class="input" name="q" placeholder="جستجوی کاربر، شماره، کد رزرو یا اقامتگاه…"><button class="btn btn-sm">جستجو</button></form>@endif
-      <div class="ctx-strip {{ $u->role }}"><x-i3 name="{{ ['guest' => 'user', 'host' => 'key', 'admin' => 'shield'][$u->role] }}" class="sm"/> شما در <b>پنل {{ $roleName }}</b> هستید @if($u->isAdmin())· دسترسی کامل مدیریتی @endif</div>
+      @unless($u->isAdmin())      <div class="ctx-strip {{ $u->role }}"><x-i3 name="{{ ['guest' => 'user', 'host' => 'key', 'admin' => 'shield'][$u->role] }}" class="sm"/> شما در <b>پنل {{ $roleName }}</b> هستید </div>@endunless
       @include('partials.flash')
       @yield('content')
     </section>

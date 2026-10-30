@@ -267,7 +267,7 @@ class PlatformRulesTest extends TestCase
         $this->actingAs($host)->post('/host/ads', ['type' => 'ladder', 'property_id' => $p->id])->assertSessionHasNoErrors();
         $this->assertSame(3000000 - (int) setting('ad_ladder'), $host->fresh()->wallet);
         $this->assertGreaterThan(time() - 60, $p->fresh()->ad_bump);
-        $this->actingAs($host)->post('/host/ads', ['type' => 'banner', 'property_id' => $p->id, 'units' => 3, 'title' => 'ویلای ویژه'])->assertSessionHasNoErrors();
+        $this->actingAs($host)->post('/host/ads', ['type' => 'banner', 'property_id' => $p->id, 'units' => 3, 'title' => 'ویلای ویژه', 'banner_mode' => 'support', 'support_text' => 'بنر ساده با عکس ویلا'])->assertSessionHasNoErrors();
         $this->assertDatabaseHas('ads', ['type' => 'banner', 'status' => 'pending']);
     }
 

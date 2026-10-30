@@ -45,6 +45,37 @@ class AuthController extends Controller
         return redirect()->intended(Auth::user()->homeRoute());
     }
 
+    /** ورود با پیامک ۱: درخواست کد */
+    public function smsRequest(Request $r)
+    {
+        $phone = $this->normalizePhone($r->phone);
+        if (! preg_match('/^09\d{9}$/', (string) $phone)) {
+            return redirect()->route('login', ['m' => 'sms'])->withInput(['phone' => $r->phone])->withErrors(['phone' => 'شماره موبایل باید مثل 09123456789 باشد.']);
+        }
+        [$ok, $msg] = \App\Support\LoginCode::request($phone);
+        if (! $ok) {
+            return redirect()->route('login', ['m' => 'sms'])->withInput(['phone' => $phone])->withErrors(['phone' => $msg]);
+        }
+
+        return redirect()->route('login', ['m' => 'sms'])->with(['otp_phone' => $phone, 'ok' => $msg]);
+    }
+
+    /** ورود با پیامک ۲: تأیید کد */
+    public function smsVerify(Request $r)
+    {
+        $phone = $this->normalizePhone($r->phone);
+        $code = preg_replace('/\D/', '', \App\Support\Jalali::latinDigits((string) $r->code));
+        $user = strlen($code) === 5 && $phone ? \App\Support\LoginCode::verify($phone, $code) : null;
+        if (! $user) {
+            return redirect()->route('login', ['m' => 'sms'])->with('otp_phone', $phone)->withErrors(['code' => 'کد اشتباه یا منقضی است. دوباره تلاش کنید یا کد جدید بگیرید.']);
+        }
+        Auth::login($user, true);
+        $r->session()->regenerate();
+        $user->forceFill(['last_login_at' => now(), 'last_login_ip' => $r->ip()])->save();
+
+        return redirect()->intended($user->homeRoute());
+    }
+
     public function register(Request $r)
     {
         $r->merge(['phone' => $this->normalizePhone($r->phone)]);
@@ -59,6 +90,7 @@ class AuthController extends Controller
         unset($data['ref']);
         $user = User::create($data + ['referred_by' => $referrer?->id]);
         Auth::login($user);
+        User::notifyAdmins($user->isHost() ? 'میزبان جدید ثبت‌نام کرد' : 'مهمان جدید ثبت‌نام کرد', $user->name.' · '.fa($user->phone), route('admin.users.edit', $user));
         $user->notify('به می‌جا خوش آمدید', $user->isHost() ? 'ابتدا اطلاعات هویتی و بانکی را تکمیل کنید.' : 'اقامتگاه رویایی‌تان را پیدا کنید.');
 
         return redirect($user->isHost() ? route('host.onboard') : $user->homeRoute());

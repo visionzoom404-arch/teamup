@@ -86,10 +86,10 @@ public class MainActivity extends Activity {
         updater = new Updater(this);
         watchNetwork();
         UpdateJob.schedule(this);
-        openUpdateFromNotification(getIntent());
 
         if (b != null) web.restoreState(b);
         else load(startUrl(getIntent()));
+        openUpdateFromNotification(getIntent());
         h.postDelayed(new Runnable() { @Override public void run() { hideSplash(); } }, 9000);
     }
 
@@ -344,6 +344,13 @@ public class MainActivity extends Activity {
 
     /** لمس اعلان «نسخه‌ی جدید رسید» → پنجره‌ی به‌روزرسانی */
     private void openUpdateFromNotification(Intent i) {
+        if (i != null) {
+            String u = i.getStringExtra(UpdateJob.EXTRA_URL);
+            if (u != null) {
+                i.removeExtra(UpdateJob.EXTRA_URL);
+                if (u.startsWith(Cfg.BASE)) load(u); else load(Cfg.BASE + "/notices");
+            }
+        }
         if (i == null || !i.getBooleanExtra(UpdateJob.EXTRA_UPDATE, false)) return;
         i.removeExtra(UpdateJob.EXTRA_UPDATE);
         h.postDelayed(new Runnable() { @Override public void run() { if (updater != null) updater.check(true); } }, 1200);

@@ -39,6 +39,15 @@
   <form class="card" method="post" action="{{ route('admin.users.wallet', $u) }}">@csrf<h3>کیف پول — موجودی {{ toman($u->wallet) }}</h3>
     <div class="grid2"><div class="field"><label>مبلغ (منفی = کسر)</label><input class="input" dir="ltr" type="number" name="amount" required></div><div class="field"><label>دلیل</label><input class="input" name="reason" required></div></div><button class="btn btn-sm btn-gold">اعمال</button>
     @foreach($txs as $t)<div class="row between small" style="padding:6px 0;border-bottom:1px solid var(--line)"><span>{{ $t->reason }}</span><b class="ltr" style="color:{{ $t->type === 'credit' ? 'var(--ok)' : 'var(--sale)' }}">{{ $t->type === 'credit' ? '+' : '−' }}{{ fa(number_format($t->amount)) }}</b></div>@endforeach</form>
+  @if($u->isHost())
+  <form class="card" method="post" action="{{ route('admin.users.settle', $u) }}" enctype="multipart/form-data">@csrf<h3>تسویه‌ی کیف پول میزبان</h3>
+    <p class="small muted">موجودی قابل برداشت: <b>{{ toman($u->wallet) }}</b> — پس از واریز دستی به شبا <span class="ltr">{{ $u->sheba ?: '—' }}</span>، اینجا رسید را ثبت کنید؛ مبلغ از کیف پول کم می‌شود و رسید برای میزبان (اعلان + پیامک) می‌رود.</p>
+    <div class="grid2"><div class="field"><label>مبلغ (خالی = همه‌ی موجودی)</label><input class="input" dir="ltr" type="number" name="amount" max="{{ $u->wallet }}" placeholder="{{ $u->wallet }}"></div><div class="field"><label>کد پیگیری بانکی</label><input class="input" dir="ltr" name="tracking_code"></div></div>
+    <div class="field"><label>تصویر رسید بانکی</label><input class="input" type="file" name="receipt" accept="image/*"></div>
+    <div class="field"><label>توضیح (اختیاری)</label><input class="input" name="note" maxlength="200"></div>
+    @error('receipt')<div class="msg-e">{{ $message }}</div>@enderror
+    <button class="btn btn-sm btn-gold" @disabled($u->wallet < 1) onclick="return confirm('تسویه ثبت و رسید ارسال شود؟')">ثبت واریز و ارسال رسید</button></form>
+  @endif
   <div class="card"><h3>اقدامات</h3><div class="stack">
     @unless($u->isAdmin())<form method="post" action="{{ route('admin.users.toggle', $u) }}">@csrf<button class="btn btn-ghost btn-block">{{ $u->is_active ? 'مسدود کردن حساب' : 'رفع مسدودی' }}</button></form>@endunless
     @if($u->id !== auth()->id())<form method="post" action="{{ route('admin.users.destroy', $u) }}" onsubmit="return confirm('این کاربر و همه‌ی اطلاعات وابسته (اقامتگاه‌ها، رزروها) برای همیشه حذف شود؟')">@csrf @method('DELETE')<button class="btn btn-danger btn-block"><x-icon name="trash" class="sm"/> حذف کاربر</button></form>@endif</div></div>

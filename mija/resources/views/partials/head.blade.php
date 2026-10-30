@@ -13,5 +13,7 @@
 <link rel="stylesheet" href="{{ asset('css/lux.css') }}?v={{ filemtime(public_path('css/lux.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/glass.css') }}?v={{ filemtime(public_path('css/glass.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/resp.css') }}?v={{ filemtime(public_path('css/resp.css')) }}">
+<link rel="stylesheet" href="{{ asset('css/more.css') }}?v={{ filemtime(public_path('css/more.css')) }}">
 <link rel="stylesheet" href="{{ asset('vendor/swiper-bundle.min.css') }}">
 <meta name="csrf-token" content="{{ csrf_token() }}">
+@auth<meta name="notice-last" content="{{ (int) auth()->user()->notices()->max('id') }}">@endauth

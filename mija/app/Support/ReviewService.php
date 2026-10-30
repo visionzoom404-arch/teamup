@@ -29,7 +29,7 @@ class ReviewService
         $r->update(['status' => 'published', 'is_published' => true, 'published_at' => now()]);
         $p = $r->property;
         $p->update(['rating_avg' => round((float) $p->reviews()->avg('rating'), 2), 'reviews_count' => $p->reviews()->count()]);
-        $r->guest->notify('نظر شما منتشر شد', $p->title, route('property', $p));
+        $r->guest->notify('نظر شما منتشر شد', $p->title, route('property', $p), true);
         Cashback::award($r);
         \Illuminate\Support\Facades\Cache::forget("mija.host.{$p->host_id}");
     }

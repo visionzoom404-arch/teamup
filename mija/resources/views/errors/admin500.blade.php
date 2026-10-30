@@ -1,0 +1,7 @@
+<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>خطای سیستم | می‌جا</title>
+<link rel="stylesheet" href="{{ asset('css/lux.css') }}"><link rel="stylesheet" href="{{ asset('css/glass.css') }}"><link rel="stylesheet" href="{{ asset('css/resp.css') }}"><link rel="stylesheet" href="{{ asset('css/more.css') }}"></head>
+<body><main class="container" style="padding:24px 16px;max-width:760px"><div class="card">
+<div class="row" style="gap:10px"><span class="ntc-ic admin"><x-icon name="info"/></span><div><h1 style="font-size:19px;margin:0">خطای سیستم (فقط مدیر این را می‌بیند)</h1><div class="muted small">برای رفع سریع، متن زیر را برای پشتیبان فنی بفرستید.</div></div></div>
+<div class="alert bad" style="margin-top:14px"><div><b>{{ class_basename($e) }}</b><div style="margin-top:4px;overflow-wrap:anywhere">{{ \Illuminate\Support\Str::limit($e->getMessage(), 600) }}</div></div></div>
+<div class="small muted" dir="ltr" style="text-align:left;overflow-wrap:anywhere;margin-bottom:12px">{{ str_replace(base_path().'/', '', $e->getFile()) }}:{{ $e->getLine() }}</div>
+<a class="btn" href="{{ url()->previous() }}">بازگشت</a> <a class="btn btn-light" href="{{ route('admin.errors') }}">گزارش خطاهای اخیر</a></div></main></body></html>

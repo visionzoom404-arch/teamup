@@ -78,12 +78,22 @@
     $('[data-inc]', c).addEventListener('click', () => set(+inp.value + 1));
   });
 
-  /* ---------- گالری ---------- */
+  /* ---------- گالری و نمایش تمام‌صفحه (با ورق زدن) ---------- */
   const lb = $('#lightbox');
+  let lbList = [], lbIdx = 0;
+  const lbShow = i => { if (!lbList.length) return; lbIdx = (i + lbList.length) % lbList.length; $('img', lb).src = lbList[lbIdx].getAttribute('href'); const c = $('.lb-count', lb); if (c) c.textContent = lbList.length > 1 ? (lbIdx + 1) + ' / ' + lbList.length : ''; lb.classList.toggle('single', lbList.length < 2); };
   $$('[data-lightbox]').forEach(a => a.addEventListener('click', e => {
-    e.preventDefault(); if (!lb) return; $('img', lb).src = a.getAttribute('href'); lb.classList.add('open');
+    e.preventDefault(); if (!lb) return;
+    const g = a.dataset.g; lbList = g ? $$('[data-lightbox][data-g="' + g + '"]') : [a]; lb.classList.add('open'); lbShow(lbList.indexOf(a));
   }));
-  lb && lb.addEventListener('click', () => lb.classList.remove('open'));
+  if (lb) {
+    lb.addEventListener('click', e => { if (e.target === lb || e.target.closest('.lb-x')) lb.classList.remove('open'); });
+    const pv = $('.lb-prev', lb), nx = $('.lb-next', lb);
+    pv && pv.addEventListener('click', e => { e.stopPropagation(); lbShow(lbIdx - 1); }); nx && nx.addEventListener('click', e => { e.stopPropagation(); lbShow(lbIdx + 1); });
+    document.addEventListener('keydown', e => { if (!lb.classList.contains('open')) return; if (e.key === 'Escape') lb.classList.remove('open'); if (e.key === 'ArrowLeft') lbShow(lbIdx + 1); if (e.key === 'ArrowRight') lbShow(lbIdx - 1); });
+    let tx = null; lb.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
+    lb.addEventListener('touchend', e => { if (tx === null) return; const d = e.changedTouches[0].clientX - tx; if (Math.abs(d) > 50) lbShow(lbIdx + (d > 0 ? -1 : 1)); tx = null; });
+  }
 
   /* ---------- پیش‌نمایش آپلود ---------- */
   $$('input[type=file][data-preview]').forEach(i => i.addEventListener('change', () => {
@@ -257,4 +267,78 @@ document.addEventListener('click', async e => {
     };
     const iv = setInterval(tick, 1000); tick();
   });
+})();
+
+/* ---------- اعلان‌های زنده: هر ۲۵ ثانیه اعلان تازه می‌گیرد و نشان می‌دهد ---------- */
+(function () {
+  var m = document.querySelector('meta[name=notice-last]');
+  if (!m || !window.fetch) return;
+  var last = parseInt(m.content || '0', 10), busy = false;
+  var inApp = /MijaApp\//.test(navigator.userAgent);
+  var fa = function (n) { return String(n).replace(/\d/g, function (d) { return '۰۱۲۳۴۵۶۷۸۹'[d]; }); };
+  function box() {
+    var b = document.getElementById('live-toasts');
+    if (!b) { b = document.createElement('div'); b.id = 'live-toasts'; b.className = 'live-toasts'; document.body.appendChild(b); }
+    return b;
+  }
+  function toast(n) {
+    var a = document.createElement('a'); a.className = 'live-toast'; a.href = n.url || '/notices';
+    var t = document.createElement('b'); t.textContent = n.title; a.appendChild(t);
+    if (n.body) { var s = document.createElement('span'); s.textContent = n.body; a.appendChild(s); }
+    box().appendChild(a);
+    setTimeout(function () { a.classList.add('out'); setTimeout(function () { a.remove(); }, 400); }, 7000);
+    try { if (!inApp && window.Notification && Notification.permission === 'granted' && document.hidden) { var x = new Notification(n.title, { body: n.body || '', icon: '/icons/icon-192.png', lang: 'fa', dir: 'rtl' }); x.onclick = function () { location.href = a.href; }; } } catch (e) {}
+  }
+  function badge(c) {
+    var l = document.querySelector('a.top-btn[href$="/notices"]'); if (!l) return;
+    var d = l.querySelector('.dot'); if (!c) { d && d.remove(); return; }
+    if (!d) { d = document.createElement('span'); d.className = 'dot'; l.appendChild(d); } d.textContent = fa(c);
+  }
+  function poll() {
+    if (busy || document.hidden) return; busy = true;
+    fetch('/api/notices?after=' + last, { credentials: 'same-origin', headers: { Accept: 'application/json' } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) { if (!j) return; (j.items || []).forEach(toast); if (j.last_id) last = Math.max(last, j.last_id); badge(j.unread); })
+      .catch(function () {}).then(function () { busy = false; });
+  }
+  setInterval(poll, 25000); document.addEventListener('visibilitychange', function () { if (!document.hidden) poll(); });
+  var en = document.getElementById('enable-browser-notify');
+  if (en) { if (!window.Notification || Notification.permission === 'granted') en.hidden = true; en.addEventListener('click', function () { Notification.requestPermission().then(function () { en.hidden = true; }); }); }
+})();
+
+/* اینماد: اگر تصویر نماد از سایت اینماد بارگذاری نشد، لینک متنی نشان بده تا نماد همیشه قابل کلیک باشد */
+(function () {
+  var box = document.getElementById('enamad-box'); if (!box) return;
+  var img = box.querySelector('img'), a = box.querySelector('a'); if (!img || !a) return;
+  function fb() { if (box.querySelector('.enamad-fb')) return; img.style.display = 'none'; var l = document.createElement('a'); l.className = 'enamad-fb'; l.href = a.href; l.target = '_blank'; l.rel = 'noopener'; l.textContent = '✔ نماد اعتماد الکترونیکی (اینماد) — برای تأیید کلیک کنید'; box.appendChild(l); }
+  img.addEventListener('error', fb);
+  setTimeout(function () { if (!img.complete || img.naturalWidth === 0) fb(); }, 6000);
+})();
+
+/* ---------- کارت بانکی کیف پول: شمارش انیمیشنی، شیب سه‌بعدی، انتخاب سریع مبلغ ---------- */
+(function () {
+  var fa = function (n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '٬').replace(/\d/g, function (d) { return '۰۱۲۳۴۵۶۷۸۹'[d]; }); };
+  document.querySelectorAll('.atm-card .count').forEach(function (el) {
+    var to = parseInt(el.getAttribute('data-to') || '0', 10); if (!to || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var t0 = null, dur = 1100; el.textContent = fa(0);
+    (function step(ts) { if (!t0) t0 = ts; var p = Math.min(1, (ts - t0) / dur), e = 1 - Math.pow(1 - p, 3); el.textContent = fa(Math.round(to * e)); if (p < 1) requestAnimationFrame(step); })(performance.now());
+  });
+  document.querySelectorAll('[data-tilt]').forEach(function (c) {
+    if (matchMedia('(hover: none)').matches) return;
+    c.addEventListener('pointermove', function (e) { var r = c.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5; c.style.transform = 'perspective(900px) rotateY(' + (-x * 8) + 'deg) rotateX(' + (y * 8) + 'deg)'; });
+    c.addEventListener('pointerleave', function () { c.style.transform = ''; });
+  });
+  document.querySelectorAll('.atm-chips').forEach(function (box) {
+    var inp = document.getElementById('po-amt'); if (!inp) return;
+    var max = parseInt(box.getAttribute('data-max') || '0', 10);
+    box.querySelectorAll('button').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var v = b.dataset.v ? parseInt(b.dataset.v, 10) : Math.floor(max * parseInt(b.dataset.pc, 10) / 100);
+        inp.value = v || ''; inp.dispatchEvent(new Event('input'));
+        box.querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); });
+      });
+    });
+  });
+  var f = document.querySelector('form.atm-form');
+  if (f) f.addEventListener('submit', function () { var g = f.querySelector('.atm-go'); if (g) g.classList.add('busy'); });
 })();

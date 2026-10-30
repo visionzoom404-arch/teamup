@@ -46,18 +46,27 @@
     </div>
   </header>
 
-  {{-- گالری --}}
-  <section class="vp-gal">
-    @forelse($imgs->take(5) as $i => $im)
-      <a href="{{ $im->url() }}" data-lightbox class="g{{ $i }}"><img src="{{ $im->url() }}" alt="{{ $p->title }}" @if($i) loading="lazy" @endif>@if($loop->last && $imgs->count() > 5)<span class="vp-more">+{{ fa($imgs->count() - 5) }} عکس</span>@endif</a>
-    @empty
-      <a href="#" class="g0 solo"><img src="{{ asset('img/placeholder.svg') }}" alt=""></a>
-    @endforelse
+  {{-- گالری اسلایدی: هر تعداد عکس (۱ تا ۵۰) — اسلاید + تصاویر کوچک + نمایش تمام‌صفحه --}}
+  <section class="pg" data-swiper="pgal" aria-label="عکس‌های اقامتگاه">
+    <div class="pg-main"><div class="swiper"><div class="swiper-wrapper">
+      @forelse($imgs as $i => $im)
+        <div class="swiper-slide"><a href="{{ $im->url() }}" data-lightbox data-g="pg" class="pg-slide"><img src="{{ $im->url() }}" alt="{{ $p->title }} — عکس {{ fa($i + 1) }}" @if($i) loading="lazy" @else fetchpriority="high" @endif></a></div>
+      @empty
+        <div class="swiper-slide"><a href="#" class="pg-slide"><img class="pg-ph" src="{{ asset('img/placeholder.svg') }}" alt=""></a></div>
+      @endforelse
+    </div></div>
+    @if($imgs->count() > 1)
+    <button type="button" class="pg-nav sw-prev" aria-label="قبلی"><x-icon name="chev-r"/></button><button type="button" class="pg-nav sw-next" aria-label="بعدی"><x-icon name="chev-l"/></button>
+    <span class="count pg-count"></span>
+    @endif
+    </div>
+    @if($imgs->count() > 1)
+    <div class="pg-thumbs" role="tablist">@foreach($imgs as $i => $im)<button type="button" class="{{ $i === 0 ? 'on' : '' }}" data-i="{{ $i }}" aria-label="عکس {{ fa($i + 1) }}"><img src="{{ $im->url() }}" alt="" loading="lazy"></button>@endforeach</div>
+    @endif
   </section>
   @if($credits->count())<div class="xs muted" style="margin-top:6px">عکس‌ها: @foreach($credits as $cr)<a href="{{ $cr->credit_url }}" target="_blank" rel="noopener" style="text-decoration:underline">{{ $cr->credit }}</a>@if(!$loop->last)، @endif @endforeach — <a href="https://unsplash.com/?utm_source=mija&utm_medium=referral" target="_blank" rel="noopener" style="text-decoration:underline">Unsplash</a></div>@endif
-  <div class="gal-sw" data-swiper="gallery"><div class="swiper"><div class="swiper-wrapper">@forelse($imgs as $im)<div class="swiper-slide"><img src="{{ $im->url() }}" alt="{{ $p->title }}"></div>@empty<div class="swiper-slide"><img src="{{ asset('img/placeholder.svg') }}" alt=""></div>@endforelse</div></div><span class="count"></span></div>
   <div id="recent-data" hidden data-slug="{{ $p->slug }}" data-title="{{ $p->title }}" data-img="{{ $p->cover() }}" data-url="{{ route('property', $p) }}" data-price="{{ toman($p->startingPrice(), false) }}"></div>
-  <div class="lightbox" id="lightbox"><button class="vp-ic" aria-label="بستن"><x-icon name="x"/></button><img src="" alt=""></div>
+  <div class="lightbox" id="lightbox"><button class="vp-ic lb-x" aria-label="بستن"><x-icon name="x"/></button><button class="pg-nav lb-prev" aria-label="قبلی"><x-icon name="chev-r"/></button><img src="" alt=""><button class="pg-nav lb-next" aria-label="بعدی"><x-icon name="chev-l"/></button><span class="lb-count"></span></div>
 
   <div class="vp-grid">
     <div class="vp-main">

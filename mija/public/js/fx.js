@@ -86,6 +86,8 @@
       cats: { slidesPerView: 'auto', spaceBetween: 10, freeMode: true },
       testi: { slidesPerView: 1.1, spaceBetween: 14, loop: false, autoplay: { delay: 4500, disableOnInteraction: false }, breakpoints: { 700: { slidesPerView: 2.1 }, 1000: { slidesPerView: 3 } } },
       gallery: { slidesPerView: 1, spaceBetween: 0 },
+      banners: { slidesPerView: 1, spaceBetween: 12, loop: true, autoplay: { delay: 4200, disableOnInteraction: false, pauseOnMouseEnter: true }, speed: 700 },
+      pgal: { slidesPerView: 1, spaceBetween: 8, keyboard: { enabled: true }, preloadImages: false },
     };
     $$('[data-swiper]').forEach(el => {
       const sw = el.querySelector('.swiper') || el, name = el.dataset.swiper, host = el;
@@ -93,6 +95,8 @@
       if ($('.sw-next', host) && $('.sw-prev', host)) opts.navigation = { nextEl: $('.sw-next', host), prevEl: $('.sw-prev', host) };
       if ($('.swiper-pagination', host)) opts.pagination = { el: $('.swiper-pagination', host), clickable: true };
       const inst = new Swiper(sw, opts);
+      const ths = $$('.pg-thumbs button', host);
+      if (ths.length) { const on = () => ths.forEach((b, i) => { const a = i === inst.realIndex; b.classList.toggle('on', a); if (a && b.scrollIntoView) { const bx = b.parentElement; bx.scrollTo({ left: b.offsetLeft - bx.clientWidth / 2 + b.clientWidth / 2, behavior: 'smooth' }); } }); ths.forEach((b, i) => b.addEventListener('click', () => inst.slideTo(i))); inst.on('slideChange', on); }
       const cnt = $('.count', host); if (cnt) { const upd = () => cnt.textContent = fa(inst.realIndex + 1) + ' از ' + fa(inst.slides.length); inst.on('slideChange', upd); upd(); }
     });
   }

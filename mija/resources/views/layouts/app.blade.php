@@ -15,7 +15,7 @@
       <div class="f2-brand">
         <img class="foot-logo" src="{{ asset('img/mija-logo-h.png') }}" alt="می‌جا" width="103" height="42">
         <p>{{ setting('footer_about') }}</p>
-        <div class="f2-contact">@if(setting('support_phone'))<a href="tel:{{ setting('support_phone') }}"><x-icon name="phone" class="sm"/> <span class="ltr">{{ fa(setting('support_phone')) }}</span></a>@endif @if(setting('support_email'))<a href="mailto:{{ setting('support_email') }}"><x-icon name="mail" class="sm"/> <span class="ltr">{{ setting('support_email') }}</span></a>@endif</div>
+        <div class="f2-contact">@foreach(array_slice(contact_lines('contact_phones'), 0, 3) as [$ct, $cn])<a href="tel:{{ preg_replace('/[^\d+]/', '', \App\Support\Jalali::latinDigits($cn)) }}"><x-icon name="phone" class="sm"/> <span class="ltr">{{ fa($cn) }}</span></a>@endforeach @if(setting('support_email'))<a href="mailto:{{ setting('support_email') }}"><x-icon name="mail" class="sm"/> <span class="ltr">{{ setting('support_email') }}</span></a>@endif @foreach(array_slice(contact_lines('contact_addresses'), 0, 1) as [$at, $ad])<a href="{{ route('page', 'contact') }}" class="f2-addr"><x-icon name="pin" class="sm"/> <span>{{ $ad }}</span></a>@endforeach</div>
       </div>
       <div class="f2-links">
         <div><h4>مهمانان</h4><a href="{{ route('search') }}">جستجوی اقامتگاه</a><a href="{{ route('register') }}">ثبت‌نام مهمان</a><a href="{{ route('page', 'rules-guest') }}">قوانین مهمانان</a><a href="{{ route('help') }}">راهنما</a></div>
@@ -23,7 +23,8 @@
         <div><h4>می‌جا</h4><a href="{{ route('page', 'about') }}">درباره ما</a><a href="{{ route('page', 'rules') }}">قوانین و مقررات</a><a href="{{ route('page', 'privacy') }}">حریم خصوصی</a><a href="{{ route('page', 'contact') }}">تماس با ما</a>@unless(app_client())<a href="{{ route('app') }}">دانلود اپلیکیشن</a>@endunless</div>
       </div>
     </div>
-    @if(setting('enamad_html'))<div class="f2-trust">{!! setting('enamad_html') !!}</div>@endif
+    @php $enamad = trim((string) setting('enamad_html')) ?: trim((string) config('mija.enamad_html')); @endphp
+    @if($enamad)<div class="f2-trust" id="enamad-box">{!! $enamad !!}</div>@endif
     <div class="f2-copy">© {{ fa(jdate(now(), 'Y')) }} می‌جا — تمامی حقوق محفوظ است.</div>
   </div>
 </footer>
