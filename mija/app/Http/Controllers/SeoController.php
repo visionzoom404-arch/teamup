@@ -26,6 +26,7 @@ class SeoController extends Controller
         };
         $add(url('/'), now()->toDateString(), 'daily', '1.0');
         $add(url('/search'), now()->toDateString(), 'daily', '0.9');
+        \App\Models\AppRelease::exists() && $add(route('app'), null, 'weekly', '0.6');
         foreach (array_keys(config('mija.regions')) as $r) {
             $add(url('/search').'?region='.$r, null, 'daily', '0.8');
         }

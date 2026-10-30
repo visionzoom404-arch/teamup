@@ -538,6 +538,6 @@ table.tbl{border-collapse:separate;border-spacing:0 6px}
 .stamp{position:static!important;transform:none!important;display:inline-flex;margin:0 0 12px;border-width:2px;font-size:13px;opacity:1;padding:2px 14px}
 @media (max-width:1020px){.pay{order:-1}}
 .packlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px}.packlist .check{padding:7px 10px;font-size:12.5px}
-.f2-trust{display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap;margin-top:14px}.f2-trust img{max-height:70px;width:auto}
+.f2-trust{display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap;margin-top:14px}.f2-trust img{max-height:120px;max-width:125px;width:auto;height:auto}
 .seo-text{max-width:900px;margin-inline:auto}.seo-text h2{font-size:17px}.seo-text p{font-size:13px;color:var(--ink-2);line-height:2.1}.seo-text a{color:var(--brand-d);font-weight:600}
 .seo-links{display:flex;flex-wrap:wrap;gap:6px}.seo-links a{font-size:12px;padding:4px 12px;border-radius:99px;background:linear-gradient(180deg,rgba(255,255,255,.85),rgba(255,255,255,.5));border:1px solid #fff;box-shadow:0 0 0 1px var(--g-ring)}

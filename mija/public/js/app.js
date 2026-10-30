@@ -10,12 +10,26 @@
   }
   let deferred;
   const bar = $('#install');
+  const inApp = /MijaApp\//.test(navigator.userAgent);
+  const appUrl = bar && bar.dataset.app;
+  const isAndroid = /Android/i.test(navigator.userAgent);
+  if (inApp && bar) bar.remove();
+  else if (appUrl && isAndroid && bar) {
+    // اپلیکیشن بومی اندروید در دسترس است: به‌جای نصب PWA، به صفحه‌ی دانلود می‌بریم
+    $('#install-t').textContent = 'اپلیکیشن اندروید می‌جا';
+    $('#install-d').textContent = 'سریع‌تر و راحت‌تر؛ دانلود مستقیم یا از بازار و مایکت';
+    $('#install-btn').textContent = 'دریافت';
+    let hide = false; try { hide = Date.now() - (+localStorage.getItem('mija-app-x') || 0) < 7 * 864e5; } catch (_) {}
+    if (!hide && !/^\/app/.test(location.pathname)) setTimeout(() => bar.classList.add('show'), 3500);
+  }
   window.addEventListener('beforeinstallprompt', e => {
     e.preventDefault(); deferred = e;
+    if (appUrl || inApp) return;
     try { if (localStorage.getItem('mija-install-x')) return; } catch (_) {}
     bar && bar.classList.add('show');
   });
   $('#install-btn') && $('#install-btn').addEventListener('click', async () => {
+    if (appUrl && isAndroid) { location.href = appUrl; return; }
     if (!deferred) return; deferred.prompt(); await deferred.userChoice; deferred = null; bar.classList.remove('show');
   });
   $$('[data-install]').forEach(b => b.addEventListener('click', async () => {
@@ -23,7 +37,7 @@
     alert('برای نصب: در مرورگر موبایل از منوی ⋮ (اندروید) یا دکمه‌ی اشتراک‌گذاری (آیفون) گزینه‌ی «افزودن به صفحه اصلی» را بزنید.');
   }));
   $('#install-x') && $('#install-x').addEventListener('click', () => {
-    bar.classList.remove('show'); try { localStorage.setItem('mija-install-x', '1'); } catch (_) {}
+    bar.classList.remove('show'); try { localStorage.setItem(appUrl ? 'mija-app-x' : 'mija-install-x', appUrl ? String(Date.now()) : '1'); } catch (_) {}
   });
 
   /* ---------- منوی بیشتر ---------- */

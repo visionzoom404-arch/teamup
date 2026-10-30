@@ -7,7 +7,7 @@ B="$(mktemp -d)/mija-installer"
 mkdir -p "$B"
 tar -c --exclude='./vendor' --exclude='./.env' --exclude='./node_modules' --exclude='./tests' --exclude='./database/*.sqlite' \
   --exclude='./storage/logs/*' --exclude='./storage/framework/cache/data/*' --exclude='./storage/framework/sessions/*' --exclude='./storage/framework/views/*' \
-  --exclude='./storage/app/public/*' --exclude='./public/storage' --exclude='./.phpunit.result.cache' --exclude='./.git' --exclude='./bootstrap/cache/*.php' --exclude='./CLAUDE.md' --exclude='./AGENTS.md' --exclude='./CHANGELOG.md' --exclude='./package.json' --exclude='./vite.config.js' --exclude='./phpunit.xml' . | tar -x -C "$B"
+  --exclude='./storage/app/public/*' --exclude='./public/storage' --exclude='./.phpunit.result.cache' --exclude='./.git' --exclude='./bootstrap/cache/*.php' --exclude='./android' --exclude='./CLAUDE.md' --exclude='./AGENTS.md' --exclude='./CHANGELOG.md' --exclude='./package.json' --exclude='./vite.config.js' --exclude='./phpunit.xml' . | tar -x -C "$B"
 mkdir -p "$B"/storage/app/public "$B"/photos/{villa,cottage,garden_villa,suite,eco,apartment,farm,tiny,all,site}
 touch "$B"/storage/app/public/.gitignore
 (cd "$B" && composer install --no-dev --no-interaction --no-scripts --prefer-dist 2>&1 | tail -3)

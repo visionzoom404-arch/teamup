@@ -40,3 +40,17 @@ if (! function_exists('site_image')) {
         return null;
     }
 }
+
+if (! function_exists('app_client')) {
+    /** اگر درخواست از داخل اپلیکیشن اندروید می‌جا باشد: ['name'=>..,'code'=>..,'flavor'=>..]؛ وگرنه null */
+    function app_client(): ?array
+    {
+        $req = request();
+        if (! $req->attributes->has('mija.app_client')) {
+            $ua = (string) $req->userAgent();
+            $req->attributes->set('mija.app_client', preg_match('~MijaApp/([\d.]+) \(code (\d+); flavor (\w+)\)~', $ua, $m) ? ['name' => $m[1], 'code' => (int) $m[2], 'flavor' => $m[3]] : null);
+        }
+
+        return $req->attributes->get('mija.app_client');
+    }
+}

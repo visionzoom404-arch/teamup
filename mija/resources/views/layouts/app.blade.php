@@ -20,7 +20,7 @@
       <div class="f2-links">
         <div><h4>مهمانان</h4><a href="{{ route('search') }}">جستجوی اقامتگاه</a><a href="{{ route('register') }}">ثبت‌نام مهمان</a><a href="{{ route('page', 'rules-guest') }}">قوانین مهمانان</a><a href="{{ route('help') }}">راهنما</a></div>
         <div><h4>میزبانان</h4><a href="{{ route('page', 'become-host') }}">میزبان شوید</a><a href="{{ route('register', ['as' => 'host']) }}">ثبت اقامتگاه</a><a href="{{ route('page', 'rules-host') }}">قوانین میزبانان</a><a href="{{ route('page', 'faq') }}">پرسش‌های متداول</a></div>
-        <div><h4>می‌جا</h4><a href="{{ route('page', 'about') }}">درباره ما</a><a href="{{ route('page', 'rules') }}">قوانین و مقررات</a><a href="{{ route('page', 'privacy') }}">حریم خصوصی</a><a href="{{ route('page', 'contact') }}">تماس با ما</a></div>
+        <div><h4>می‌جا</h4><a href="{{ route('page', 'about') }}">درباره ما</a><a href="{{ route('page', 'rules') }}">قوانین و مقررات</a><a href="{{ route('page', 'privacy') }}">حریم خصوصی</a><a href="{{ route('page', 'contact') }}">تماس با ما</a>@unless(app_client())<a href="{{ route('app') }}">دانلود اپلیکیشن</a>@endunless</div>
       </div>
     </div>
     @if(setting('enamad_html'))<div class="f2-trust">{!! setting('enamad_html') !!}</div>@endif

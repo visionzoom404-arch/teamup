@@ -64,6 +64,7 @@ fi
 
 echo "==> مهاجرت دیتابیس"
 $PHP artisan migrate --force
+$PHP artisan mija:app-sync || true   # ثبت نسخه‌ی اپ اندروید همراه بسته در دیتابیس
 if [ "$FIRST" = 1 ]; then
   $PHP artisan db:seed --force      # در production فقط تنظیمات و امکانات
 fi
@@ -111,7 +112,7 @@ server {
     add_header Strict-Transport-Security "max-age=31536000" always;
     root ${APP}/public;
     index index.php;
-    client_max_body_size 30m;
+    client_max_body_size 80m;
     charset utf-8;
     gzip on; gzip_types text/css application/javascript application/json image/svg+xml;
 
@@ -129,7 +130,10 @@ NGINX
 ln -sf /etc/nginx/sites-available/mija /etc/nginx/sites-enabled/mija
 rm -f /etc/nginx/sites-enabled/default
 nginx -t
+# آپلود فایل‌های بزرگ‌تر (APK اپلیکیشن، عکس‌ها)
+printf 'upload_max_filesize=80M\npost_max_size=80M\nmemory_limit=256M\n' > /etc/php/${PHPV}/fpm/conf.d/99-mija.ini
 systemctl enable --now php${PHPV}-fpm nginx
+systemctl restart php${PHPV}-fpm
 systemctl reload nginx
 
 echo "==> گواهی SSL معتبر (Let's Encrypt)"

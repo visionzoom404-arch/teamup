@@ -114,6 +114,12 @@ Route::middleware(['auth', 'role:host'])->prefix('host')->name('host.')->group(f
 });
 
 /* ---------- پنل مدیریت ---------- */
+// اپلیکیشن اندروید
+Route::get('/app', [App\Http\Controllers\AppController::class, 'index'])->name('app');
+Route::get('/app/update', [App\Http\Controllers\AppController::class, 'update'])->name('app.update');
+Route::get('/app/download', [App\Http\Controllers\AppController::class, 'download'])->name('app.download')->middleware('throttle:30,1');
+Route::get('/api/app/version', [App\Http\Controllers\AppController::class, 'version'])->name('app.version')->middleware('throttle:120,1');
+
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [Admin\DashboardController::class, 'index'])->name('dashboard');
     Route::post('/tick', [Admin\DashboardController::class, 'tick'])->name('tick');
@@ -145,6 +151,14 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/users/{user}/wallet', [Admin\UserController::class, 'wallet'])->name('users.wallet');
     Route::post('/users/{user}/impersonate', [Admin\UserController::class, 'impersonate'])->name('users.impersonate');
     Route::get('/users/{user}/id-photo', [Admin\UserController::class, 'idPhoto'])->name('users.idphoto');
+
+    // اپلیکیشن اندروید
+    Route::get('/app', [Admin\AppAdminController::class, 'index'])->name('app');
+    Route::post('/app', [Admin\AppAdminController::class, 'store'])->name('app.store');
+    Route::post('/app/stores', [Admin\AppAdminController::class, 'settings'])->name('app.stores');
+    Route::post('/app/{release}/toggle', [Admin\AppAdminController::class, 'toggle'])->name('app.toggle');
+    Route::delete('/app/{release}', [Admin\AppAdminController::class, 'destroy'])->name('app.destroy');
+    Route::get('/app/{release}/file/{flavor}', [Admin\AppAdminController::class, 'file'])->name('app.file');
 
     // رزروها و پرداخت‌ها
     Route::get('/bookings', [Admin\ManageController::class, 'bookings'])->name('bookings');

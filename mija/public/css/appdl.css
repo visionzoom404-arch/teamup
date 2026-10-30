@@ -1,0 +1,158 @@
+/* می‌جا — صفحه‌های دانلود و به‌روزرسانی اپلیکیشن | موبایل‌اول، شیشه‌ای، نارنجیِ طلایی */
+.ap{--o:#E8860C;--od:#B86A06;--ot:#FFF1DC;--ink:#1F1B16;--mut:#6F675B;--ok:#1F8A5B;--bad:#C2410C;padding-bottom:calc(var(--nav-h,80px) + 28px);overflow-x:clip}
+.ap *{min-width:0}
+.ap .container{padding-inline:16px}
+.ap-sec{margin-top:34px}
+.ap-h{font-size:19px;font-weight:800;margin:0 0 14px;color:var(--ink)}
+.ap-link{color:var(--od);font-weight:700;font-size:13.5px;text-decoration:none}
+.ap-link:hover{text-decoration:underline}
+
+/* ---- نمایش بخش‌ها بر اساس دستگاه ---- */
+.ap .only-android,.ap .only-desktop,.ap .only-ios,.ap .only-inapp{display:none!important}
+.ap.dev-android .only-android,.ap.dev-desktop .only-desktop,.ap.dev-ios .only-ios,.ap.dev-inapp .only-inapp,.ap.in-app .only-inapp{display:block!important}
+.ap.dev-android .ap-cta.only-android,.ap.dev-desktop .ap-cta.only-desktop,.ap:not([class*="dev-"]):not(.in-app) .ap-cta{display:flex!important}
+.ap .ap-btn.only-inapp{display:none!important}.ap.dev-inapp .ap-btn.only-inapp,.ap.in-app .ap-btn.only-inapp{display:flex!important}
+.ap.in-app .ap-cta,.ap.dev-inapp .ap-cta,.ap.in-app .only-desktop{display:none!important}
+
+/* ---- هیرو ---- */
+.ap-hero{display:grid;gap:26px;padding-top:22px;align-items:center}
+.ap-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;font-size:12.5px;font-weight:700;color:var(--od);background:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.9);box-shadow:0 6px 18px -10px rgba(184,106,6,.5);backdrop-filter:blur(12px)}
+.ap-copy h1{font-size:clamp(28px,8vw,46px);line-height:1.25;margin:14px 0 10px;font-weight:900;color:var(--ink);letter-spacing:-.2px}
+.ap-copy h1 em{font-style:normal;background:linear-gradient(135deg,#F5B23F,#E8860C 60%,#C96F05);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+.ap-lead{font-size:15px;line-height:1.9;color:var(--mut);margin:0 0 20px;max-width:34em}
+.ap-cta{flex-direction:column;gap:10px;align-items:stretch}
+.ap-stores{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ap-stores.big{grid-template-columns:1fr}
+.ap-row{display:grid;gap:10px;margin-top:12px}
+
+.ap-btn{display:flex;align-items:center;gap:12px;min-height:56px;padding:10px 16px;border-radius:18px;text-decoration:none;font-family:inherit;cursor:pointer;border:1px solid rgba(255,255,255,.85);color:var(--ink);background:rgba(255,255,255,.72);backdrop-filter:blur(16px) saturate(170%);-webkit-backdrop-filter:blur(16px) saturate(170%);box-shadow:0 1px 0 rgba(255,255,255,.95) inset,0 12px 28px -16px rgba(168,95,5,.45);transition:transform .15s,box-shadow .2s;text-align:start;width:100%}
+.ap-btn:active{transform:scale(.98)}
+.ap-btn .ap-bt{display:flex;flex-direction:column;line-height:1.35;min-width:0}
+.ap-btn b{font-size:15px;font-weight:800}.ap-btn small{font-size:12px;opacity:.78}
+.ap-btn .ap-ic{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,.28);flex:none}
+.ap-btn .ap-ic .icon{width:20px;height:20px}
+.ap-main{color:#fff;background:linear-gradient(135deg,#F8BE55 0%,#EE9A22 48%,#E07F08 100%);border-color:rgba(255,224,160,.9);box-shadow:0 1px 0 rgba(255,255,255,.55) inset,0 18px 34px -16px rgba(224,127,8,.85);text-shadow:0 1px 1px rgba(150,80,0,.35)}
+.ap-main.alt{background:linear-gradient(135deg,#34B6A6,#1F8A7B);border-color:rgba(190,245,235,.9);box-shadow:0 18px 34px -16px rgba(31,138,123,.7)}
+.ap-store{justify-content:center;text-align:center}.ap-store .ap-bt{align-items:center}
+.ap-store.off{opacity:.55;pointer-events:none}
+.ap-meta{list-style:none;display:flex;flex-wrap:wrap;gap:6px 16px;margin:16px 0 0;padding:0;font-size:12.5px;color:var(--mut)}
+.ap-meta li{display:flex;align-items:center;gap:5px}.ap-meta .icon{color:var(--ok)}
+.ap-note{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:18px;background:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.9);box-shadow:0 12px 28px -18px rgba(168,95,5,.4);backdrop-filter:blur(14px)}
+.ap-note p{margin:3px 0 0;font-size:13.5px;line-height:1.8;color:var(--mut)}.ap-note b{font-size:14.5px}
+.ap-note.ok{background:rgba(236,250,243,.8)}
+
+/* ---- قاب گوشی ---- */
+.ap-visual{position:relative;display:grid;place-items:center;padding:8px 0 4px}
+.ap-glow{position:absolute;width:min(78vw,380px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(248,190,85,.65),rgba(248,190,85,0) 68%);filter:blur(6px);z-index:0}
+.ap-phone{position:relative;z-index:1;width:min(58vw,250px);aspect-ratio:390/800;border-radius:34px;padding:7px;background:linear-gradient(160deg,#2b2620,#0f0d0a);box-shadow:0 40px 70px -28px rgba(120,66,5,.6),0 0 0 1px rgba(255,255,255,.08) inset;overflow:hidden;transform:rotate(-3deg)}
+.ap-phone img{display:block;width:100%;height:100%;object-fit:cover;object-position:top;border-radius:28px;background:#fff}
+.ap-notch{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:26%;height:14px;border-radius:12px;background:#0f0d0a;z-index:2}
+.ap-phone.sm{width:200px;flex:none;transform:none;scroll-snap-align:center}
+.ap-float{position:absolute;z-index:2;display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:14px;font-size:12.5px;font-weight:800;color:var(--ink);background:rgba(255,255,255,.82);border:1px solid rgba(255,255,255,.95);box-shadow:0 14px 28px -14px rgba(168,95,5,.55);backdrop-filter:blur(12px);animation:apf 4.2s ease-in-out infinite}
+.ap-float.f1{top:14%;inset-inline-start:2%}.ap-float.f2{bottom:16%;inset-inline-end:0;animation-delay:-2s}
+@keyframes apf{50%{transform:translateY(-8px)}}
+
+/* ---- اعتماد / کد QR ---- */
+.ap-trust{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:16px;border-radius:22px}
+.ap-t{display:flex;flex-direction:column;gap:3px}.ap-t small{font-size:11.5px;color:var(--mut)}.ap-t b{font-size:14px}
+.ap-t.wide{grid-column:1/-1;border-top:1px dashed rgba(184,106,6,.25);padding-top:12px}
+.ap-t code{font-size:11px;word-break:break-all;color:var(--ink-2,#3A342C);background:rgba(255,255,255,.6);padding:8px 10px;border-radius:10px;line-height:1.6;text-align:left}
+.ap-copy-btn{align-self:flex-start;margin-top:4px;border:0;border-radius:10px;padding:7px 14px;font:700 12.5px inherit;font-family:inherit;color:var(--od);background:var(--ot);cursor:pointer}
+.ap-qr{display:flex;gap:18px;align-items:center;padding:20px;border-radius:24px}
+.ap-qr h3{margin:0 0 6px;font-size:16px}.ap-qr p{margin:0;font-size:13.5px;line-height:1.9;color:var(--mut)}
+.ap-qrbox{width:132px;height:132px;flex:none;padding:10px;border-radius:18px;background:#fff;box-shadow:0 10px 26px -14px rgba(168,95,5,.5)}.ap-qrbox svg{width:100%;height:100%;display:block}
+
+/* ---- ویژگی‌ها ---- */
+.ap-feats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ap-feat{padding:16px 14px;border-radius:20px}
+.ap-feat i{display:grid;place-items:center;width:46px;height:46px;border-radius:15px;background:linear-gradient(135deg,#FFF4E2,#FFE3B8);margin-bottom:10px;box-shadow:0 8px 18px -10px rgba(224,127,8,.7)}
+.ap-feat i .i3{width:30px;height:30px}
+.ap-feat b{display:block;font-size:14.5px;margin-bottom:4px}.ap-feat p{margin:0;font-size:12.5px;line-height:1.8;color:var(--mut)}
+
+/* ---- تصاویر ---- */
+.ap-shots{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;padding:6px 16px 22px;margin-inline:-16px;scrollbar-width:none}
+.ap-shots::-webkit-scrollbar{display:none}
+
+/* ---- مراحل نصب، تاریخچه، سؤال‌ها ---- */
+.ap-steps{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.ap-steps li{display:flex;gap:14px;align-items:flex-start;padding:14px 16px;border-radius:20px}
+.ap-steps .n{display:grid;place-items:center;width:34px;height:34px;border-radius:12px;background:linear-gradient(135deg,#F8BE55,#E07F08);color:#fff;font-weight:900;flex:none}
+.ap-steps b{display:block;font-size:14.5px;margin-bottom:2px}.ap-steps p{margin:0;font-size:13px;line-height:1.85;color:var(--mut)}
+.ap-hist-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.ap-hist{display:grid;gap:12px}
+.ap-hist article{padding:16px;border-radius:20px}.ap-hist header{display:flex;justify-content:space-between;gap:8px;margin-bottom:8px}.ap-hist header span{font-size:12px;color:var(--mut)}
+.ap-hist ul,.up-tl ul{margin:0;padding-inline-start:18px;font-size:13.5px;line-height:2;color:var(--ink-2,#3A342C)}
+.ap-faq{display:grid;gap:10px}
+.ap-faq details{border-radius:18px;padding:0 16px}.ap-faq summary{padding:15px 0;font-weight:800;font-size:14.5px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:10px}
+.ap-faq summary::after{content:"+";color:var(--od);font-size:20px;line-height:1}.ap-faq details[open] summary::after{content:"−"}
+.ap-faq p{margin:0 0 16px;font-size:13.5px;line-height:1.95;color:var(--mut)}
+
+/* ---- پایین‌برگه‌ی راهنمای نصب ---- */
+.ap-sheet-back{position:fixed;inset:0;z-index:90;background:rgba(30,20,5,.42);opacity:0;transition:opacity .25s}.ap-sheet-back.open{opacity:1}
+.ap-sheet{position:fixed;z-index:91;inset-inline:0;bottom:0;max-width:520px;margin-inline:auto;padding:12px 20px calc(22px + env(safe-area-inset-bottom,0px));border-radius:28px 28px 0 0;background:rgba(255,253,248,.96);backdrop-filter:blur(22px);box-shadow:0 -24px 60px -20px rgba(120,66,5,.5);transform:translateY(105%);transition:transform .28s cubic-bezier(.2,.8,.2,1)}
+.ap-sheet.open{transform:none}
+.ap-grab{width:44px;height:5px;border-radius:9px;background:#E5DAC8;margin:0 auto 14px}
+.ap-sheet h3{margin:0 0 12px;font-size:18px}
+.ap-prog{height:8px;border-radius:9px;background:#F3E7D3;overflow:hidden;margin-bottom:16px}.ap-prog i{display:block;height:100%;width:0;border-radius:9px;background:linear-gradient(90deg,#F8BE55,#E07F08)}
+.ap-mini{list-style:none;margin:0 0 12px;padding:0;display:grid;gap:8px}
+.ap-mini li{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:14px;font-size:13.5px;line-height:1.7;color:var(--mut);background:rgba(255,255,255,.6);transition:all .3s}
+.ap-mini li span{display:grid;place-items:center;width:26px;height:26px;border-radius:9px;background:#F3E7D3;font-weight:800;color:var(--od);flex:none}
+.ap-mini li.on{color:var(--ink);background:#fff;box-shadow:0 8px 20px -12px rgba(168,95,5,.55)}.ap-mini li.on span{background:linear-gradient(135deg,#F8BE55,#E07F08);color:#fff}
+.ap-mini li.done span{background:var(--ok);color:#fff}
+.ap-sheet .ap-btn{margin-top:6px;min-height:50px}
+
+/* ================= صفحه‌ی به‌روزرسانی ================= */
+.up-wrap{padding-top:20px;max-width:760px}
+.up-hero{display:grid;gap:18px;justify-items:center;text-align:center;padding:26px 18px 22px;border-radius:28px}
+.up-ring{position:relative;width:132px;height:132px;display:grid;place-items:center}
+.up-ring svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.up-ring circle{fill:none;stroke-width:7;stroke-linecap:round}
+.rg-bg{stroke:rgba(232,134,12,.16)}.rg-fg{stroke:var(--o);stroke-dasharray:327;stroke-dashoffset:327;transition:stroke-dashoffset .9s cubic-bezier(.2,.8,.2,1),stroke .3s}
+.up-ring img{position:relative;width:52px;height:auto}
+.up-badge{position:absolute;bottom:2px;inset-inline-end:4px;display:none;place-items:center;width:34px;height:34px;border-radius:50%;color:#fff;box-shadow:0 8px 18px -6px rgba(0,0,0,.35);border:3px solid #fff}
+.up-badge .icon{width:17px;height:17px}.up-ok{background:var(--ok)}.up-new{background:linear-gradient(135deg,#F8BE55,#E07F08)}
+.up-txt h1{margin:0 0 8px;font-size:22px;font-weight:900}.up-txt p{margin:0;font-size:14px;line-height:1.9;color:var(--mut)}
+.st{display:none}
+.vflow{display:inline-flex;align-items:center;gap:8px;margin-top:6px}
+.vchip{padding:5px 12px;border-radius:999px;font-weight:800;font-size:13px;background:#fff;border:1px solid var(--line,#E8E2D8);color:var(--mut)}.vchip.new{background:linear-gradient(135deg,#F8BE55,#E07F08);border-color:transparent;color:#fff}.arrow{color:var(--od);font-weight:900}
+#up[data-state=uptodate] .st-uptodate,#up[data-state=available] .st-available,#up[data-state=force] .st-force,#up[data-state=unknown] .st-unknown,#up[data-state=none] .st-none{display:block}
+#up[data-state=uptodate] .rg-fg{stroke:var(--ok);stroke-dashoffset:0}#up[data-state=uptodate] .up-ok{display:grid}
+#up[data-state=available] .rg-fg{stroke-dashoffset:90;animation:rgs 2.4s linear infinite;transform-origin:center}#up[data-state=available] .up-new,#up[data-state=unknown] .up-new{display:grid}
+#up[data-state=force] .rg-fg{stroke:var(--bad);stroke-dashoffset:60;animation:rgs 1.6s linear infinite;transform-origin:center}#up[data-state=force] .up-new{display:grid;background:var(--bad)}
+#up[data-state=unknown] .rg-fg{stroke-dashoffset:0}
+@keyframes rgs{to{transform:rotate(360deg)}}
+.up-actions{width:100%;display:grid;gap:10px}
+.by-store{display:none}#up[data-mode=store] .by-store{display:block}#up[data-mode=store] .by-direct{display:none}
+#up[data-state=uptodate] .by-direct,#up[data-state=uptodate] .by-store{display:none!important}
+#up[data-state=none] .up-actions{display:none}
+.up-sec{margin-top:30px}
+.up-notes{list-style:none;margin:0;padding:8px 16px;border-radius:22px}
+.up-notes li{display:flex;gap:10px;align-items:flex-start;padding:11px 0;font-size:14px;line-height:1.8;border-bottom:1px dashed rgba(184,106,6,.2)}.up-notes li:last-child{border:0}.up-notes .icon{color:var(--ok);margin-top:5px;flex:none}
+.ap-feats.three{grid-template-columns:1fr}
+.up-tl{display:grid;gap:10px}
+.up-tl details{border-radius:18px;padding:0 16px}
+.up-tl summary{display:flex;align-items:center;gap:8px;padding:14px 0;cursor:pointer;list-style:none;flex-wrap:wrap}
+.up-tl summary::-webkit-details-marker,.ap-faq summary::-webkit-details-marker{display:none}
+.up-tl .dot{width:10px;height:10px;border-radius:50%;background:var(--o);box-shadow:0 0 0 4px rgba(232,134,12,.18)}
+.up-tl em{font-style:normal;font-size:11.5px;font-weight:800;padding:2px 9px;border-radius:999px;background:var(--ot);color:var(--od)}.up-tl em.red{background:#FFE7DC;color:var(--bad)}
+.up-tl .dt{margin-inline-start:auto;font-size:12px;color:var(--mut)}
+.up-tl ul{padding-bottom:14px}
+.up-back{text-align:center;margin-top:26px}
+
+/* ---- دسکتاپ ---- */
+@media(min-width:760px){
+  .ap .container{padding-inline:24px}
+  .ap-hero{grid-template-columns:1.15fr .85fr;gap:48px;padding-top:46px}
+  .ap-phone{width:min(26vw,300px)}
+  .ap-cta{max-width:460px}.ap-stores{grid-template-columns:1fr 1fr}
+  .ap-feats{grid-template-columns:repeat(3,1fr);gap:16px}.ap-feats.three{grid-template-columns:repeat(3,1fr)}
+  .ap-steps{grid-template-columns:repeat(3,1fr)}.ap-steps li{flex-direction:column}
+  .ap-hist{grid-template-columns:1fr 1fr}
+  .ap-shots{justify-content:center;overflow:visible;flex-wrap:wrap}
+  .ap-trust{grid-template-columns:repeat(3,1fr) 2.4fr}.ap-t.wide{grid-column:auto;border-top:0;padding-top:0;border-inline-start:1px dashed rgba(184,106,6,.25);padding-inline-start:16px}
+  .ap-sheet{bottom:24px;border-radius:28px}
+}
+@media(max-width:359px){
+  .ap-stores{grid-template-columns:1fr}.ap-feats{grid-template-columns:1fr}.ap-trust{grid-template-columns:1fr 1fr}.ap-qr{flex-direction:column;text-align:center}
+}
+@media(prefers-reduced-motion:reduce){.ap-float,.rg-fg{animation:none!important}.ap-sheet{transition:none}}
