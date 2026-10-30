@@ -63,4 +63,17 @@ class PagesSmokeTest extends TestCase
             '/admin/payments', '/admin/payments?tab=review', '/admin/payouts', '/admin/reviews', '/admin/reviews?tab=all', '/admin/amenities', '/admin/coupons', '/admin/ads', '/admin/pages', '/admin/pages/rules', '/admin/words', '/admin/sms', '/admin/activity', '/admin/broadcast', '/admin/pool', '/admin/search?q=علی',
             '/admin/settings', '/admin/settings?tab=cash', '/admin/settings?tab=ads', '/admin/settings?tab=sms', '/admin/settings?tab=gateway', '/admin/settings?tab=texts', '/admin/settings?tab=peaks', '/admin/export/users', '/profile']);
     }
+
+    public function test_seo_endpoints_and_meta(): void
+    {
+        $p = Property::first();
+        $this->get('/robots.txt')->assertOk()->assertSee('Sitemap:', false)->assertSee('Disallow: /admin', false);
+        $x = $this->get('/sitemap.xml')->assertOk();
+        $x->assertSee('<urlset', false)->assertSee(route('property', $p), false)->assertSee('/search?region=north', false);
+        $this->get('/')->assertOk()->assertSee('<link rel="canonical"', false)->assertSee('application/ld+json', false)->assertSee('FAQPage', false)->assertSee('رزرو ویلا');
+        $this->get("/p/{$p->slug}")->assertOk()->assertSee('VacationRental', false)->assertSee('BreadcrumbList', false)->assertSee('index,follow', false);
+        $this->get('/login')->assertSee('noindex,nofollow', false);
+        $this->get('/search?region=north')->assertOk()->assertSee('رزرو ویلا و کلبه در شمال کشور')->assertSee('index,follow', false);
+        $this->get('/search?region=north&sort=cheap&guests=3')->assertSee('noindex,follow', false);
+    }
 }

@@ -276,7 +276,7 @@ class ManageController extends Controller
         'ads_enabled' => 'boolean', 'ad_banner_day' => 'required|integer|min:0', 'ad_click_cpc' => 'required|integer|min:0', 'ad_click_min' => 'required|integer|min:0', 'ad_ladder' => 'required|integer|min:0', 'ad_sms_each' => 'required|integer|min:0', 'ad_push_each' => 'required|integer|min:0',
         'sms_enabled' => 'boolean', 'sms_provider' => 'nullable|string|max:20', 'sms_token' => 'nullable|string|max:300', 'sms_originator' => 'nullable|string|max:30', 'sms_base_url' => 'nullable|url|max:200',
         'gateway_driver' => 'required|in:sandbox,zibal', 'zibal_merchants' => 'nullable|string|max:1000', 'cards' => 'nullable|string|max:2000', 'card_to_card_enabled' => 'boolean',
-        'support_phone' => 'nullable|string|max:40', 'support_email' => 'nullable|email|max:80', 'footer_about' => 'nullable|string|max:300',
+        'enamad_html' => 'nullable|string|max:3000', 'ga4_id' => ['nullable', 'regex:/^G-[A-Z0-9]{4,15}$/'], 'google_verify' => 'nullable|string|max:120', 'bing_verify' => 'nullable|string|max:120', 'support_phone' => 'nullable|string|max:40', 'support_email' => 'nullable|email|max:80', 'footer_about' => 'nullable|string|max:300',
     ];
 
     public function settingsUpdate(Request $r)

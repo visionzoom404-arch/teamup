@@ -12,6 +12,8 @@ use App\Http\Controllers\PublicController;
 use Illuminate\Support\Facades\Route;
 
 /* ---------- عمومی ---------- */
+Route::get('/robots.txt', [\App\Http\Controllers\SeoController::class, 'robots']);
+Route::get('/sitemap.xml', [\App\Http\Controllers\SeoController::class, 'sitemap']);
 Route::get('/', [PublicController::class, 'home'])->name('home');
 Route::get('/search', [PublicController::class, 'search'])->name('search');
 Route::get('/p/{property}', [PublicController::class, 'show'])->name('property');

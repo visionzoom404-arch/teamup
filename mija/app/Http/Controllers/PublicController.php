@@ -108,7 +108,19 @@ class PublicController extends Controller
         $sponsored = ($r->page ?? 1) == 1 ? Ads::sponsored(2) : collect();
         $sponsored->each(fn ($a) => $a->increment('impressions'));
 
+        // سئو: صفحه‌های دسته‌بندی ساده ایندکس می‌شوند؛ ترکیب فیلترها خیر
+        $only = collect($r->query())->except('page')->filter(fn ($v) => $v !== null && $v !== '');
+        $label = $r->filled('city') ? $r->city : ($r->filled('region') ? (config('mija.regions.'.$r->region.'.name') ?? null) : (($r->filled('type') && count((array) $r->type) === 1) ? (config('mija.property_types.'.((array) $r->type)[0]) ?? null) : null));
+        $simple = $only->count() === 1 && $label && collect(['city', 'region', 'type'])->contains(fn ($k) => $only->has($k));
+        $seo = [
+            'title' => $simple ? ($r->filled('city') ? "اجاره ویلا و کلبه در {$label}" : ($r->filled('region') ? "رزرو ویلا و کلبه در {$label}" : "رزرو و اجاره {$label}")) : 'جستجو و رزرو ویلا و کلبه',
+            'desc' => $simple ? "رزرو آنلاین و اجاره روزانه {$label}؛ مشاهده‌ی عکس، قیمت شبانه، تقویم و نظرات مهمانان و رزرو مستقیم از میزبان در می‌جا." : 'جستجوی ویلا، کلبه و اقامتگاه در سراسر ایران؛ فیلتر براساس شهر، قیمت، ظرفیت و امکانات و رزرو آنلاین در می‌جا.',
+            'canonical' => $simple ? url('/search').'?'.http_build_query($only->all()) : url('/search'),
+            'robots' => ($only->isEmpty() || $simple) ? 'index,follow' : 'noindex,follow',
+        ];
+
         return view('search', [
+            'seo' => $seo,
             'sponsored' => $sponsored,
             'items' => $items,
             'amenities' => Amenity::orderBy('sort')->get(),

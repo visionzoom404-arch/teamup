@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # نصب/به‌روزرسانی «می‌جا» روی سرور Ubuntu/Debian خالی (nginx + PHP 8.3 + SQLite) پشت Cloudflare
 # استفاده (روی سرور، با root، از داخل پوشه‌ی کلون‌شده‌ی مخزن):
-#   MIJA_ADMIN_PHONE=09xxxxxxxxx MIJA_ADMIN_PASSWORD='...' [MIJA_DEMO=1] bash mija/deploy/setup-server.sh amirxui.site
+#   MIJA_ADMIN_PHONE=09xxxxxxxxx MIJA_ADMIN_PASSWORD='...' [MIJA_DEMO=1] bash mija/deploy/setup-server.sh mija.click
 #   MIJA_DEMO=1  → اقامتگاه‌های نمونه هم ساخته شود (برای دیدن سایت پر)
 set -euo pipefail
 
-DOMAIN="${1:?دامنه را وارد کنید. مثال: bash setup-server.sh amirxui.site}"
+DOMAIN="${1:-mija.click}"
 APP=/var/www/mija
 SRC="$(cd "$(dirname "$0")/.." && pwd)"
 [ "$(id -u)" = 0 ] || { echo "با root اجرا کنید (sudo)"; exit 1; }

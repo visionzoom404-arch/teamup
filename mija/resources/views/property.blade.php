@@ -1,5 +1,12 @@
 @extends('layouts.app')
-@section('title', $p->title)
+@section('title', 'اجاره '.$p->typeLabel().' '.$p->city.' — '.$p->title)
+@section('keywords', 'اجاره '.$p->typeLabel().' در '.$p->city.', رزرو '.$p->typeLabel().' '.$p->province.', '.$p->title.', اجاره روزانه '.$p->typeLabel().', می‌جا')
+@section('ogtype', 'product')
+@section('ogimage', $p->cover())
+@push('jsonld')
+<script type="application/ld+json">{!! json_encode(array_filter(['@context' => 'https://schema.org', '@type' => 'VacationRental', 'name' => $p->title, 'description' => \Illuminate\Support\Str::limit(strip_tags($p->description), 300), 'url' => route('property', $p), 'image' => $p->images->take(6)->map->url()->values()->all() ?: [asset('img/og.png')], 'address' => ['@type' => 'PostalAddress', 'addressLocality' => $p->city, 'addressRegion' => $p->province, 'addressCountry' => 'IR'], 'numberOfRooms' => $p->bedrooms, 'occupancy' => ['@type' => 'QuantitativeValue', 'maxValue' => $p->capacity_max], 'petsAllowed' => (bool) ($p->house_rules['pets'] ?? false), 'priceRange' => toman($p->startingPrice(), false).' تومان', 'aggregateRating' => $p->reviews_count ? ['@type' => 'AggregateRating', 'ratingValue' => (string) $p->rating_avg, 'reviewCount' => $p->reviews_count, 'bestRating' => 5] : null]), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
+<script type="application/ld+json">{!! json_encode(['@context' => 'https://schema.org', '@type' => 'BreadcrumbList', 'itemListElement' => [['@type' => 'ListItem', 'position' => 1, 'name' => 'می‌جا', 'item' => url('/')], ['@type' => 'ListItem', 'position' => 2, 'name' => 'اجاره ویلا و کلبه در '.$p->city, 'item' => route('search', ['city' => $p->city])], ['@type' => 'ListItem', 'position' => 3, 'name' => $p->title, 'item' => route('property', $p)]]], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
+@endpush
 @section('desc', \Illuminate\Support\Str::limit(strip_tags($p->description), 150))
 @push('head')<link rel="stylesheet" href="{{ asset('vendor/leaflet/leaflet.css') }}">@endpush
 @push('vendor')<script src="{{ asset('vendor/leaflet/leaflet.js') }}"></script>@endpush

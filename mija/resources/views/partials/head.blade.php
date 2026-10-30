@@ -1,16 +1,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#E8860C">
-<meta name="description" content="@yield('desc', 'می‌جا — جای خوب، سفر خوب. رزرو آنلاین ویلا، کلبه و اقامتگاه در سراسر ایران؛ مستقیم از میزبان')">
-<title>@yield('title', 'رزرو ویلا و کلبه') | می‌جا</title>
+@include('partials.seo')
 <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
 <link rel="icon" href="{{ asset('favicon.png') }}" type="image/png">
 <link rel="apple-touch-icon" href="{{ asset('icons/apple-touch-icon.png') }}">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="می‌جا">
-<meta property="og:title" content="@yield('title', 'رزرو ویلا و کلبه') | می‌جا">
-<meta property="og:image" content="{{ asset('img/og.png') }}">
 <link rel="preload" href="{{ asset('fonts/Estedad-800.woff2') }}" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="{{ asset('fonts/Vazirmatn-Regular.woff2') }}" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{{ asset('css/lux.css') }}?v={{ filemtime(public_path('css/lux.css')) }}">

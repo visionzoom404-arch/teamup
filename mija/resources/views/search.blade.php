@@ -1,5 +1,8 @@
 @extends('layouts.app')
-@section('title', 'جستجوی اقامتگاه')
+@section('title', $seo['title'])
+@section('desc', $seo['desc'])
+@section('canonical', $seo['canonical'])
+@section('robots', $seo['robots'])
 @section('bare')
 <div class="container">
   <div style="padding-top:20px">@include('partials.flash')</div>

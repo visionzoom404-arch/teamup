@@ -53,7 +53,10 @@
 <form class="card mb" method="post" action="{{ route('admin.settings.update') }}">@csrf<input type="hidden" name="group" value="texts"><h3>متن‌های سایت و تماس</h3>
   <div class="grid2">@php $txt('support_phone', 'تلفن پشتیبانی') @endphp @php $txt('support_email', 'ایمیل پشتیبانی') @endphp</div>
   @php $txt('footer_about', 'متن کوتاه پایین سایت (فوتر)', null, 'rtl') @endphp
-  <button class="btn">ذخیره</button> <a class="btn btn-light" href="{{ route('admin.pages') }}">ویرایش صفحه‌ها (قوانین، درباره ما …)</a></form>
+  <hr class="divider"><h3>اینماد و سئو</h3>
+  <input type="hidden" name="keys[]" value="enamad_html"><div class="field"><label>کد نماد اعتماد الکترونیکی (اینماد)</label><textarea class="input" dir="ltr" name="enamad_html" rows="3" placeholder="کد HTML نماد را از پنل اینماد کپی و اینجا بچسبانید">{{ setting('enamad_html') }}</textarea><div class="help">پس از دریافت، در پایین همه‌ی صفحه‌ها نمایش داده می‌شود. (کد زرین‌پال/زیبال هم اگر نماد داشت همین‌جا اضافه شود.)</div></div>
+  <div class="grid3">@php $txt('ga4_id', 'شناسه‌ی گوگل آنالیتیکس (G-XXXX)') @endphp @php $txt('google_verify', 'کد تأیید گوگل سرچ کنسول (content)') @endphp @php $txt('bing_verify', 'کد تأیید بینگ') @endphp</div>
+  <button class="btn">ذخیره</button> <a class="btn btn-light" href="{{ route('admin.pages') }}">ویرایش صفحه‌ها (قوانین، درباره ما …)</a> <a class="btn btn-light" target="_blank" href="{{ url('/sitemap.xml') }}">sitemap.xml</a></form>
 @else
 <div class="card"><h3>ایام پیک (قیمت ویژه)</h3>
   <form method="post" action="{{ route('admin.peaks.store') }}" class="row wrap mb">@csrf<input class="input" style="max-width:200px" name="title" placeholder="عنوان (نوروز)" required><input class="input" style="max-width:150px" dir="ltr" name="from" placeholder="1406/01/01" required><input class="input" style="max-width:150px" dir="ltr" name="to" placeholder="1406/01/15" required><button class="btn btn-sm">افزودن</button></form>

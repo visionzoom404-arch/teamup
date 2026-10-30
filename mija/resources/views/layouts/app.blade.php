@@ -23,6 +23,7 @@
         <div><h4>می‌جا</h4><a href="{{ route('page', 'about') }}">درباره ما</a><a href="{{ route('page', 'rules') }}">قوانین و مقررات</a><a href="{{ route('page', 'privacy') }}">حریم خصوصی</a><a href="{{ route('page', 'contact') }}">تماس با ما</a></div>
       </div>
     </div>
+    @if(setting('enamad_html'))<div class="f2-trust">{!! setting('enamad_html') !!}</div>@endif
     <div class="f2-copy">© {{ fa(jdate(now(), 'Y')) }} می‌جا — تمامی حقوق محفوظ است.</div>
   </div>
 </footer>
