@@ -94,18 +94,28 @@ mkdir -p /etc/ssl/mija
 [ -f /etc/ssl/mija/origin.crt ] || openssl req -x509 -nodes -newkey rsa:2048 -days 3650 \
   -subj "/CN=${DOMAIN}" -keyout /etc/ssl/mija/origin.key -out /etc/ssl/mija/origin.crt 2>/dev/null
 cat > /etc/nginx/sites-available/mija <<NGINX
+# پورت ۸۰: فقط تأیید دامنه‌ی Let's Encrypt و ریدایرکت به https
 server {
     listen 80 default_server;
+    server_name ${DOMAIN} www.${DOMAIN} _;
+    location ^~ /.well-known/acme-challenge/ { root /var/www/letsencrypt; default_type text/plain; }
+    location / { return 301 https://${DOMAIN}\$request_uri; }
+}
+# پورت ۴۴۳: خود سایت
+server {
     listen 443 ssl default_server;
     server_name ${DOMAIN} www.${DOMAIN} _;
     ssl_certificate     /etc/ssl/mija/origin.crt;
     ssl_certificate_key /etc/ssl/mija/origin.key;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    add_header Strict-Transport-Security "max-age=31536000" always;
     root ${APP}/public;
     index index.php;
     client_max_body_size 30m;
     charset utf-8;
     gzip on; gzip_types text/css application/javascript application/json image/svg+xml;
 
+    location ^~ /.well-known/acme-challenge/ { root /var/www/letsencrypt; default_type text/plain; }
     location / { try_files \$uri \$uri/ /index.php?\$query_string; }
     location ~ \.php\$ {
         include snippets/fastcgi-php.conf;
@@ -122,7 +132,11 @@ nginx -t
 systemctl enable --now php${PHPV}-fpm nginx
 systemctl reload nginx
 
+echo "==> گواهی SSL معتبر (Let's Encrypt)"
+mkdir -p /var/www/letsencrypt
+bash "$SRC/deploy/enable-ssl.sh" "$DOMAIN" "${MIJA_EMAIL:-}" || true
+
 echo
 echo "✅ نصب شد: https://${DOMAIN}"
 [ -f /root/mija-admin.txt ] && echo "   اطلاعات مدیر: cat /root/mija-admin.txt (پس از ورود رمز را عوض کنید)"
-echo "   در Cloudflare: SSL/TLS ← حالت Full"
+echo "   در Cloudflare: SSL/TLS ← حالت Full (یا Full strict اگر گواهی معتبر صادر شد)"
