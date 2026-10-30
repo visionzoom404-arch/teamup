@@ -51,6 +51,7 @@ return [
     'card_to_card_enabled' => 1,
     'support_phone' => '',
     'support_email' => '',
+    'enamad_html' => "<a referrerpolicy='origin' target='_blank' href='https://trustseal.enamad.ir/?id=8442708&Code=33CmTLhblwMY0K19kmC1Fny5SUveaRpB'><img referrerpolicy='origin' src='https://trustseal.enamad.ir/logo.aspx?id=8442708&Code=33CmTLhblwMY0K19kmC1Fny5SUveaRpB' alt='نماد اعتماد الکترونیکی' style='cursor:pointer' code='33CmTLhblwMY0K19kmC1Fny5SUveaRpB'></a>",
     'footer_about' => 'رزرو ویلا و کلبه، مستقیم از میزبان؛ با قیمت شفاف و پرداخت امن.',
 
     'levels' => [
