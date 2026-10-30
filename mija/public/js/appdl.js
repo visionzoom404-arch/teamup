@@ -83,14 +83,10 @@
     var state = !latest ? 'none' : (!known ? 'unknown' : (cur >= latest ? 'uptodate' : (force ? 'force' : 'available')));
     up.setAttribute('data-state', state);
     up.setAttribute('data-mode', store ? 'store' : 'direct');
+    if (store && inApp) up.classList.add('store-app');
+    $$('[data-cur-code]').forEach(function (e) { e.textContent = known ? 'شماره‌ی ساخت ' + fa(cur) : ''; });
     if (curName || cur) { $$('[data-cur-name]').forEach(function (e) { e.textContent = curName ? fa(curName) : fa(cur); }); }
     var go = $('#up-go');
-    if (go) {
-      go.addEventListener('click', function (e) {
-        if (native && native.startUpdate) { e.preventDefault(); native.startUpdate(); return; }
-        if (!go.hasAttribute('data-dl')) return;
-        setTimeout(openSheet, 350);
-      });
-    }
+    if (go) go.addEventListener('click', function () { if (native && native.startUpdate) native.startUpdate(); });
   }
 })();

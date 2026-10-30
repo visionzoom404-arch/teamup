@@ -31,23 +31,34 @@
 
       @if($has)
       <div class="up-actions">
-        {{-- حالت مستقیم: دانلود از سایت --}}
-        <div class="by-direct">
-          <a class="ap-btn ap-main" id="up-go" href="{{ route('app.download') }}" data-dl rel="nofollow"><span class="ap-ic"><x-icon name="download"/></span><span class="ap-bt"><b>دانلود و نصب نسخه‌ی <bdi dir="ltr">{{ fa($ver) }}</bdi></b><small>{{ $size }} · روی نسخه‌ی فعلی نصب می‌شود</small></span></a>
+        {{-- دانلود مستقیم: همیشه در دسترس (به‌جز اپِ نسخه‌ی فروشگاهی که از خود فروشگاه به‌روز می‌شود) --}}
+        <a class="ap-btn ap-main up-dl-main" id="up-dl" href="{{ route('app.download') }}" data-dl rel="nofollow">
+          <span class="ap-ic"><x-icon name="download"/></span>
+          <span class="ap-bt"><b><span class="lbl-new">دانلود مستقیم نسخه‌ی</span><span class="lbl-same">دانلود دوباره‌ی نسخه‌ی</span> <bdi dir="ltr">{{ fa($ver) }}</bdi></b><small>شماره‌ی ساخت <bdi dir="ltr">{{ fa($latest->version_code) }}</bdi> · {{ $size }} · فایل APK</small></span>
+        </a>
+        <div class="ap-stores up-stores">
+          @if($bazaar)<a class="ap-btn ap-store" href="{{ $bazaar }}" target="_blank" rel="noopener"><span class="ap-bt"><small>به‌روزرسانی در</small><b>کافه‌بازار</b></span></a>@else<span class="ap-btn ap-store off"><span class="ap-bt"><small>به‌زودی در</small><b>کافه‌بازار</b></span></span>@endif
+          @if($myket)<a class="ap-btn ap-store" href="{{ $myket }}" target="_blank" rel="noopener"><span class="ap-bt"><small>به‌روزرسانی در</small><b>مایکت</b></span></a>@else<span class="ap-btn ap-store off"><span class="ap-bt"><small>به‌زودی در</small><b>مایکت</b></span></span>@endif
         </div>
-        {{-- حالت فروشگاهی: بازار یا مایکت --}}
-        <div class="by-store">
-          <div class="ap-stores big">
-            @if($bazaar)<a class="ap-btn ap-main" href="{{ $bazaar }}" target="_blank" rel="noopener"><span class="ap-bt"><small>به‌روزرسانی در</small><b>کافه‌بازار</b></span></a>@endif
-            @if($myket)<a class="ap-btn ap-main alt" href="{{ $myket }}" target="_blank" rel="noopener"><span class="ap-bt"><small>به‌روزرسانی در</small><b>مایکت</b></span></a>@endif
-            @if(! $bazaar && ! $myket)<a class="ap-btn ap-main" href="{{ route('app.download') }}" data-dl rel="nofollow"><span class="ap-ic"><x-icon name="download"/></span><span class="ap-bt"><b>دانلود مستقیم</b><small>{{ $size }}</small></span></a>@endif
-          </div>
-          @if($bazaar || $myket)<p class="xs muted">اپ شما از فروشگاه نصب شده؛ به‌روزرسانی هم از همان فروشگاه انجام می‌شود.</p>@endif
-        </div>
-        <button class="ap-btn ap-store only-inapp" type="button" id="chk"><span class="ap-bt"><b>بررسی دوباره</b></span></button>
+        {{-- فقط داخل خود اپ: به‌روزرسانی بومی (مستقیم یا از فروشگاه، بر اساس منبع نصب) --}}
+        <button class="ap-btn ap-main up-native" type="button" id="up-go"><span class="ap-ic"><x-icon name="bolt"/></span><span class="ap-bt"><b>به‌روزرسانی داخل برنامه</b><small>همین حالا، بدون خروج از می‌جا</small></span></button>
+        <button class="ap-btn ap-store only-inapp" type="button" id="chk"><span class="ap-bt"><b>بررسی دوباره‌ی نسخه</b></span></button>
       </div>
       @endif
     </section>
+
+    @if($has)
+    <section class="up-sec">
+      <h2 class="ap-h">مشخصات نسخه‌ها</h2>
+      <div class="up-ver glass">
+        <div><small>نسخه‌ی نصب‌شده روی گوشی شما</small><b><span data-cur-name>—</span></b><em data-cur-code></em></div>
+        <div><small>آخرین نسخه‌ی منتشرشده</small><b><bdi dir="ltr">{{ fa($ver) }}</bdi></b><em>شماره‌ی ساخت <bdi dir="ltr">{{ fa($latest->version_code) }}</bdi></em></div>
+        <div><small>حجم فایل</small><b>{{ $size }}</b><em>{{ jdate($latest->created_at, 'j F Y') }}</em></div>
+        <div><small>حداقل اندروید</small><b>۵٫۰</b><em>اندروید ۵ به بالا</em></div>
+        <div class="wide"><small>اثر انگشت SHA-256 فایل مستقیم</small><code id="sha" dir="ltr">{{ $latest->direct_sha256 }}</code></div>
+      </div>
+    </section>
+    @endif
 
     @if($has && ($latest->changelog ?? []))
     <section class="up-sec">
@@ -71,7 +82,7 @@
       <div class="up-tl">
         @foreach($history as $i => $r)
         <details class="glass" @if($i === 0) open @endif>
-          <summary><span class="dot"></span><b>نسخه‌ی <bdi dir="ltr">{{ fa($r->version_name) }}</bdi></b>@if($i === 0)<em>آخرین</em>@endif @if($r->force)<em class="red">ضروری</em>@endif<span class="dt">{{ jdate($r->created_at, 'j F Y') }}</span></summary>
+          <summary><span class="dot"></span><b>نسخه‌ی <bdi dir="ltr">{{ fa($r->version_name) }}</bdi></b><span class="bc">ساخت <bdi dir="ltr">{{ fa($r->version_code) }}</bdi></span>@if($i === 0)<em>آخرین</em>@endif @if($r->force)<em class="red">ضروری</em>@endif<span class="dt">{{ jdate($r->created_at, 'j F Y') }}</span></summary>
           <ul>@forelse(($r->changelog ?? []) as $c)<li>{{ $c }}</li>@empty<li>بهبود پایداری و کارایی</li>@endforelse</ul>
         </details>
         @endforeach

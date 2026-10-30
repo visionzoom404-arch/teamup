@@ -287,7 +287,7 @@ public class MainActivity extends Activity {
             if (isOwn(host)) {
                 String p = u.getPath() == null ? "" : u.getPath();
                 // فایل APK خارج از اپ دانلود شود (نسخه‌ی فروشگاهی هرگز APK نصب نمی‌کند)
-                if (p.endsWith(".apk")) { if (Cfg.STORE) return true; download(url, null, null, "application/vnd.android.package-archive"); return true; }
+                if (p.endsWith(".apk") || p.equals("/app/download")) { if (Cfg.STORE) { Toast.makeText(this, "این نسخه از فروشگاه به‌روز می‌شود.", Toast.LENGTH_SHORT).show(); return true; } download(url, null, null, "application/vnd.android.package-archive"); return true; }
                 return false;
             }
             if (host.equals("wa.me") || host.endsWith("whatsapp.com") || host.equals("t.me") || host.endsWith("instagram.com")
@@ -320,7 +320,7 @@ public class MainActivity extends Activity {
     }
 
     private void download(String url, String ua, String cd, String mime) {
-        if (Cfg.STORE && url.endsWith(".apk")) return;
+        if (Cfg.STORE && (url.endsWith(".apk") || url.contains("/app/download") || "application/vnd.android.package-archive".equals(mime))) return;
         try {
             DownloadManager.Request r = new DownloadManager.Request(Uri.parse(url));
             String name = URLUtil.guessFileName(url, cd, mime);
