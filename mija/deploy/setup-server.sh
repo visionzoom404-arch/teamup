@@ -43,7 +43,9 @@ mkdir -p "$APP"
 EXC=(--exclude '/.env' --exclude '/database/database.sqlite' --exclude '/storage' --exclude '/node_modules' --exclude '/deploy' --exclude '/photos' --exclude '/INSTALL-FA.txt')
 [ "$HAS_VENDOR" = 0 ] && EXC+=(--exclude '/vendor')
 rsync -a --delete "${EXC[@]}" "$SRC"/ "$APP"/
-mkdir -p "$APP"/storage/{app/public,framework/{cache/data,sessions,views},logs} "$APP"/bootstrap/cache
+mkdir -p "$APP"/storage/{app/public,app/apk,framework/{cache/data,sessions,views},logs} "$APP"/bootstrap/cache
+# فایل‌های اپ اندروید (rsync پوشه‌ی storage را کپی نمی‌کند)
+[ -d "$SRC/storage/app/apk" ] && cp -f "$SRC"/storage/app/apk/* "$APP"/storage/app/apk/
 cd "$APP"
 
 if [ "$HAS_VENDOR" = 0 ]; then

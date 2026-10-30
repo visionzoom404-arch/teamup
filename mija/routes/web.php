@@ -152,14 +152,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/users/{user}/impersonate', [Admin\UserController::class, 'impersonate'])->name('users.impersonate');
     Route::get('/users/{user}/id-photo', [Admin\UserController::class, 'idPhoto'])->name('users.idphoto');
 
-    // اپلیکیشن اندروید
-    Route::get('/app', [Admin\AppAdminController::class, 'index'])->name('app');
-    Route::post('/app', [Admin\AppAdminController::class, 'store'])->name('app.store');
-    Route::post('/app/stores', [Admin\AppAdminController::class, 'settings'])->name('app.stores');
-    Route::post('/app/{release}/toggle', [Admin\AppAdminController::class, 'toggle'])->name('app.toggle');
-    Route::delete('/app/{release}', [Admin\AppAdminController::class, 'destroy'])->name('app.destroy');
-    Route::get('/app/{release}/file/{flavor}', [Admin\AppAdminController::class, 'file'])->name('app.file');
-
     // رزروها و پرداخت‌ها
     Route::get('/bookings', [Admin\ManageController::class, 'bookings'])->name('bookings');
     Route::get('/bookings/{booking}', [Admin\ManageController::class, 'booking'])->name('bookings.show');

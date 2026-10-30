@@ -18,7 +18,14 @@ public class InstallReceiver extends BroadcastReceiver {
             }
         } else if (st != PackageInstaller.STATUS_SUCCESS) {
             Updater.installFailed();
-            Toast.makeText(ctx, "نصب به‌روزرسانی انجام نشد. دوباره تلاش کنید یا از صفحه‌ی دانلود سایت نصب کنید.", Toast.LENGTH_LONG).show();
+            if (st == PackageInstaller.STATUS_FAILURE_ABORTED) return; // کاربر خودش لغو کرد
+            String m;
+            if (st == PackageInstaller.STATUS_FAILURE_STORAGE) m = "فضای گوشی کافی نیست؛ مقداری فضا آزاد کنید و دوباره تلاش کنید.";
+            else if (st == PackageInstaller.STATUS_FAILURE_INCOMPATIBLE) m = "این نسخه با گوشی شما سازگار نیست.";
+            else if (st == PackageInstaller.STATUS_FAILURE_CONFLICT) m = "نسخه‌ی نصب‌شده با فایل جدید تداخل دارد؛ اپ را از همان محلِ قبلی (بازار/مایکت/سایت) به‌روز کنید.";
+            else if (st == PackageInstaller.STATUS_FAILURE_BLOCKED) m = "نصب توسط گوشی مسدود شد؛ اجازه‌ی «نصب از این منبع» یا محافظ گوشی را بررسی کنید.";
+            else m = "نصب به‌روزرسانی انجام نشد. دوباره تلاش کنید یا از صفحه‌ی دانلود سایت نصب کنید.";
+            Toast.makeText(ctx, m, Toast.LENGTH_LONG).show();
         }
     }
 }

@@ -85,6 +85,8 @@ public class MainActivity extends Activity {
 
         updater = new Updater(this);
         watchNetwork();
+        UpdateJob.schedule(this);
+        openUpdateFromNotification(getIntent());
 
         if (b != null) web.restoreState(b);
         else load(startUrl(getIntent()));
@@ -154,7 +156,7 @@ public class MainActivity extends Activity {
             @Override public void run() { splash.setVisibility(View.GONE); splashSpin.stop(); }
         }).start();
         // بررسی به‌روزرسانی کمی بعد از ورود
-        h.postDelayed(new Runnable() { @Override public void run() { if (updater != null) updater.check(false); } }, 2500);
+        h.postDelayed(new Runnable() { @Override public void run() { if (updater != null) updater.check(false); askNotificationPermission(); } }, 2500);
     }
 
     // ───────────── وب‌ویو ─────────────
@@ -340,6 +342,25 @@ public class MainActivity extends Activity {
 
     // ───────────── ناوبری ─────────────
 
+    /** لمس اعلان «نسخه‌ی جدید رسید» → پنجره‌ی به‌روزرسانی */
+    private void openUpdateFromNotification(Intent i) {
+        if (i == null || !i.getBooleanExtra(UpdateJob.EXTRA_UPDATE, false)) return;
+        i.removeExtra(UpdateJob.EXTRA_UPDATE);
+        h.postDelayed(new Runnable() { @Override public void run() { if (updater != null) updater.check(true); } }, 1200);
+    }
+
+    /** اندروید ۱۳+: اجازه‌ی نمایش اعلان (فقط یک بار پرسیده می‌شود) */
+    private void askNotificationPermission() {
+        try {
+            if (Build.VERSION.SDK_INT < 33) return;
+            android.content.SharedPreferences sp = getSharedPreferences("mija", 0);
+            if (sp.getBoolean("askedNotif", false)) return;
+            if (checkSelfPermission("android.permission.POST_NOTIFICATIONS") == android.content.pm.PackageManager.PERMISSION_GRANTED) return;
+            sp.edit().putBoolean("askedNotif", true).apply();
+            requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"}, 55);
+        } catch (Exception ignored) { }
+    }
+
     private String startUrl(Intent i) {
         if (i != null && i.getData() != null && isOwn(i.getData().getHost())) return i.getData().toString();
         return Cfg.BASE + "/";
@@ -383,6 +404,7 @@ public class MainActivity extends Activity {
     @Override protected void onNewIntent(Intent i) {
         super.onNewIntent(i);
         setIntent(i);
+        openUpdateFromNotification(i);
         if (i != null && i.getData() != null && isOwn(i.getData().getHost())) load(i.getData().toString());
     }
 

@@ -43,8 +43,9 @@ class AppRelease extends Model
     }
 
     /**
-     * نسخه‌های همراه بسته‌ی نصب (storage/app/apk/release.json) را در دیتابیس ثبت می‌کند.
-     * ساخته‌شده توسط android/build.sh (و deploy/build-release.sh).
+     * نسخه‌ی همراه بسته (storage/app/apk/release.json) را خودکار در دیتابیس ثبت می‌کند؛
+     * با هر نصب/به‌روزرسانی سایت و همچنین هر دقیقه توسط زمان‌بند (mija:tick) اجرا می‌شود.
+     * برای نسخه‌ی تازه، به کاربران اپ اعلان «نسخه‌ی جدید رسید» می‌رود.
      */
     public static function sync(): int
     {
@@ -56,19 +57,46 @@ class AppRelease extends Model
         if (! is_array($j) || empty($j['version_code'])) {
             return 0;
         }
+        // لینک فروشگاه‌ها (اختیاری) از همین فایل
+        foreach (['bazaar' => 'app_bazaar_url', 'myket' => 'app_myket_url'] as $k => $key) {
+            $url = trim((string) ($j['stores'][$k] ?? ''));
+            if ($url !== '' && $url !== setting($key)) {
+                Setting::put($key, $url);
+            }
+        }
         $r = static::firstOrNew(['version_code' => (int) $j['version_code']]);
-        if ($r->exists && $r->direct_file === ($j['direct']['file'] ?? null) && $r->direct_sha256 === ($j['direct']['sha256'] ?? null)) {
+        $same = $r->exists && $r->direct_file === ($j['direct']['file'] ?? null) && $r->direct_sha256 === ($j['direct']['sha256'] ?? null);
+        if ($same) {
             return 0;
         }
+        $isNew = ! $r->exists;
         $r->fill([
             'version_name' => $j['version_name'],
             'changelog' => $j['changelog'] ?? [],
+            'force' => (bool) ($j['force'] ?? $r->force),
             'direct_file' => $j['direct']['file'] ?? null, 'direct_size' => $j['direct']['size'] ?? 0, 'direct_sha256' => $j['direct']['sha256'] ?? null,
             'store_file' => $j['store']['file'] ?? null, 'store_size' => $j['store']['size'] ?? 0, 'store_sha256' => $j['store']['sha256'] ?? null,
         ]);
         $r->published = $r->exists ? $r->published : true;
         $r->save();
+        if ($isNew && static::latest()?->id === $r->id) {
+            static::announce($r);
+        }
 
         return 1;
+    }
+
+    /** اعلان درون‌سایت برای کاربرانی که با نسخه‌ی قدیمی‌تر اپ را استفاده می‌کنند */
+    protected static function announce(self $r): void
+    {
+        $url = route('app.update');
+        User::whereNotNull('app_code')->where('app_code', '<', $r->version_code)->select('id')->chunkById(200, function ($users) use ($r, $url) {
+            $now = now();
+            Notice::insert($users->map(fn ($u) => [
+                'user_id' => $u->id, 'title' => 'نسخه‌ی جدید اپلیکیشن می‌جا رسید',
+                'body' => 'نسخه‌ی '.fa($r->version_name).' آماده است؛ همین حالا به‌روزرسانی کنید.', 'url' => $url,
+                'created_at' => $now, 'updated_at' => $now,
+            ])->all());
+        });
     }
 }

@@ -52,73 +52,71 @@ class AppReleaseTest extends TestCase
         $this->getJson('/api/app/version?code=1')->assertJson(['ok' => false]);
     }
 
-    public function test_admin_publishes_and_clients_see_update(): void
+    private function writeRelease(int $code, string $name, array $extra = []): void
     {
-        $admin = User::create(['name' => 'مدیر', 'phone' => '09130000001', 'password' => 'secret123', 'role' => 'admin']);
-        $this->actingAs($admin)->get('/admin/app')->assertOk();
-        $this->actingAs($admin)->post('/admin/app', [
-            'version_name' => '1.2.0', 'version_code' => 3, 'changelog' => "مورد اول\nمورد دوم",
-            'direct' => $this->fakeApk('a.apk'), 'store' => $this->fakeApk('b.apk'), 'force' => 1,
-        ])->assertSessionHasNoErrors();
+        $f = "mija-direct-$name.apk";
+        file_put_contents(AppRelease::dir()."/$f", "PK\x03\x04".str_repeat('x', 2048 + $code));
+        file_put_contents(AppRelease::dir().'/release.json', json_encode([
+            'version_name' => $name, 'version_code' => $code, 'changelog' => ['مورد اول', 'مورد دوم'],
+            'direct' => ['file' => $f, 'size' => filesize(AppRelease::dir()."/$f"), 'sha256' => hash_file('sha256', AppRelease::dir()."/$f")],
+        ] + $extra, JSON_UNESCAPED_UNICODE));
+    }
 
+    public function test_release_is_picked_up_automatically_and_served(): void
+    {
+        $this->writeRelease(3, '1.2.0', ['force' => true, 'stores' => ['bazaar' => 'https://cafebazaar.ir/app/click.mija.app']]);
+        $this->assertSame(1, AppRelease::sync());
         $r = AppRelease::latest();
         $this->assertSame('1.2.0', $r->version_name);
         $this->assertSame(['مورد اول', 'مورد دوم'], $r->changelog);
         $this->assertTrue($r->force);
-        $this->assertNotNull($r->path('direct'));
-        $this->assertSame(hash_file('sha256', $r->path('direct')), $r->direct_sha256);
+        $this->assertSame('https://cafebazaar.ir/app/click.mija.app', setting('app_bazaar_url'));
 
-        // کلاینت قدیمی: به‌روزرسانی اجباری
         $j = $this->getJson('/api/app/version?code=1&flavor=direct')->assertOk()->json();
         $this->assertTrue($j['update_available']);
         $this->assertTrue($j['force']);
         $this->assertSame(3, $j['latest']['code']);
         $this->assertSame($r->direct_sha256, $j['apk']['sha256']);
-        // کلاینت به‌روز
         $j = $this->getJson('/api/app/version?code=3')->json();
         $this->assertFalse($j['update_available']);
-        $this->assertFalse($j['force']);
 
-        // دانلود عمومی
         $res = $this->get('/app/download')->assertOk();
         $this->assertSame('application/vnd.android.package-archive', $res->headers->get('Content-Type'));
         $this->assertSame(1, $r->fresh()->downloads);
 
-        // صفحات عمومی با نسخه
-        $this->get('/app')->assertOk()->assertSee('دانلود مستقیم')->assertSee($r->direct_sha256);
+        $this->get('/app')->assertOk()->assertSee('دانلود مستقیم')->assertSee($r->direct_sha256)->assertSee('cafebazaar.ir', false);
         $this->get('/app/update')->assertOk()->assertSee('data-latest="3"', false);
-        // درون‌برنامه: بدون لینک دانلود اپ در فوتر
         $ua = ['User-Agent' => 'Mozilla/5.0 Android MijaApp/1.0.0 (code 1; flavor store)'];
         $this->withHeaders($ua)->get('/app')->assertOk()->assertSee('شما از اپلیکیشن می‌جا استفاده می‌کنید');
         $this->withHeaders($ua)->get('/')->assertOk()->assertDontSee('دانلود اپلیکیشن');
         $this->flushHeaders()->get('/')->assertSee('دانلود اپلیکیشن');
     }
 
-    public function test_admin_validation_and_toggle(): void
+    public function test_new_release_notifies_app_users_only(): void
     {
-        $admin = User::create(['name' => 'مدیر', 'phone' => '09130000002', 'password' => 'secret123', 'role' => 'admin']);
-        $bad = UploadedFile::fake()->create('x.txt', 10);
-        $this->actingAs($admin)->post('/admin/app', ['version_name' => 'abc', 'version_code' => 1, 'direct' => $bad])->assertSessionHasErrors(['version_name']);
-        $this->actingAs($admin)->post('/admin/app', ['version_name' => '1.0.0', 'version_code' => 1, 'direct' => UploadedFile::fake()->create('x.apk', 10)])->assertStatus(422);
-        $this->actingAs($admin)->post('/admin/app', ['version_name' => '1.0.0', 'version_code' => 1, 'direct' => $this->fakeApk('a.apk')]);
-        $r = AppRelease::first();
-        $this->actingAs($admin)->post("/admin/app/{$r->id}/toggle", ['field' => 'published']);
-        $this->assertNull(AppRelease::latest());
-        $this->actingAs($admin)->post('/admin/app/stores', ['app_bazaar_url' => 'https://cafebazaar.ir/app/click.mija.app', 'app_myket_url' => ''])->assertSessionHasNoErrors();
-        $this->assertSame('https://cafebazaar.ir/app/click.mija.app', setting('app_bazaar_url'));
-        $this->actingAs($admin)->delete("/admin/app/{$r->id}");
-        $this->assertSame(0, AppRelease::count());
-        // غیرمدیر دسترسی ندارد
-        $guest = User::create(['name' => 'مهمان', 'phone' => '09130000003', 'password' => 'secret123', 'role' => 'guest']);
-        $this->actingAs($guest)->get('/admin/app')->assertForbidden();
+        $old = User::create(['name' => 'قدیمی', 'phone' => '09130000011', 'password' => 'secret123', 'role' => 'guest', 'app_code' => 1]);
+        $cur = User::create(['name' => 'به‌روز', 'phone' => '09130000012', 'password' => 'secret123', 'role' => 'guest', 'app_code' => 5]);
+        $web = User::create(['name' => 'وب', 'phone' => '09130000013', 'password' => 'secret123', 'role' => 'guest']);
+        $this->writeRelease(5, '2.0.0');
+        AppRelease::sync();
+        $this->assertSame(1, \App\Models\Notice::where('user_id', $old->id)->count());
+        $this->assertSame(0, \App\Models\Notice::where('user_id', $cur->id)->count());
+        $this->assertSame(0, \App\Models\Notice::where('user_id', $web->id)->count());
+        // همگام‌سازی دوباره اعلان تکراری نمی‌فرستد
+        AppRelease::sync();
+        $this->assertSame(1, \App\Models\Notice::where('user_id', $old->id)->count());
     }
 
-    public function test_sync_from_release_json(): void
+    public function test_app_client_version_is_tracked(): void
     {
-        file_put_contents(AppRelease::dir().'/mija-direct-1.0.0.apk', "PK\x03\x04abc");
-        file_put_contents(AppRelease::dir().'/release.json', json_encode(['version_name' => '1.0.0', 'version_code' => 1, 'changelog' => ['الف'], 'direct' => ['file' => 'mija-direct-1.0.0.apk', 'size' => 7, 'sha256' => 'aa']]));
-        $this->assertSame(1, AppRelease::sync());
-        $this->assertSame(0, AppRelease::sync());
-        $this->get('/app')->assertOk()->assertSee('دانلود مستقیم');
+        $u = User::create(['name' => 'کاربر', 'phone' => '09130000014', 'password' => 'secret123', 'role' => 'guest']);
+        $this->actingAs($u)->withHeaders(['User-Agent' => 'Mozilla/5.0 Android MijaApp/1.0.1 (code 2; flavor direct)'])->get('/panel');
+        $this->assertSame(2, $u->fresh()->app_code);
+    }
+
+    public function test_admin_has_no_app_settings_page(): void
+    {
+        $admin = User::create(['name' => 'مدیر', 'phone' => '09130000002', 'password' => 'secret123', 'role' => 'admin']);
+        $this->actingAs($admin)->get('/admin/app')->assertNotFound();
     }
 }

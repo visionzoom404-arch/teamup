@@ -2,6 +2,10 @@ package click.mija.app;
 
 import android.app.Dialog;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInstaller;
@@ -115,16 +119,19 @@ final class Updater {
         check(true);
     }
 
-    private Info fetch() {
+    private Info fetch() { return fetchInfo(act); }
+
+    /** دریافت اطلاعات آخرین نسخه از سایت (برای خود اپ و کار پس‌زمینه‌ی اعلان) */
+    static Info fetchInfo(Context ctx) {
         HttpURLConnection c = null;
         try {
-            String u = Cfg.BASE + "/api/app/version?code=" + Cfg.versionCode(act) + "&flavor=" + Cfg.flavor()
-                    + "&installer=" + Uri.encode(Cfg.installer(act)) + "&sdk=" + Build.VERSION.SDK_INT;
+            String u = Cfg.BASE + "/api/app/version?code=" + Cfg.versionCode(ctx) + "&flavor=" + Cfg.flavor()
+                    + "&installer=" + Uri.encode(Cfg.installer(ctx)) + "&sdk=" + Build.VERSION.SDK_INT;
             c = (HttpURLConnection) new URL(u).openConnection();
             c.setConnectTimeout(8000);
             c.setReadTimeout(8000);
             c.setRequestProperty("Accept", "application/json");
-            c.setRequestProperty("User-Agent", "MijaApp/" + Cfg.versionName(act));
+            c.setRequestProperty("User-Agent", "MijaApp/" + Cfg.versionName(ctx));
             if (c.getResponseCode() != 200) return null;
             InputStream in = c.getInputStream();
             java.io.ByteArrayOutputStream bo = new java.io.ByteArrayOutputStream();
@@ -139,7 +146,7 @@ final class Updater {
             i.code = l.optInt("code");
             i.name = l.optString("name");
             i.force = j.optBoolean("force");
-            i.available = j.optBoolean("update_available") && i.code > Cfg.versionCode(act);
+            i.available = j.optBoolean("update_available") && i.code > Cfg.versionCode(ctx);
             JSONArray ch = l.optJSONArray("changelog");
             if (ch != null) for (int k = 0; k < ch.length(); k++) i.notes.add(ch.optString(k));
             JSONObject apk = j.optJSONObject("apk");
@@ -370,6 +377,7 @@ final class Updater {
                         for (byte b : md.digest()) hex.append(String.format("%02x", b));
                         if (!hex.toString().equalsIgnoreCase(i.sha)) throw new Exception("checksum");
                     }
+                    if (!sameSigner(f, i.code)) throw new Exception("signer");
                     setProgress(100, "در حال آماده‌سازی نصب…");
                     install(f);
                 } catch (Exception e) {
@@ -385,6 +393,27 @@ final class Updater {
                 }
             }
         }).start();
+    }
+
+    /** امنیت: فقط فایلی نصب می‌شود که بسته‌ی همین اپ باشد، با همان کلید امضا و نسخه‌ی بالاتر. */
+    @SuppressWarnings("deprecation")
+    private boolean sameSigner(File f, int expectCode) {
+        try {
+            PackageManager pm = act.getPackageManager();
+            PackageInfo arc = pm.getPackageArchiveInfo(f.getAbsolutePath(), PackageManager.GET_SIGNATURES);
+            PackageInfo me = pm.getPackageInfo(act.getPackageName(), PackageManager.GET_SIGNATURES);
+            if (arc == null || me == null || !act.getPackageName().equals(arc.packageName)) return false;
+            if (arc.versionCode <= me.versionCode) return false;
+            if (arc.signatures == null || me.signatures == null || arc.signatures.length == 0) return false;
+            for (Signature a : arc.signatures) {
+                boolean ok = false;
+                for (Signature m : me.signatures) if (a.equals(m)) ok = true;
+                if (!ok) return false;
+            }
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private void install(File f) throws Exception {
