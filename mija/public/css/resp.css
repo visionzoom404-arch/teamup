@@ -1,0 +1,66 @@
+/* ==========================================================
+   می‌جا — اصلاحات ریسپانسیو (فقط اندازه‌ها؛ ظاهر تغییر نمی‌کند)
+   هدف: هیچ عنصری از کادر کارت یا لبه‌ی صفحه بیرون نزند.
+   ========================================================== */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+img,video,canvas,svg,iframe,embed,object{max-width:100%}
+/* آیتم‌های گرید و فلکس اجازه‌ی کوچک شدن دارند (علت اصلی بیرون‌زدن محتوا) */
+.grow,.row>*,.item-row>*,.card>*,.glass>*,.grid>*,[class*="grid"]>*,[class*="-grid"]>*,.hub>*,.vp-main>*,.panel>*,.tiles>*,.stats>*{min-width:0}
+.grow{min-width:0}
+/* متن‌های بلند (ایمیل، آدرس، کد) بشکنند و از کادر بیرون نزنند */
+p,li,td,th,.lead,.msg,.alert,.muted,.small,.xs{overflow-wrap:break-word}
+.tile b,.tcell b,.stat b{white-space:nowrap}
+.ltr,[dir=ltr]{overflow-wrap:normal}
+code{overflow-wrap:anywhere}
+.tbl td,.tbl th{overflow-wrap:normal}
+@media (max-width:860px){.tbl td .ltr,.tbl td.ltr{white-space:nowrap}}
+.table-wrap,.tbl-wrap{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.chart-box{max-width:100%;min-width:0}.chart-box canvas{max-width:100%!important}
+pre{max-width:100%;overflow-x:auto}
+
+@media (max-width:1020px){
+  .hub-g{align-items:stretch}
+  .hub-chips{max-width:100%;min-width:0;width:100%}
+}
+@media (max-width:860px){
+  .au-shell{grid-template-columns:minmax(0,1fr)}
+  .au-shell>*,.au-form{min-width:0;max-width:100%}
+  .row.wrap>.grow{flex:1 1 200px}
+}
+@media (max-width:380px){
+  .tile b{font-size:clamp(15px,5.6vw,20px)}
+}
+@media (max-width:420px){
+  .btn{max-width:100%}
+  .page-h{flex-wrap:wrap;gap:10px}
+  .fl-2{grid-template-columns:minmax(0,1fr)}
+}
+
+/* مرورگرها/وب‌ویوهای قدیمی (اندروید ۵ تا ۸) overflow:clip را نمی‌شناسند و صفحه را به کنار می‌کشند */
+html{overflow-x:hidden;overflow-x:clip}
+
+/* منوی اشتراک‌گذاری: از لبه‌ی صفحه بیرون نزند (در راست‌به‌چپ باید به سمت داخل صفحه باز شود) */
+@media (max-width:860px){
+  .share-menu{inset-inline-end:auto;inset-inline-start:0;max-width:calc(100vw - 24px)}
+  .adm-search{flex-wrap:nowrap}.adm-search .input,.adm-search input{min-width:0;flex:1 1 auto}.adm-search .btn{flex:none;white-space:nowrap;padding-inline:14px}
+}
+/* دکمه‌ها روی صفحه‌ی باریک: متن بشکند، نه اینکه بریده شود */
+@media (max-width:340px){
+  .btn{white-space:normal;text-align:center}
+  .alt-link{flex-wrap:wrap}.alt-link .btn{flex:1 1 120px;min-width:0}
+}
+
+/* تقویم میزبان: ۷ ستون برابر که هیچ‌وقت از صفحه بیرون نزند */
+.cal{grid-template-columns:repeat(7,minmax(0,1fr))}
+.cal-cell,.cal-dow{min-width:0}
+@media (max-width:600px){
+  .cal{gap:4px}
+  .cal-cell{min-height:62px;padding:5px 2px;align-items:center;text-align:center;border-radius:10px;overflow:hidden}
+  .cal-cell b{font-size:14px}
+  .cal-cell .pr{font-size:9.5px;white-space:nowrap;letter-spacing:-.2px}
+  .cal-cell .who{font-size:9.5px;max-width:100%}
+  .cal-dow{font-size:11px}
+}
+@media (max-width:340px){.cal-cell .pr{font-size:8.5px}.cal-cell b{font-size:13px}}
+[style*="flex:1"],[style*="flex: 1"],.flex-1{min-width:0}
+@media (max-width:300px){.cal-cell{padding:4px 0}.cal-cell .pr{font-size:7.5px;letter-spacing:-.4px}}

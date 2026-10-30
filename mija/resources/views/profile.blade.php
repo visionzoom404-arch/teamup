@@ -26,7 +26,7 @@
     <p class="small muted" style="margin:10px 0 0">{{ fa($lv['nights']) }} شب اقامت‌ انجام‌شده @if($lv['next']) — {{ fa($lv['next']['nights'] - $lv['nights']) }} شب تا سطح «{{ $lv['next']['name'] }}» @else — شما در بالاترین سطح هستید @endif</p>
     <div class="lvl-steps">@foreach(config('mija.levels') as $l)<div class="{{ $lv['nights'] >= $l['nights'] ? 'on' : '' }}" style="--c:{{ $l['color'] }}"><i></i><b>{{ $l['name'] }}</b><small>{{ $l['cashback'] ? fa($l['cashback']).'٪ بازگشت وجه' : 'شروع' }}</small></div>@endforeach</div>
   </div>
-  <div class="tiles" style="grid-template-columns:1fr 1fr;margin:0">
+  <div class="tiles" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr);margin:0">
     <div class="tile card"><div class="ic3"><x-i3 name="p_calendar"/></div><b>{{ fa($stats['trips']) }}</b><span>سفر قطعی</span></div>
     <div class="tile card"><div class="ic3"><x-i3 name="p_star"/></div><b>{{ fa($stats['reviews']) }}</b><span>نظر ثبت‌شده</span></div>
     <div class="tile card"><div class="ic3"><x-i3 name="p_heart"/></div><b>{{ fa($stats['favorites']) }}</b><span>علاقه‌مندی</span></div>
