@@ -230,3 +230,9 @@
 .bn-txt{bottom:26px}
 .lg-seg+#pane-pw .btn-auth+*,#pane-sms .btn-auth+p{margin-top:16px!important}
 #pane-sms form{display:block}
+
+/* ---- گوشی‌های خیلی باریک (۲۸۰px): کارت کیف پول و فرم‌های مدیر ---- */
+.atm-mid{flex-wrap:wrap;row-gap:6px}
+.atm-bal b{font-size:clamp(21px,7.2vw,38px)}
+.stack{min-width:0}form.stack[style*="min-width"]{min-width:0!important;width:min(260px,100%)}
+@media(max-width:340px){.atm-chip{width:40px;height:31px}.atm-card{padding:14px}.atm-bal em{margin-inline-start:5px}}
