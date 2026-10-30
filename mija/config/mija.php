@@ -12,17 +12,52 @@ return [
     // پیش‌فرض‌ها (از پنل مدیریت قابل تغییرند)
     'commission_percent' => 10,   // سهم پلتفرم از میزبان
     'service_fee_percent' => 0,   // کارمزد مهمان
-    'host_response_hours' => 12,  // مهلت پاسخ میزبان
-    'payment_window_minutes' => 60,
+    'host_response_minutes' => 30, // مهلت تأیید یا رد میزبان
+    'payment_window_minutes' => 30, // مهلت پرداخت مهمان پس از تأیید
+    'offer_minutes' => 30,        // مهلت پاسخ مهمان به پیشنهاد روز جایگزین
+    'payout_hours_min' => 24,     // تسویه با میزبان: حداقل ساعت
+    'payout_hours_max' => 72,     // تسویه با میزبان: حداکثر ساعت
     'min_payout' => 500000,       // حداقل برداشت (تومان)
     'referral_bonus' => 100000,   // هدیه‌ی دعوت دوستان به هر دو طرف (تومان)
 
     // سطح وفاداری مهمان: [نام، حداقل شب اقامت، درصد بازگشت وجه به کیف پول، رنگ]
+    // هدیه‌ی نظر: درصدی از مبلغ رزرو به کیف پول مهمان (اعتبار موقت)
+    'cashback_enabled' => 1,
+    'cashback_percent' => 2,
+    'cashback_days' => 30,
+    // رزرو اقساطی: با جمع شدن اعتبار منقضی‌شده‌ی مهمان در صندوق پنهان فعال می‌شود
+    'installment_enabled' => 1,
+    'installment_threshold' => 5000000,
+    'installment_parts' => 3,
+    'installment_first_pct' => 40,
+    'installment_min_days' => 21,
+    // تبلیغات (تومان)
+    'ads_enabled' => 1,
+    'ad_banner_day' => 300000,
+    'ad_click_cpc' => 3000,
+    'ad_click_min' => 100000,
+    'ad_ladder' => 150000,
+    'ad_sms_each' => 1200,
+    'ad_push_each' => 400,
+    // پیامک (ippanel) و درگاه و کارت
+    'sms_enabled' => 0,
+    'sms_provider' => 'ippanel',
+    'sms_token' => '',
+    'sms_originator' => '',
+    'sms_base_url' => 'https://rest.ippanel.com/v1/messages',
+    'gateway_driver' => 'sandbox',
+    'zibal_merchants' => '',
+    'cards' => '',
+    'card_to_card_enabled' => 1,
+    'support_phone' => '',
+    'support_email' => '',
+    'footer_about' => 'رزرو ویلا و کلبه، مستقیم از میزبان؛ با قیمت شفاف و پرداخت امن.',
+
     'levels' => [
         ['key' => 'bronze', 'name' => 'برنزی', 'nights' => 0, 'cashback' => 0, 'color' => '#C9814A'],
-        ['key' => 'silver', 'name' => 'نقره‌ای', 'nights' => 5, 'cashback' => 1, 'color' => '#8E97A8'],
-        ['key' => 'gold', 'name' => 'طلایی', 'nights' => 15, 'cashback' => 2, 'color' => '#E8A500'],
-        ['key' => 'diamond', 'name' => 'الماس', 'nights' => 40, 'cashback' => 3, 'color' => '#2AB7E8'],
+        ['key' => 'silver', 'name' => 'نقره‌ای', 'nights' => 5, 'cashback' => 0, 'color' => '#8E97A8'],
+        ['key' => 'gold', 'name' => 'طلایی', 'nights' => 15, 'cashback' => 0, 'color' => '#E8A500'],
+        ['key' => 'diamond', 'name' => 'الماس', 'nights' => 40, 'cashback' => 0, 'color' => '#2AB7E8'],
     ],
 
     'property_types' => [
@@ -61,11 +96,38 @@ return [
         'awaiting_payment' => ['در انتظار پرداخت', 'orange'],
         'confirmed' => ['تأیید و پرداخت‌شده', 'green'],
         'completed' => ['اقامت انجام شد', 'dark'],
+        'offered' => ['پیشنهاد روز جایگزین', 'orange'],
+        'payment_review' => ['در انتظار تأیید پرداخت', 'gold'],
         'rejected' => ['رد شده توسط میزبان', 'red'],
         'expired' => ['منقضی شده', 'gray'],
         'cancelled_guest' => ['لغو توسط مهمان', 'red'],
         'cancelled_host' => ['لغو توسط میزبان', 'red'],
+        'cancelled_system' => ['لغو خودکار', 'gray'],
     ],
+
+    // قوانین اقامت که میزبان هنگام ثبت اقامتگاه تیک می‌زند: [کلید، عنوان، پیش‌فرض مجاز؟]
+    'house_rules' => [
+        ['pets', 'ورود حیوان خانگی', false],
+        ['smoking', 'استعمال دخانیات داخل ساختمان', false],
+        ['parties', 'برگزاری مهمانی و تجمع', false],
+        ['loud_music', 'پخش موسیقی بلند پس از ساعت ۲۳', false],
+        ['extra_guests', 'ورود مهمان اضافه بر ظرفیت', false],
+        ['shoes', 'ورود با کفش داخل ساختمان', false],
+        ['kids', 'پذیرش کودک', true],
+        ['id_required', 'ارائه‌ی مدارک شناسایی همه‌ی مسافران هنگام ورود', true],
+    ],
+
+    'service_categories' => ['lunch' => 'ناهار', 'dinner' => 'شام', 'breakfast' => 'صبحانه', 'meat' => 'گوشت و مرغ', 'drink' => 'نوشیدنی', 'wood' => 'هیزم و زغال', 'baby' => 'وسایل کودک', 'other' => 'سایر'],
+    'guest_tags' => ['تمیز و منظم', 'مودب', 'قانون‌مند', 'سروصدای کم', 'به‌موقع', 'آسیب به وسایل', 'خلاف قوانین'],
+    'ad_types' => [
+        'banner' => ['بنری', 'نمایش بنر اقامتگاه در صفحه‌ی اول سایت (قیمت هر روز)'],
+        'click' => ['کلیکی', 'اقامتگاه در بالای نتایج جستجو؛ فقط به‌ازای هر کلیک هزینه می‌شود'],
+        'ladder' => ['نردبان', 'بالا آوردن اقامتگاه به ابتدای فهرست برای ۲۴ ساعت'],
+        'sms' => ['پیامکی', 'ارسال پیامک تبلیغاتی به مهمانان علاقه‌مند (پس از تأیید مدیر)'],
+        'push' => ['اعلان (نوتیفیکیشن)', 'ارسال اعلان به مهمانان داخل سایت (پس از تأیید مدیر)'],
+    ],
+    'seasons' => ['spring' => 'بهار', 'summer' => 'تابستان', 'autumn' => 'پاییز', 'winter' => 'زمستان'],
+    'dows' => ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'],
 
     // مناطق گردشگری برای دسته‌بندی و فیلتر
     'regions' => [

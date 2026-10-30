@@ -8,6 +8,7 @@ $shareChart = ['labels' => $share->pluck('t')->all(), 'data' => $share->pluck('n
 @endphp
 <div class="page-h"><div><h1>پنل میزبان</h1><div class="muted">خوش آمدی {{ \Illuminate\Support\Str::before($u->name, ' ') }}@if($hs['superhost']) · <span class="badge gold"><x-i3 name="p_crown" class="sm"/> میزبان برتر</span>@endif</div></div><a class="btn" href="{{ route('host.properties.create') }}"><x-icon name="plus"/> ثبت اقامتگاه جدید</a></div>
 
+@unless($u->isOnboarded())<div class="now-card hot"><div class="grow"><h3><x-i3 name="p_shield" class="sm"/> اطلاعات هویتی و بانکی شما کامل نیست</h3><p>برای ثبت اقامتگاه و دریافت تسویه، ابتدا کد ملی و شماره کارت و شبا را ثبت کنید.</p><a class="btn" href="{{ route('host.onboard') }}">تکمیل اطلاعات</a></div></div>@endunless
 @if($percent < 100)
 <div class="card mb" style="background:linear-gradient(135deg,rgba(255,178,26,.18),rgba(255,255,255,.8))">
   <div class="row wrap" style="gap:18px"><div class="ring-p" style="--p:{{ $percent }}"><span>{{ fa($percent) }}٪</span></div><div class="grow"><h3 style="margin:0">راه‌اندازی اقامتگاه شما</h3><div class="small muted">چند قدم تا دریافت رزروهای بیشتر</div></div>

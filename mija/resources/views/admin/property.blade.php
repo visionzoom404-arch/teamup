@@ -1,7 +1,7 @@
 @extends('layouts.panel')
 @section('title', 'بررسی '.$p->title)
 @section('content')
-<div class="page-h"><div><a href="{{ route('admin.properties') }}" class="small muted">← اقامتگاه‌ها</a><h1>{{ $p->title }}</h1></div><a class="btn btn-sm btn-light" target="_blank" href="{{ route('property', $p) }}"><x-icon name="eye" class="sm"/> نمای عمومی</a></div>
+<div class="page-h"><div><a href="{{ route('admin.properties') }}" class="small muted">← اقامتگاه‌ها</a><h1>{{ $p->title }}</h1></div><div class="row wrap"><a class="btn btn-sm btn-gold" href="{{ route('admin.properties.edit', $p) }}"><x-icon name="edit" class="sm"/> ویرایش کامل</a><a class="btn btn-sm btn-light" href="{{ route('admin.pricing', $p) }}"><x-icon name="tag" class="sm"/> نرخ‌گذاری</a><a class="btn btn-sm btn-light" target="_blank" href="{{ route('property', $p) }}"><x-icon name="eye" class="sm"/> نمای عمومی</a></div></div>
 <div class="imgs mb">@foreach($p->images as $im)<div class="im"><img src="{{ $im->url() }}" alt=""></div>@endforeach</div>
 <div class="grid2" style="gap:18px;align-items:start">
   <div class="card"><h3>مشخصات</h3>
@@ -18,6 +18,7 @@
     <div class="card"><h3>تصمیم بررسی</h3><p class="small muted">وضعیت فعلی: <b>{{ ['draft'=>'پیش‌نویس','pending'=>'در انتظار بررسی','approved'=>'منتشر','rejected'=>'ردشده','suspended'=>'تعلیق'][$p->status] }}</b></p>
       <form method="post" action="{{ route('admin.properties.status', $p) }}" class="stack">@csrf<input class="input" name="reason" placeholder="توضیح برای میزبان (برای رد/تعلیق)" value="{{ $p->reject_reason }}">
         <div class="row wrap"><button class="btn btn-green" name="status" value="approved"><x-icon name="check"/> تأیید و انتشار</button><button class="btn btn-gold" name="status" value="rejected">نیاز به اصلاح</button><button class="btn btn-dark" name="status" value="suspended">تعلیق</button></div></form></div>
+    <div class="card"><h3>حذف</h3><form method="post" action="{{ route('admin.properties.destroy', $p) }}" onsubmit="return confirm('اقامتگاه برای همیشه حذف شود؟')">@csrf @method('DELETE')<button class="btn btn-danger btn-sm"><x-icon name="trash" class="sm"/> حذف اقامتگاه</button></form></div>
     <div class="card"><h3>ویترین صفحه اول</h3><form method="post" action="{{ route('admin.properties.feature', $p) }}">@csrf<button class="btn {{ $p->featured ? 'btn-ghost' : 'btn-gold' }}"><x-icon name="star" class="sm"/> {{ $p->featured ? 'حذف از ویترین' : 'نمایش در ویترین' }}</button></form></div>
   </div>
 </div>

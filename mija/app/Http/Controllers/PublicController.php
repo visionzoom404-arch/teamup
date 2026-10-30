@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Amenity;
 use App\Models\Property;
 use App\Models\Review;
+use App\Support\Ads;
 use App\Support\Jalali;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -13,9 +14,12 @@ class PublicController extends Controller
 {
     public function home()
     {
-        $base = Property::approved()->with('images');
+        $base = Property::approved()->with(['images', 'host']);
+        $flashIds = \App\Models\CalendarDay::whereBetween('date', [today()->toDateString(), today()->addDay()->toDateString()])->where('discount_pct', '>', 0)->pluck('property_id');
 
         return view('home', [
+            'banners' => Ads::banners(),
+            'flash' => (clone $base)->whereIn('id', $flashIds)->take(8)->get(),
             'featured' => (clone $base)->where('featured', true)->latest('id')->take(8)->get(),
             'latest' => (clone $base)->latest('id')->take(8)->get(),
             'top' => (clone $base)->where('reviews_count', '>', 0)->orderByDesc('rating_avg')->take(4)->get(),
@@ -29,9 +33,9 @@ class PublicController extends Controller
                 'properties' => Property::approved()->count(),
                 'cities' => Property::approved()->distinct('city')->count('city'),
                 'guests' => \App\Models\Booking::whereIn('status', ['confirmed', 'completed'])->distinct('guest_id')->count('guest_id'),
-                'rating' => round((float) Review::where('is_published', true)->avg('rating'), 1),
+                'rating' => round((float) Review::published()->avg('rating'), 1),
             ],
-            'reviews' => Review::with(['guest', 'property'])->where('is_published', true)->whereNotNull('comment')->where('comment', '!=', '')->latest('id')->take(9)->get(),
+            'reviews' => Review::with(['guest', 'property'])->published()->whereNotNull('comment')->where('comment', '!=', '')->latest('id')->take(9)->get(),
         ]);
     }
 
@@ -86,7 +90,7 @@ class PublicController extends Controller
             'expensive' => $q->orderByDesc('price_weekday'),
             'rating' => $q->orderByDesc('rating_avg'),
             'new' => $q->latest('id'),
-            default => $q->orderByDesc('featured')->orderByDesc('rating_avg')->latest('id'),
+            default => $q->orderByRaw('(ad_bump > ?) desc', [time() - 86400])->orderByDesc('featured')->orderByDesc('rating_avg')->latest('id'),
         };
 
         $items = $q->paginate(12)->withQueryString();
@@ -101,7 +105,11 @@ class PublicController extends Controller
             });
         }
 
+        $sponsored = ($r->page ?? 1) == 1 ? Ads::sponsored(2) : collect();
+        $sponsored->each(fn ($a) => $a->increment('impressions'));
+
         return view('search', [
+            'sponsored' => $sponsored,
             'items' => $items,
             'amenities' => Amenity::orderBy('sort')->get(),
             'in' => $in, 'out' => $out,
@@ -133,7 +141,7 @@ class PublicController extends Controller
         $peaks = \App\Models\PeakPeriod::where('ends_on', '>=', $from)->where('starts_on', '<=', $to)->get();
         $prices = [];
         for ($d = $from->copy(); $d->lte($to); $d->addDay()) {
-            $prices[$d->toDateString()] = \App\Support\Pricing::nightPrice($property, $d, $overrides, $peaks);
+            $prices[$d->toDateString()] = \App\Support\Pricing::displayPrice($property, $d, $overrides, $peaks);
         }
 
         $rv = $property->reviews()->selectRaw('avg(r_clean) c, avg(r_accuracy) a, avg(r_location) l, avg(r_host) h, avg(r_value) v')->first();
@@ -142,6 +150,7 @@ class PublicController extends Controller
         return view('property', [
             'p' => $property, 'similar' => $similar, 'prices' => $prices, 'breakdown' => $breakdown, 'hs' => $property->host->hostStats(),
             'unavailable' => array_values(array_unique(array_merge($blocked, $booked))),
+            'approx' => $property->approxCoords(),
             'isFav' => auth()->check() && auth()->user()->favorites()->whereKey($property->id)->exists(),
         ]);
     }
@@ -172,8 +181,9 @@ class PublicController extends Controller
 
     public function page(string $slug)
     {
-        abort_unless(in_array($slug, ['about', 'rules', 'become-host', 'contact']), 404);
+        $page = \App\Support\DefaultPages::find($slug);
+        abort_unless($page, 404);
 
-        return view('pages.'.$slug);
+        return view('pages.show', ['page' => $page]);
     }
 }

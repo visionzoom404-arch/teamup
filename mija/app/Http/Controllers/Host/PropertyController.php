@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Amenity;
 use App\Models\CalendarDay;
 use App\Models\Property;
+use App\Rules\Clean;
 use App\Models\PropertyImage;
 use App\Support\Jalali;
 use Carbon\Carbon;
@@ -17,7 +18,7 @@ class PropertyController extends Controller
 {
     private function own(Property $p): Property
     {
-        abort_unless($p->host_id === auth()->id(), 404);
+        abort_unless($p->host_id === auth()->id() || auth()->user()->isAdmin(), 404);
 
         return $p;
     }
@@ -38,11 +39,11 @@ class PropertyController extends Controller
             'title' => 'required|string|min:5|max:100',
             'type' => ['required', Rule::in(array_keys(config('mija.property_types')))],
             'province' => 'required|string|max:60', 'city' => 'required|string|max:80',
-            'address' => 'nullable|string|max:255', 'lat' => 'nullable|numeric|between:-90,90', 'lng' => 'nullable|numeric|between:-180,180',
-            'description' => 'required|string|min:30|max:4000', 'rules' => 'nullable|string|max:2000', 'guide' => 'nullable|string|max:2000',
+            'address' => 'required|string|min:8|max:255', 'lat' => 'required|numeric|between:-90,90', 'lng' => 'required|numeric|between:-180,180',
+            'description' => ['required', 'string', 'min:30', 'max:4000', new Clean], 'rules' => ['nullable', 'string', 'max:2000', new Clean], 'guide' => 'nullable|string|max:2000',
+            'house_rules' => 'nullable|array', 'house_rules.*' => 'in:0,1',
             'capacity_base' => 'required|integer|min:1|max:50', 'capacity_max' => 'required|integer|min:1|max:60|gte:capacity_base',
             'bedrooms' => 'required|integer|min:0|max:30', 'beds' => 'required|integer|min:1|max:60', 'bathrooms' => 'required|integer|min:0|max:30',
-            'area' => 'nullable|integer|min:1|max:100000', 'land_area' => 'nullable|integer|min:1|max:1000000',
             'price_weekday' => 'required|integer|min:50000', 'price_weekend' => 'required|integer|min:50000', 'price_peak' => 'nullable|integer|min:50000',
             'extra_guest_fee' => 'nullable|integer|min:0', 'cleaning_fee' => 'nullable|integer|min:0',
             'weekly_discount' => 'nullable|integer|between:0,60', 'monthly_discount' => 'nullable|integer|between:0,70',
@@ -59,6 +60,8 @@ class PropertyController extends Controller
     {
         $d = $r->validate($this->rules());
         $d['instant_booking'] = $r->boolean('instant_booking');
+        // قوانین اقامت: هر مورد مجاز (۱) یا ممنوع (۰)
+        $d['house_rules'] = collect(config('mija.house_rules'))->mapWithKeys(fn ($h) => [$h[0] => (bool) ($d['house_rules'][$h[0]] ?? 0)])->all();
         foreach (['extra_guest_fee', 'cleaning_fee', 'weekly_discount', 'monthly_discount'] as $k) {
             $d[$k] = (int) ($d[$k] ?? 0);
         }
@@ -107,8 +110,8 @@ class PropertyController extends Controller
     {
         $this->own($property);
         abort_unless(in_array($property->status, ['draft', 'rejected']), 422);
-        if ($property->images()->count() < 1) {
-            return back()->withErrors(['images' => 'حداقل یک عکس برای ارسال به بررسی لازم است.']);
+        if ($property->images()->count() < 3) {
+            return back()->withErrors(['images' => 'برای ارسال به بررسی، حداقل ۳ عکس واقعی از اقامتگاه خودتان بارگذاری کنید.']);
         }
         $property->update(['status' => 'pending', 'reject_reason' => null]);
 
@@ -124,7 +127,7 @@ class PropertyController extends Controller
         Storage::disk('public')->deleteDirectory('properties/'.$property->id);
         $property->delete();
 
-        return redirect()->route('host.properties.index')->with('ok', 'اقامتگاه حذف شد.');
+        return redirect()->route(auth()->user()->isAdmin() ? 'admin.properties' : 'host.properties.index')->with('ok', 'اقامتگاه حذف شد.');
     }
 
     public function destroyImage(Property $property, PropertyImage $image)
@@ -165,7 +168,7 @@ class PropertyController extends Controller
             $date = Jalali::carbon($jy, $jm, $d);
             $key = $date->toDateString();
             $bk = $bookings->first(fn ($b) => $date->gte($b->check_in) && $date->lt($b->check_out));
-            $cells[$d] = ['date' => $key, 'dow' => $date->dayOfWeek, 'booking' => $bk, 'blocked' => (bool) ($days[$key]->is_blocked ?? false), 'price' => $days[$key]->price ?? null, 'past' => $date->lt(today())];
+            $cells[$d] = ['date' => $key, 'dow' => $date->dayOfWeek, 'booking' => $bk, 'blocked' => (bool) ($days[$key]->is_blocked ?? false), 'price' => $days[$key]->price ?? null, 'discount' => $days[$key]->discount_pct ?? null, 'eff' => \App\Support\Pricing::nightPrice($property, $date, $days, \App\Models\PeakPeriod::where('ends_on', '>=', $first->toDateString())->where('starts_on', '<=', $last->toDateString())->get()), 'past' => $date->lt(today())];
         }
         $prev = $jm == 1 ? [$jy - 1, 12] : [$jy, $jm - 1];
         $next = $jm == 12 ? [$jy + 1, 1] : [$jy, $jm + 1];
@@ -197,11 +200,91 @@ class PropertyController extends Controller
                 'reset' => [$row->is_blocked, $row->price] = [false, null],
             };
             $row->save();
-            if (! $row->is_blocked && ! $row->price) {
+            if (! $row->is_blocked && ! $row->price && ! $row->discount_pct) {
                 $row->delete();
             }
         }
 
         return back()->with('ok', 'تقویم به‌روزرسانی شد.');
+    }
+
+    /* ---------- سیاست نرخ‌گذاری ---------- */
+
+    public function pricing(Property $property)
+    {
+        $this->own($property);
+        $today = today();
+
+        return view('host.pricing', ['p' => $property, 'flash' => $property->days()->where('discount_pct', '>', 0)->where('date', '>=', $today->toDateString())->orderBy('date')->get()]);
+    }
+
+    public function pricingUpdate(Request $r, Property $property)
+    {
+        $this->own($property);
+        $d = $r->validate([
+            'pricing_mode' => 'required|in:auto,manual',
+            'price_dow' => 'nullable|array', 'price_dow.*' => 'nullable|integer|min:50000',
+            'price_months' => 'nullable|array', 'price_months.*' => 'nullable|integer|min:50000',
+            'price_seasons' => 'nullable|array', 'price_seasons.*' => 'nullable|integer|min:50000',
+            'price_peak' => 'nullable|integer|min:50000',
+            'price_weekday' => 'required|integer|min:50000', 'price_weekend' => 'required|integer|min:50000',
+            'extra_guest_fee' => 'nullable|integer|min:0', 'capacity_base' => 'required|integer|min:1|max:50',
+        ]);
+        $clean = fn ($a) => collect($a ?? [])->filter(fn ($v) => $v !== null && $v !== '')->map(fn ($v) => (int) $v)->all();
+        $property->update([
+            'pricing_mode' => $d['pricing_mode'], 'price_dow' => $clean($d['price_dow'] ?? []), 'price_months' => $clean($d['price_months'] ?? []),
+            'price_seasons' => $clean($d['price_seasons'] ?? []), 'price_peak' => $d['price_peak'] ?? null,
+            'price_weekday' => $d['price_weekday'], 'price_weekend' => $d['price_weekend'],
+            'extra_guest_fee' => (int) ($d['extra_guest_fee'] ?? 0), 'capacity_base' => min($d['capacity_base'], $property->capacity_max),
+        ]);
+
+        return back()->with('ok', 'سیاست نرخ‌گذاری ذخیره شد.');
+    }
+
+    /** تخفیف فوری (لحظه‌آخری) برای امروز و فردا یا برداشتن آن */
+    public function flash(Request $r, Property $property)
+    {
+        $this->own($property);
+        $d = $r->validate(['days' => 'required|in:today,tomorrow,both,clear', 'pct' => 'nullable|integer|between:5,70']);
+        $dates = match ($d['days']) { 'today' => [today()], 'tomorrow' => [today()->addDay()], default => [today(), today()->addDay()] };
+        if ($d['days'] === 'clear') {
+            foreach ($property->days()->where('discount_pct', '>', 0)->get() as $row) {
+                $row->update(['discount_pct' => null]);
+                ! $row->is_blocked && ! $row->price && $row->delete();
+            }
+
+            return back()->with('ok', 'تخفیف‌های فوری برداشته شد.');
+        }
+        abort_unless($d['pct'] ?? null, 422);
+        $n = 0;
+        foreach ($dates as $date) {
+            if ($property->bookings()->active()->where('check_in', '<=', $date->toDateString())->where('check_out', '>', $date->toDateString())->exists()) {
+                continue;
+            }
+            CalendarDay::updateOrCreate(['property_id' => $property->id, 'date' => $date->toDateString()], ['discount_pct' => $d['pct'], 'is_blocked' => false]);
+            $n++;
+        }
+
+        return back()->with('ok', $n ? 'تخفیف فوری فعال شد و در بخش «تخفیف لحظه‌آخری» صفحه‌ی اول نمایش داده می‌شود.' : 'این روزها رزرو شده‌اند.');
+    }
+
+    public static function icalToken(Property $p): string
+    {
+        return substr(hash_hmac('sha256', 'ical'.$p->id, config('app.key')), 0, 24);
+    }
+
+    /** خروجی تقویم (iCal) برای همگام‌سازی با گوگل‌کالندر و سایر سایت‌ها */
+    public function ical(Property $property, string $token)
+    {
+        abort_unless(hash_equals(self::icalToken($property), $token), 404);
+        $ev = '';
+        foreach ($property->bookings()->active()->where('check_out', '>=', today())->get() as $b) {
+            $ev .= "BEGIN:VEVENT\r\nUID:{$b->code}@mija\r\nDTSTART;VALUE=DATE:{$b->check_in->format('Ymd')}\r\nDTEND;VALUE=DATE:{$b->check_out->format('Ymd')}\r\nSUMMARY:Reserved\r\nEND:VEVENT\r\n";
+        }
+        foreach ($property->days()->where('is_blocked', true)->where('date', '>=', today()->toDateString())->get() as $d) {
+            $ev .= "BEGIN:VEVENT\r\nUID:blk{$d->id}@mija\r\nDTSTART;VALUE=DATE:{$d->date->format('Ymd')}\r\nDTEND;VALUE=DATE:{$d->date->copy()->addDay()->format('Ymd')}\r\nSUMMARY:Blocked\r\nEND:VEVENT\r\n";
+        }
+
+        return response("BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Mija//FA\r\n{$ev}END:VCALENDAR\r\n", 200, ['Content-Type' => 'text/calendar; charset=utf-8']);
     }
 }

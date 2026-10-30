@@ -21,11 +21,8 @@
   window.addEventListener('pageshow', () => { document.body.classList.remove('leaving'); if (g) g.set(bar, { scaleX: 0 }); });
 
   /* ---------- هدر ---------- */
-  const top = $('.topbar'); let lastY = scrollY;
-  if (top) addEventListener('scroll', () => {
-    const y = scrollY; top.classList.toggle('scrolled', y > 6);
-    top.classList.toggle('hide', y > lastY && y > 140); lastY = y;
-  }, { passive: true });
+  const top = $('.topbar'); let wasScrolled = false;   // هدر ثابت می‌ماند (بدون پنهان/آشکار شدن هنگام اسکرول تا نلرزد)
+  if (top) addEventListener('scroll', () => { const s = scrollY > 6; if (s !== wasScrolled) { wasScrolled = s; top.classList.toggle('scrolled', s); } }, { passive: true });
 
   /* ---------- نشانگر لغزان منوی پایین ---------- */
   const nav = $('.bottomnav ul');
@@ -123,11 +120,26 @@
 
   /* ---------- نقشه (Leaflet + OSM) ---------- */
   $$('[data-map]').forEach(el => {
-    if (!window.L) return; const lat = +el.dataset.lat, lng = +el.dataset.lng;
-    const m = L.map(el, { scrollWheelZoom: false, zoomControl: true }).setView([lat, lng], 12);
+    if (!window.L) return; const lat = +el.dataset.lat, lng = +el.dataset.lng, approx = el.hasAttribute('data-approx');
+    const m = L.map(el, { scrollWheelZoom: false, zoomControl: true }).setView([lat, lng], approx ? 12 : 14);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '© OpenStreetMap' }).addTo(m);
-    L.circle([lat, lng], { radius: 700, color: '#F26B0F', fillColor: '#FF7A00', fillOpacity: .25, weight: 2 }).addTo(m);
-    L.marker([lat, lng], { icon: L.divIcon({ className: '', html: '<img src="/img/mija-mark-sm.png" width="40" height="40" style="filter:drop-shadow(0 6px 8px rgba(0,0,0,.35))">', iconSize: [40, 40], iconAnchor: [20, 36] }) }).addTo(m);
+    L.circle([lat, lng], { radius: approx ? 1500 : 150, color: '#E8860C', fillColor: '#F9C05A', fillOpacity: .3, weight: 2 }).addTo(m);
+    if (!approx) L.marker([lat, lng], { icon: L.divIcon({ className: '', html: '<img src="/img/mija-mark-sm.png" width="40" height="40" style="filter:drop-shadow(0 6px 8px rgba(0,0,0,.35))">', iconSize: [40, 40], iconAnchor: [20, 36] }) }).addTo(m);
+  });
+
+  /* ---------- انتخاب موقعیت دقیق روی نقشه (فرم ثبت اقامتگاه) ---------- */
+  $$('[data-map-pick]').forEach(el => {
+    if (!window.L) return; const la = $('#lat'), ln = $('#lng');
+    const has = la.value && ln.value, c = has ? [+la.value, +ln.value] : [32.4, 53.7];
+    const m = L.map(el, { scrollWheelZoom: true }).setView(c, has ? 15 : 5);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(m);
+    const icon = L.divIcon({ className: '', html: '<img src="/img/mija-mark-sm.png" width="40" height="40">', iconSize: [40, 40], iconAnchor: [20, 38] });
+    let mk = has ? L.marker(c, { icon, draggable: true }).addTo(m) : null;
+    const set = (p) => { la.value = p.lat.toFixed(6); ln.value = p.lng.toFixed(6); if (!mk) { mk = L.marker(p, { icon, draggable: true }).addTo(m); mk.on('dragend', () => set(mk.getLatLng())); } else mk.setLatLng(p); };
+    if (mk) mk.on('dragend', () => set(mk.getLatLng()));
+    m.on('click', e => set(e.latlng));
+    const me = $('#map-me'); if (me) me.addEventListener('click', () => navigator.geolocation && navigator.geolocation.getCurrentPosition(p => { const ll = L.latLng(p.coords.latitude, p.coords.longitude); set(ll); m.setView(ll, 16); }));
+    setTimeout(() => m.invalidateSize(), 400);
   });
 
   /* ---------- شیت رزرو در موبایل ---------- */

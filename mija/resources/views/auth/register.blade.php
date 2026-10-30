@@ -46,6 +46,7 @@
     </div>
   </div>
   <div class="strength" id="strength" data-s="0" data-a><i></i><i></i><i></i><i></i><span></span></div>
+  <p class="xs muted" data-a style="margin:0 0 10px">با ساخت حساب، <a href="{{ route('page', 'rules') }}" target="_blank" style="text-decoration:underline">قوانین و مقررات</a> و <a href="{{ route('page', $r === 'host' ? 'rules-host' : 'rules-guest') }}" target="_blank" style="text-decoration:underline">{{ $r === 'host' ? 'قوانین میزبانان' : 'قوانین مهمانان' }}</a> را می‌پذیرید.</p>
   <button class="btn btn-auth btn-lg" data-a><span class="spin"></span><span class="lbl">ساخت حساب</span><x-icon name="chev-l"/></button>
 </form>
 <div class="divider-t" data-a>قبلاً ثبت‌نام کرده‌ای؟</div>

@@ -10,10 +10,14 @@
   $credits = $imgs->whereNotNull('credit')->unique('credit');
   $statusFa = ['draft' => 'پیش‌نویس', 'pending' => 'در انتظار تأیید', 'rejected' => 'ردشده', 'suspended' => 'تعلیق‌شده'];
   $tiers = $p->policy()['tiers'];
+  $cm = \App\Support\Pricing::commissionFor($p->host);
+  $wdG = \App\Support\Pricing::gross($p->price_weekday, $cm); $weG = \App\Support\Pricing::gross($p->price_weekend, $cm);
 @endphp
 <div class="container vp">
   @include('partials.flash')
   @if($p->status !== 'approved')<div class="alert warn"><x-icon name="info"/>این اقامتگاه هنوز منتشر نشده است ({{ $statusFa[$p->status] ?? $p->status }}) و فقط برای شما قابل مشاهده است.</div>@endif
+
+  @include('partials.stepper', ['steps' => [['انتخاب تاریخ', 'calendar'], ['تأیید میزبان', 'check'], ['پرداخت', 'card'], ['رزرو قطعی', 'shield'], ['اقامت', 'home'], ['ثبت نظر', 'star']], 'at' => 1])
 
   {{-- سرتیتر --}}
   <header class="vp-head">
@@ -61,8 +65,6 @@
           <div><i><x-icon name="bed"/></i><b>{{ fa($p->bedrooms) }}</b><span>اتاق خواب</span></div>
           <div><i><x-icon name="bed"/></i><b>{{ fa($p->beds) }}</b><span>تخت</span></div>
           <div><i><x-icon name="bath"/></i><b>{{ fa($p->bathrooms) }}</b><span>سرویس</span></div>
-          @if($p->area)<div><i><x-icon name="ruler"/></i><b>{{ fa($p->area) }}</b><span>متر بنا</span></div>@endif
-          @if($p->land_area)<div><i><x-icon name="home"/></i><b>{{ fa($p->land_area) }}</b><span>متر زمین</span></div>@endif
         </div>
         <div class="vp-host">
           <img class="avatar" src="{{ $p->host->avatarUrl() }}" alt="">
@@ -96,7 +98,8 @@
           <div class="cx-lbl">@foreach($tiers as [$days, $pct])<span>تا {{ fa($days) }} روز مانده</span>@endforeach<span>کمتر</span></div>
           <p>{{ $p->policy()['desc'] }}</p>
         </div>
-        @if($p->extra_guest_fee)<div class="vp-line"><x-icon name="users" class="sm"/>هر نفر اضافه (بالای {{ fa($p->capacity_base) }} نفر): <b>{{ toman($p->extra_guest_fee) }}</b> در شب</div>@endif
+        <div class="rules-grid">@foreach($p->rulesList() as [$rk, $rl, $ok])<div class="{{ $ok ? 'yes' : 'no' }}"><i><x-icon :name="$ok ? 'check' : 'x'" class="sm"/></i>{{ $ok ? 'مجاز' : 'ممنوع' }}: {{ $rl }}</div>@endforeach</div>
+        @if($p->extra_guest_fee)<div class="vp-line"><x-icon name="users" class="sm"/>ظرفیت استاندارد {{ fa($p->capacity_base) }} نفر؛ هر نفر اضافه (تا {{ fa($p->capacity_max) }} نفر): <b>{{ toman(\App\Support\Pricing::gross($p->extra_guest_fee, $cm)) }}</b> در شب</div>@endif
         @if($p->weekly_discount || $p->monthly_discount)<div class="vp-line off"><x-icon name="tag" class="sm"/>@if($p->weekly_discount)تخفیف هفتگی {{ fa($p->weekly_discount) }}٪ @endif @if($p->monthly_discount)· تخفیف ماهانه {{ fa($p->monthly_discount) }}٪@endif</div>@endif
         @if($p->rules)<div class="vp-rules"><h4>قوانین میزبان</h4><p>{{ $p->rules }}</p></div>@endif
       </section>
@@ -104,7 +107,7 @@
       {{-- موقعیت --}}
       <section class="vp-card" id="v-map">
         <h2 class="vp-h"><x-i3 name="p_pin" class="sm"/>موقعیت</h2>
-        @if($p->lat && $p->lng)<div class="map-l" data-map data-lat="{{ $p->lat }}" data-lng="{{ $p->lng }}"></div><p class="xs muted" style="margin:8px 0 0">موقعیت تقریبی است؛ آدرس دقیق پس از قطعی شدن رزرو ارسال می‌شود.</p>
+        @if($approx)<div class="map-l" data-map data-approx data-lat="{{ $approx[0] }}" data-lng="{{ $approx[1] }}"></div><p class="xs muted" style="margin:8px 0 0"><x-icon name="lock" class="sm"/> محدوده‌ی تقریبی نمایش داده شده است؛ آدرس دقیق، نقشه و شماره‌ی میزبان پس از پرداخت و قطعی شدن رزرو برای شما باز می‌شود.</p>
         @else<div class="vp-nomap"><x-i3 name="p_pin" class="lg"/><b>{{ $p->province }}، {{ $p->city }}</b><small>آدرس دقیق پس از قطعی شدن رزرو ارسال می‌شود</small></div>@endif
       </section>
 
@@ -119,8 +122,9 @@
         @endif
         @forelse($p->reviews as $rv)
           <article class="rev">
-            <div class="row"><img class="avatar sm" src="{{ $rv->guest->avatarUrl() }}" alt=""><div class="grow"><b>{{ $rv->guest->name }}</b><div class="xs muted">{{ jdate($rv->created_at, 'j F Y') }} · اقامت تأییدشده</div></div><span class="vp-rate"><x-icon name="star" class="sm"/><b>{{ fa($rv->rating) }}</b></span></div>
+            <div class="row"><a href="{{ route('guest.public', $rv->guest) }}"><img class="avatar sm" src="{{ $rv->guest->avatarUrl() }}" alt=""></a><div class="grow"><a href="{{ route('guest.public', $rv->guest) }}"><b>{{ $rv->guest->name }}</b></a>@if($rv->recommend) <span class="badge green" style="padding:0 8px;font-size:10.5px">پیشنهاد می‌کند</span>@endif<div class="xs muted">{{ jdate($rv->created_at, 'j F Y') }} · اقامت تأییدشده</div></div><span class="vp-rate"><x-icon name="star" class="sm"/><b>{{ fa($rv->rating) }}</b></span></div>
             @if($rv->comment)<p>{{ $rv->comment }}</p>@endif
+            @if($rv->photos)<div class="rv-ph">@foreach($rv->photoUrls() as $u)<a href="{{ $u }}" data-lightbox><img src="{{ $u }}" alt=""></a>@endforeach</div>@endif
             @if($rv->host_reply)<div class="rev-reply"><b>پاسخ میزبان</b><p>{{ $rv->host_reply }}</p></div>@endif
           </article>
         @empty
@@ -132,7 +136,7 @@
     {{-- ستون رزرو --}}
     <aside class="booking-box">
       <div class="vp-book"><div class="grip-b"></div><button type="button" class="vp-x sheet-x" data-close-book aria-label="بستن"><x-icon name="x" class="sm"/></button>
-        <div class="vp-price"><span>شروع از</span><div><b>{{ toman($p->startingPrice(), false) }}</b><small>تومان / شب</small></div><em>میان‌هفته {{ toman($p->price_weekday, false) }} · آخر هفته {{ toman($p->price_weekend, false) }}</em></div>
+        <div class="vp-price"><span>شروع از</span><div><b>{{ toman($p->startingPrice(), false) }}</b><small>تومان / شب</small></div><em>میان‌هفته {{ toman($wdG, false) }} · آخر هفته {{ toman($weG, false) }}</em></div>
         @auth
           @if(auth()->user()->isGuest())
           <form id="booking-form" method="post" action="{{ route('guest.book', $p) }}" data-quote="{{ route('property.quote', $p) }}">

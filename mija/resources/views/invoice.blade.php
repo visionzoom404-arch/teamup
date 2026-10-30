@@ -1,29 +1,107 @@
-<!doctype html>
-<html lang="fa" dir="rtl"><head>@include('partials.head')<style>
-body{background:#f4f5f8!important;animation:none}body::before{display:none}
-.inv{max-width:820px;margin:24px auto;background:#fff;border-radius:22px;padding:38px 42px;box-shadow:0 20px 60px rgba(20,22,32,.1);position:relative;overflow:hidden}
-.inv::before{content:"";position:absolute;top:0;inset-inline:0;height:8px;background:var(--grad-warm)}
-.inv h1{font-size:24px;margin:0}.inv table{width:100%;border-collapse:collapse;margin-top:18px;font-size:14px}.inv td,.inv th{padding:10px 8px;border-bottom:1px solid #eee;text-align:start}
-.inv .tot td{font-weight:800;font-size:16px;border-top:2px solid #111;border-bottom:0}
-.stamp{position:absolute;inset-inline-start:36px;top:120px;transform:rotate(-12deg);border:3px solid var(--green);color:var(--green);padding:4px 18px;border-radius:12px;font-weight:800;font-size:20px;opacity:.8}
-@media print{body{background:#fff!important}.inv{box-shadow:none;margin:0}.noprint{display:none!important}}
-</style></head><body>
-@include('partials.i3-defs')
-<div class="inv">
-  <div class="row between" style="margin-top:8px"><div class="row"><img src="{{ asset('img/mija-logo-h.png') }}" width="130" alt="می‌جا"><div><h1>فاکتور رزرو</h1><div class="muted small">می‌جا — پلتفرم رزرو ویلا و کلبه</div></div></div><div class="center"><div class="muted small">شماره رزرو</div><b class="ltr" style="font-size:20px">{{ $b->code }}</b></div></div>
-  @if(in_array($b->status, ['confirmed','completed']))<div class="stamp">پرداخت‌شده</div>@endif
-  <hr class="divider">
-  <div class="grid2"><div><div class="muted small">مهمان</div><b>{{ $b->guest->name }}</b><div class="small ltr">{{ fa($b->guest->phone) }}</div></div><div><div class="muted small">میزبان</div><b>{{ $b->property->host->name }}</b></div></div>
-  <div class="grid2" style="margin-top:14px"><div><div class="muted small">اقامتگاه</div><b>{{ $b->property->title }}</b><div class="small">{{ $b->property->province }}، {{ $b->property->city }}</div></div><div><div class="muted small">تاریخ اقامت</div><b>{{ jdate($b->check_in, 'j F Y') }} تا {{ jdate($b->check_out, 'j F Y') }}</b><div class="small">{{ fa($b->nights) }} شب · {{ fa($b->guestsCount()) }} نفر</div></div></div>
-  @php $bd = $b->breakdown ?? []; @endphp
-  <table><thead><tr><th>شرح</th><th style="text-align:end">مبلغ (تومان)</th></tr></thead><tbody>
-    <tr><td>اقامت ({{ fa($b->nights) }} شب)</td><td style="text-align:end">{{ toman($bd['base'] ?? 0, false) }}</td></tr>
-    @if(($bd['extra'] ?? 0) > 0)<tr><td>نفر اضافه</td><td style="text-align:end">{{ toman($bd['extra'], false) }}</td></tr>@endif
-    @if(($bd['cleaning'] ?? 0) > 0)<tr><td>هزینه‌ی نظافت</td><td style="text-align:end">{{ toman($bd['cleaning'], false) }}</td></tr>@endif
-    @if(($bd['long_discount'] ?? 0) > 0)<tr><td>تخفیف اقامت طولانی</td><td style="text-align:end">−{{ toman($bd['long_discount'], false) }}</td></tr>@endif
-    @if($b->discount > 0)<tr><td>کد تخفیف {{ $b->coupon_code }}</td><td style="text-align:end">−{{ toman($b->discount, false) }}</td></tr>@endif
-    @if($b->service_fee > 0)<tr><td>کارمزد خدمات</td><td style="text-align:end">{{ toman($b->service_fee, false) }}</td></tr>@endif
-    <tr class="tot"><td>مبلغ کل</td><td style="text-align:end">{{ toman($b->total, false) }}</td></tr></tbody></table>
-  <p class="small muted" style="margin-top:18px">وضعیت: {{ $b->statusLabel() }} @if($b->paid_at)· پرداخت در {{ jdate($b->paid_at, 'j F Y H:i') }}@endif @foreach($b->payments->where('status','paid') as $pay)· کد پیگیری <span class="ltr">{{ $pay->ref_id }}</span>@endforeach</p>
-  <div class="row noprint" style="gap:8px;margin-top:18px"><button class="btn" onclick="print()">چاپ / ذخیره PDF</button><a class="btn btn-light" href="javascript:history.back()">بازگشت</a></div>
-</div></body></html>
+@extends('layouts.app')
+@section('title', 'فاکتور '.$b->code)
+@section('nofooter', '1')
+@section('bare')
+@php
+  $p = $b->property; $host = $p->host; $unlocked = $b->detailsUnlocked(); $bd = $b->breakdown ?? [];
+  $paid = $b->isPaid();
+  $first = $b->installments->firstWhere('seq', 1);
+  $canPay = $isGuest && $b->canPay();
+  $inst = $canPay && auth()->user()->canInstallment() && now()->diffInDays($b->check_in, false) >= (int) setting('installment_min_days');
+  $partsN = max(2, (int) setting('installment_parts'));
+  $firstAmt = intdiv($b->total * (int) setting('installment_first_pct'), 100);
+  $wallet = auth()->user()->wallet;
+@endphp
+<div class="container inv-wrap">
+  @include('partials.flash')
+  @if($isGuest)@include('partials.stepper', ['steps' => [['ثبت رزرو', 'receipt'], ['تأیید میزبان', 'check'], ['پرداخت', 'card'], ['رزرو قطعی', 'shield'], ['اقامت', 'home'], ['ثبت نظر', 'star']], 'at' => $b->stepState('guest')[0], 'bad' => $b->stepState('guest')[1]])@endif
+
+  <div class="inv-grid {{ $canPay || ($isGuest && ! $paid && $b->status === 'payment_review') ? '' : 'solo' }}">
+    <article class="inv" id="invoice">
+      <header class="inv-h">
+        <img src="{{ asset('img/mija-logo-h.png') }}" alt="می‌جا" height="38">
+        <div class="inv-no"><small>شماره‌ی فاکتور</small><b class="ltr">{{ $b->code }}</b><small>{{ jdate($b->created_at, 'j F Y — H:i') }}</small></div>
+      </header>
+      @if($paid)<div class="stamp ok"><x-icon name="check"/>پرداخت‌شده</div>@elseif(in_array($b->status, ['awaiting_payment', 'payment_review', 'pending_host']))<div class="stamp wait">{{ $b->status === 'payment_review' ? 'در حال بررسی' : 'پرداخت‌نشده' }}</div>@else<div class="stamp bad">{{ $b->statusLabel() }}</div>@endif
+
+      <div class="inv-parties">
+        <div><small>مهمان</small><b>{{ $b->guest->name }}</b>@if($unlocked)<span class="ltr">{{ fa($b->guest->phone) }}</span>@else<span class="muted xs">شماره پس از پرداخت</span>@endif</div>
+        <div><small>میزبان</small><b>{{ $host->name }}</b>@if($unlocked)<span class="ltr">{{ fa($host->phone) }}</span>@else<span class="muted xs">شماره پس از پرداخت</span>@endif</div>
+      </div>
+
+      <div class="inv-prop"><img src="{{ $p->cover() }}" alt=""><div><b>{{ $p->title }}</b><div class="small muted">{{ $p->province }}، {{ $p->city }} · {{ $p->typeLabel() }}</div>@if($unlocked)<div class="small" style="margin-top:4px"><x-icon name="pin" class="sm"/> {{ $p->address }}</div>@endif</div></div>
+
+      <div class="inv-dates">
+        <div><small>ورود</small><b>{{ jdate($b->check_in, 'l j F Y') }}</b><span>{{ fa($p->check_in_time) }}</span></div>
+        <div><small>خروج</small><b>{{ jdate($b->check_out, 'l j F Y') }}</b><span>{{ fa($p->check_out_time) }}</span></div>
+        <div><small>مدت</small><b>{{ fa($b->nights) }} شب</b><span>{{ fa($b->adults) }} بزرگسال@if($b->children) · {{ fa($b->children) }} کودک @endif</span></div>
+      </div>
+
+      <table class="inv-t">
+        <thead><tr><th>شرح</th><th>مبلغ</th></tr></thead>
+        <tbody>
+          @foreach(($bd['lines'] ?? []) as $ln)<tr class="ln"><td>{{ jdate($ln['date'], 'l j F') }} @if(($ln['flash'] ?? 0) > 0)<span class="badge red" style="padding:0 8px">{{ fa($ln['flash']) }}٪ تخفیف فوری</span>@endif</td><td>{{ toman($ln['price']) }}</td></tr>@endforeach
+          <tr><td>جمع اقامت ({{ fa($b->nights) }} شب)</td><td>{{ toman($bd['base'] ?? 0) }}</td></tr>
+          @if(($bd['extra'] ?? 0) > 0)<tr><td>هزینه‌ی نفر اضافه</td><td>{{ toman($bd['extra']) }}</td></tr>@endif
+          @if(($bd['cleaning'] ?? 0) > 0)<tr><td>نظافت</td><td>{{ toman($bd['cleaning']) }}</td></tr>@endif
+          @if(($bd['long_discount'] ?? 0) > 0)<tr class="off"><td>تخفیف اقامت طولانی ({{ fa($bd['long_pct']) }}٪)</td><td>−{{ toman($bd['long_discount']) }}</td></tr>@endif
+          @if(($bd['offer_pct'] ?? 0) > 0)<tr class="off"><td>تخفیف پیشنهادی میزبان ({{ fa($bd['offer_pct']) }}٪)</td><td>−{{ toman(($bd['total_before'] ?? $b->total) - $b->total) }}</td></tr>@endif
+          @if($b->discount > 0)<tr class="off"><td>کد تخفیف {{ $b->coupon_code }}</td><td>−{{ toman($b->discount) }}</td></tr>@endif
+        </tbody>
+        <tfoot><tr class="tot"><td>مبلغ قابل پرداخت</td><td>{{ toman($b->total) }}</td></tr></tfoot>
+      </table>
+      @if($b->is_installment && $b->installments->count())
+        <div class="inv-inst">@foreach($b->installments as $in)<div class="{{ $in->status }}"><b>قسط {{ fa($in->seq) }}</b><span>{{ toman($in->amount) }}</span><small>{{ $in->status === 'paid' ? 'پرداخت شد' : 'سررسید '.jdate($in->due_on, 'j F') }}</small></div>@endforeach</div>
+      @endif
+      <p class="inv-note">سیاست لغو: {{ $p->policy()['name'] }} — {{ $p->policy()['desc'] }}</p>
+      <div class="inv-actions noprint"><button class="btn btn-light btn-sm" onclick="print()"><x-icon name="download" class="sm"/> چاپ / ذخیره PDF</button><a class="btn btn-light btn-sm" href="{{ $isGuest ? route('guest.bookings.show', $b) : (auth()->user()->isHost() ? route('host.bookings.show', $b) : route('admin.bookings.show', $b)) }}">بازگشت به رزرو</a></div>
+    </article>
+
+    {{-- پنل پرداخت --}}
+    @if($canPay)
+    <aside class="pay noprint">
+      <div class="pay-card">
+        @include('partials.countdown', ['until' => $b->pay_by, 'total' => setting('payment_window_minutes') * 60, 'label' => 'فرصت پرداخت'])
+        <h3>پرداخت رزرو</h3>
+        <form method="post" action="{{ route('guest.bookings.pay', $b) }}" enctype="multipart/form-data" id="pay-form">@csrf
+          @if($inst)
+          <div class="pm-title">طرح پرداخت</div>
+          <div class="plan">
+            <label class="pm"><input type="radio" name="plan" value="full" checked><div class="pm-b"><b>پرداخت کامل</b><small>{{ toman($b->total) }}</small></div></label>
+            <label class="pm"><input type="radio" name="plan" value="installment"><div class="pm-b"><b>پرداخت اقساطی <span class="badge gold" style="padding:0 8px"><x-i3 name="p_crown" class="sm"/>ویژه شما</span></b><small>الان {{ toman($firstAmt) }} · بقیه در {{ fa($partsN - 1) }} قسط تا ۳ روز مانده به ورود</small></div></label>
+          </div>
+          <p class="xs muted" style="margin:6px 0 10px">این گزینه به‌دلیل امتیاز بالای شما در می‌جا برایتان فعال شده است.</p>
+          @endif
+          <div class="pm-title">روش پرداخت</div>
+          <label class="pm"><input type="radio" name="method" value="online" checked><div class="pm-b"><b><x-icon name="card" class="sm"/> پرداخت آنلاین ({{ $online }})</b><small>با تمام کارت‌های عضو شتاب</small></div></label>
+          <label class="pm @if($wallet < $b->total && ! $inst) dis @endif"><input type="radio" name="method" value="wallet"><div class="pm-b"><b><x-icon name="wallet" class="sm"/> کیف پول</b><small>موجودی: {{ toman($wallet) }}</small></div></label>
+          @if($cardOn)
+          <label class="pm"><input type="radio" name="method" value="card"><div class="pm-b"><b><x-icon name="receipt" class="sm"/> کارت‌به‌کارت</b><small>پس از واریز، کد پیگیری را ثبت کنید؛ با تأیید مدیر رزرو قطعی می‌شود</small></div></label>
+          <div class="pm-card" hidden>
+            @foreach($cards as $i => $c)
+              <label class="bankcard"><input type="radio" name="card_to" value="{{ $c['number'] }}" @checked($i === 0)><div><b class="ltr" id="cn{{ $i }}">{{ \App\Support\Payments::fmtCard($c['number']) }}</b><small>{{ $c['holder'] }} @if($c['bank']) · {{ $c['bank'] }} @endif</small></div><button type="button" class="btn btn-sm btn-light" data-copy="#cn{{ $i }}">کپی</button></label>
+            @endforeach
+            <input class="input" name="tracking_code" placeholder="کد پیگیری یا ۴ رقم آخر کارت مبدأ" value="{{ old('tracking_code') }}">
+            <label class="xs muted">تصویر رسید (اختیاری)</label><input class="input" type="file" name="receipt" accept="image/*">
+          </div>
+          @endif
+          @error('method')<div class="msg-e">{{ $message }}</div>@enderror @error('pay')<div class="msg-e">{{ $message }}</div>@enderror @error('tracking_code')<div class="msg-e">{{ $message }}</div>@enderror
+          <button class="btn btn-lg btn-block" id="pay-btn"><x-icon name="lock"/> <span id="pay-lbl">پرداخت {{ toman($b->total) }}</span></button>
+        </form>
+        <ul class="vp-trust"><li><x-i3 name="p_shield" class="sm"/>پرداخت امن</li><li><x-i3 name="p_lock" class="sm"/>اطلاعات محفوظ</li><li><x-i3 name="p_phone" class="sm"/>پشتیبانی</li></ul>
+      </div>
+    </aside>
+    <script>
+    (function(){var f=document.getElementById('pay-form');if(!f)return;var card=f.querySelector('.pm-card'),lbl=document.getElementById('pay-lbl');
+    var full={{ $b->total }},first={{ $inst ? $firstAmt : 0 }},fa=function(n){return String(n).replace(/\B(?=(\d{3})+(?!\d))/g,'٬').replace(/\d/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'[d]})};
+    function upd(){var m=(f.querySelector('input[name=method]:checked')||{}).value,pl=(f.querySelector('input[name=plan]:checked')||{value:'full'}).value;
+    if(card)card.hidden=m!=='card';var amt=pl==='installment'?first:full;lbl.textContent=(m==='card'?'ثبت پرداخت کارت‌به‌کارت ':'پرداخت ')+fa(amt)+' تومان';
+    f.querySelectorAll('.pm').forEach(function(l){var i=l.querySelector('input');l.classList.toggle('on',i.checked)})}
+    f.addEventListener('change',upd);upd()})();
+    </script>
+    @elseif($isGuest && ! $paid && $b->status === 'payment_review')
+    <aside class="pay noprint"><div class="pay-card"><h3>پرداخت در حال بررسی</h3><p class="small muted">پرداخت کارت‌به‌کارت شما ثبت شده و پس از تأیید مدیر، رزرو قطعی می‌شود.</p></div></aside>
+    @endif
+  </div>
+</div>
+@endsection

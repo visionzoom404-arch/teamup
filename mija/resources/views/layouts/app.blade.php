@@ -2,21 +2,28 @@
 <html lang="fa" dir="rtl">
 <head>@include('partials.head')@stack('head')</head>
 <body class="@yield('bodyclass')">
+@include('partials.impersonate')
 @include('partials.i3-defs')
 @include('partials.topbar')
 <main>
   @hasSection('bare')@yield('bare')@else<div class="container" style="padding-top:20px">@include('partials.flash')</div>@yield('content')@endif
 </main>
 @unless(View::hasSection('nofooter'))
-<footer class="footer">
+<footer class="footer2">
   <div class="container">
-    <div class="cols">
-      <div><img class="foot-logo" src="{{ asset('img/mija-logo-h.png') }}" alt="می‌جا" width="103" height="42"><p class="small" style="margin-top:10px"><b style="color:var(--gold-l)">{{ config('mija.tagline') }}.</b> از ویلای شمال تا کلبه‌ی جنگلی و بوم‌گردی کویر؛ مستقیم از میزبان، با قیمت شفاف، پرداخت امن و ضمانت بازگشت وجه.</p></div>
-      <div><h4>می‌جا</h4><a href="{{ route('page', 'about') }}">درباره ما</a><a href="{{ route('page', 'rules') }}">قوانین و سیاست‌های لغو</a><a href="{{ route('page', 'contact') }}">تماس با ما</a></div>
-      <div><h4>مهمانان</h4><a href="{{ route('search') }}">جستجوی اقامتگاه</a><a href="{{ route('register') }}">ثبت‌نام مهمان</a><a href="{{ route('login') }}">ورود</a></div>
-      <div><h4>میزبانان</h4><a href="{{ route('page', 'become-host') }}">میزبان شوید</a><a href="{{ route('register', ['as' => 'host']) }}">ثبت اقامتگاه</a></div>
+    <div class="f2-grid">
+      <div class="f2-brand">
+        <img class="foot-logo" src="{{ asset('img/mija-logo-h.png') }}" alt="می‌جا" width="103" height="42">
+        <p>{{ setting('footer_about') }}</p>
+        <div class="f2-contact">@if(setting('support_phone'))<a href="tel:{{ setting('support_phone') }}"><x-icon name="phone" class="sm"/> <span class="ltr">{{ fa(setting('support_phone')) }}</span></a>@endif @if(setting('support_email'))<a href="mailto:{{ setting('support_email') }}"><x-icon name="mail" class="sm"/> <span class="ltr">{{ setting('support_email') }}</span></a>@endif</div>
+      </div>
+      <div class="f2-links">
+        <div><h4>مهمانان</h4><a href="{{ route('search') }}">جستجوی اقامتگاه</a><a href="{{ route('register') }}">ثبت‌نام مهمان</a><a href="{{ route('page', 'rules-guest') }}">قوانین مهمانان</a><a href="{{ route('help') }}">راهنما</a></div>
+        <div><h4>میزبانان</h4><a href="{{ route('page', 'become-host') }}">میزبان شوید</a><a href="{{ route('register', ['as' => 'host']) }}">ثبت اقامتگاه</a><a href="{{ route('page', 'rules-host') }}">قوانین میزبانان</a><a href="{{ route('page', 'faq') }}">پرسش‌های متداول</a></div>
+        <div><h4>می‌جا</h4><a href="{{ route('page', 'about') }}">درباره ما</a><a href="{{ route('page', 'rules') }}">قوانین و مقررات</a><a href="{{ route('page', 'privacy') }}">حریم خصوصی</a><a href="{{ route('page', 'contact') }}">تماس با ما</a></div>
+      </div>
     </div>
-    <div class="copy">© {{ fa(jdate(now(), 'Y')) }} می‌جا — تمامی حقوق محفوظ است.</div>
+    <div class="f2-copy">© {{ fa(jdate(now(), 'Y')) }} می‌جا — تمامی حقوق محفوظ است.</div>
   </div>
 </footer>
 @endunless

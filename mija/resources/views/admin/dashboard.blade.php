@@ -26,7 +26,10 @@ $d2 = ['labels' => collect($propStatus)->keys()->map(fn ($k) => $stl[$k] ?? $k)-
 <div class="card mb" style="border-color:rgba(255,150,20,.5)"><h3>نیازمند اقدام</h3><div class="row wrap">
   @if($queue['properties'])<a class="btn btn-gold" href="{{ route('admin.properties', ['status' => 'pending']) }}">{{ fa($queue['properties']) }} اقامتگاه در انتظار تأیید</a>@endif
   @if($queue['payouts'])<a class="btn btn-blue" href="{{ route('admin.payouts') }}">{{ fa($queue['payouts']) }} درخواست برداشت</a>@endif
-  @if($queue['unverified'])<a class="btn btn-light" href="{{ route('admin.users', ['role' => 'host']) }}">{{ fa($queue['unverified']) }} میزبان تأیید‌نشده</a>@endif
+  @if($queue['unverified'])<a class="btn btn-light" href="{{ route('admin.users', ['id_status' => 'pending']) }}">{{ fa($queue['unverified']) }} هویت در انتظار بررسی</a>@endif
+  @if($queue['cards'])<a class="btn btn-gold" href="{{ route('admin.payments', ['tab' => 'review']) }}">{{ fa($queue['cards']) }} کارت‌به‌کارت در انتظار تأیید</a>@endif
+  @if($queue['reviews'])<a class="btn btn-blue" href="{{ route('admin.reviews') }}">{{ fa($queue['reviews']) }} نظر ارجاع‌شده از میزبان</a>@endif
+  @if($queue['ads'])<a class="btn btn-blue" href="{{ route('admin.ads', ['status' => 'pending']) }}">{{ fa($queue['ads']) }} تبلیغ در انتظار</a>@endif
 </div></div>
 @endif
 

@@ -13,7 +13,10 @@ use App\Models\Property;
 use App\Models\Review;
 use App\Models\Setting;
 use App\Models\User;
+use App\Support\Audit;
 use App\Support\Jalali;
+use App\Support\Payments;
+use App\Support\ReviewService;
 use Illuminate\Http\Request;
 
 class ManageController extends Controller
@@ -91,9 +94,46 @@ class ManageController extends Controller
         return view('admin.booking', ['b' => $booking->load(['property', 'guest', 'host', 'messages.sender', 'payments', 'review'])]);
     }
 
-    public function payments()
+    public function bookingUpdate(Request $r, Booking $booking)
     {
-        return view('admin.payments', ['items' => Payment::with(['user', 'booking'])->latest('id')->paginate(25)]);
+        $d = $r->validate(['status' => 'required|in:'.implode(',', array_keys(config('mija.booking_statuses'))), 'cancel_reason' => 'nullable|string|max:200', 'guest_note' => 'nullable|string|max:500']);
+        $booking->update($d);
+        Audit::log('booking.update', $booking->code, $d);
+
+        return back()->with('ok', 'رزرو به‌روزرسانی شد.');
+    }
+
+    public function bookingDestroy(Booking $booking)
+    {
+        Audit::log('booking.delete', $booking->code);
+        $booking->delete();
+
+        return redirect()->route('admin.bookings')->with('ok', 'رزرو حذف شد.');
+    }
+
+    public function payments(Request $r)
+    {
+        $tab = $r->query('tab', 'all');
+        $q = Payment::with(['user', 'booking'])->latest('id');
+        $tab === 'review' && $q->where('status', 'review');
+
+        return view('admin.payments', ['items' => $q->paginate(25)->withQueryString(), 'tab' => $tab, 'reviewCount' => Payment::where('status', 'review')->count(), 'cards' => Payments::cards()]);
+    }
+
+    public function cardApprove(Payment $payment)
+    {
+        Payments::approveCard($payment);
+        Audit::log('card.approve', "#{$payment->id}");
+
+        return back()->with('ok', 'پرداخت تأیید و رزرو قطعی شد.');
+    }
+
+    public function cardReject(Request $r, Payment $payment)
+    {
+        Payments::rejectCard($payment, $r->validate(['note' => 'nullable|string|max:200'])['note'] ?? null);
+        Audit::log('card.reject', "#{$payment->id}");
+
+        return back()->with('ok', 'پرداخت رد شد.');
     }
 
     /* ---------- تسویه‌ها ---------- */
@@ -105,8 +145,12 @@ class ManageController extends Controller
     public function payoutUpdate(Request $r, Payout $payout)
     {
         abort_unless($payout->status === 'pending', 422);
-        $d = $r->validate(['action' => 'required|in:paid,rejected', 'tracking_code' => 'nullable|string|max:40', 'note' => 'nullable|string|max:200']);
-        $payout->update(['status' => $d['action'], 'tracking_code' => $d['tracking_code'] ?? null, 'note' => $d['note'] ?? null, 'processed_at' => now()]);
+        $d = $r->validate(['action' => 'required|in:paid,rejected', 'tracking_code' => 'nullable|string|max:40', 'note' => 'nullable|string|max:200', 'receipt' => 'nullable|image|max:4096']);
+        if ($d['action'] === 'paid' && ! $r->hasFile('receipt') && empty($d['tracking_code'])) {
+            return back()->withErrors(['receipt' => 'برای ثبت واریز، رسید را بارگذاری کنید یا کد پیگیری را وارد کنید.']);
+        }
+        $payout->update(['status' => $d['action'], 'tracking_code' => $d['tracking_code'] ?? null, 'note' => $d['note'] ?? null, 'processed_at' => now(), 'receipt' => $r->file('receipt')?->store('payouts', 'public')]);
+        Audit::log('payout.'.$d['action'], "#{$payout->id}");
         if ($d['action'] === 'rejected') {
             $payout->host->walletChange($payout->amount, 'بازگشت درخواست برداشت ردشده');
         }
@@ -116,18 +160,45 @@ class ManageController extends Controller
     }
 
     /* ---------- نظرات ---------- */
-    public function reviews()
+    public function reviews(Request $r)
     {
-        return view('admin.reviews', ['items' => Review::with(['guest', 'property'])->latest('id')->paginate(20)]);
+        $tab = $r->query('tab', 'flagged');
+        $q = Review::with(['guest', 'property.host'])->latest('id');
+        match ($tab) {
+            'flagged' => $q->where('status', 'host_rejected'),
+            'pending' => $q->where('status', 'pending_host'),
+            'published' => $q->where('status', 'published'),
+            'removed' => $q->where('status', 'removed'),
+            default => null,
+        };
+
+        return view('admin.reviews', ['items' => $q->paginate(20)->withQueryString(), 'tab' => $tab, 'counts' => Review::selectRaw('status, count(*) c')->groupBy('status')->pluck('c', 'status')]);
     }
 
-    public function reviewToggle(Review $review)
+    public function reviewApprove(Review $review)
     {
-        $review->update(['is_published' => ! $review->is_published]);
-        $p = $review->property;
-        $p->update(['rating_avg' => round((float) $p->reviews()->avg('rating'), 2), 'reviews_count' => $p->reviews()->count()]);
+        ReviewService::adminApprove($review);
+        Audit::log('review.approve', "#{$review->id}");
 
-        return back();
+        return back()->with('ok', 'نظر منتشر شد.');
+    }
+
+    public function reviewRemove(Request $r, Review $review)
+    {
+        ReviewService::adminRemove($review, $r->validate(['note' => 'nullable|string|max:200'])['note'] ?? null);
+        Audit::log('review.remove', "#{$review->id}");
+
+        return back()->with('ok', 'نظر حذف شد (از دید مهمان و میزبان).');
+    }
+
+    public function reviewDestroy(Review $review)
+    {
+        $p = $review->property;
+        $review->delete();
+        $p->update(['rating_avg' => round((float) $p->reviews()->avg('rating'), 2), 'reviews_count' => $p->reviews()->count()]);
+        Audit::log('review.delete', "#{$review->id}");
+
+        return back()->with('ok', 'نظر برای همیشه حذف شد.');
     }
 
     /* ---------- امکانات ---------- */
@@ -142,6 +213,13 @@ class ManageController extends Controller
         Amenity::create($d + ['key' => 'c'.time().random_int(10, 99), 'sort' => (int) Amenity::max('sort') + 1, 'icon' => $d['icon'] ?? 'sparkle']);
 
         return back()->with('ok', 'امکانات اضافه شد.');
+    }
+
+    public function amenityUpdate(Request $r, Amenity $amenity)
+    {
+        $amenity->update($r->validate(['name' => 'required|string|max:60', 'grp' => 'required|in:feature,basic,rules,service']));
+
+        return back()->with('ok', 'امکانات ویرایش شد.');
     }
 
     public function amenityDestroy(Amenity $amenity)
@@ -169,6 +247,13 @@ class ManageController extends Controller
         return back()->with('ok', 'کد تخفیف ساخته شد.');
     }
 
+    public function couponDestroy(Coupon $coupon)
+    {
+        $coupon->delete();
+
+        return back();
+    }
+
     public function couponToggle(Coupon $coupon)
     {
         $coupon->update(['is_active' => ! $coupon->is_active]);
@@ -182,16 +267,28 @@ class ManageController extends Controller
         return view('admin.settings', ['peaks' => PeakPeriod::orderBy('starts_on')->get()]);
     }
 
+    /** گروه‌های تنظیمات و قوانین اعتبارسنجی هر کلید */
+    public const SETTINGS = [
+        'commission_percent' => 'required|integer|between:0,40', 'host_response_minutes' => 'required|integer|between:5,1440', 'payment_window_minutes' => 'required|integer|between:5,1440',
+        'offer_minutes' => 'required|integer|between:5,1440', 'min_payout' => 'required|integer|min:0', 'payout_hours_min' => 'required|integer|between:1,240', 'payout_hours_max' => 'required|integer|between:1,240',
+        'cashback_enabled' => 'boolean', 'cashback_percent' => 'required|integer|between:0,20', 'cashback_days' => 'required|integer|between:1,365',
+        'installment_enabled' => 'boolean', 'installment_threshold' => 'required|integer|min:0', 'installment_parts' => 'required|integer|between:2,6', 'installment_first_pct' => 'required|integer|between:10,90', 'installment_min_days' => 'required|integer|between:3,365',
+        'ads_enabled' => 'boolean', 'ad_banner_day' => 'required|integer|min:0', 'ad_click_cpc' => 'required|integer|min:0', 'ad_click_min' => 'required|integer|min:0', 'ad_ladder' => 'required|integer|min:0', 'ad_sms_each' => 'required|integer|min:0', 'ad_push_each' => 'required|integer|min:0',
+        'sms_enabled' => 'boolean', 'sms_provider' => 'nullable|string|max:20', 'sms_token' => 'nullable|string|max:300', 'sms_originator' => 'nullable|string|max:30', 'sms_base_url' => 'nullable|url|max:200',
+        'gateway_driver' => 'required|in:sandbox,zibal', 'zibal_merchants' => 'nullable|string|max:1000', 'cards' => 'nullable|string|max:2000', 'card_to_card_enabled' => 'boolean',
+        'support_phone' => 'nullable|string|max:40', 'support_email' => 'nullable|email|max:80', 'footer_about' => 'nullable|string|max:300',
+    ];
+
     public function settingsUpdate(Request $r)
     {
-        $d = $r->validate([
-            'commission_percent' => 'required|integer|between:0,40', 'service_fee_percent' => 'required|integer|between:0,20',
-            'host_response_hours' => 'required|integer|between:1,72', 'payment_window_minutes' => 'required|integer|between:10,1440',
-            'min_payout' => 'required|integer|min:0',
-        ]);
-        foreach ($d as $k => $v) {
-            Setting::put($k, $v);
+        $group = $r->input('group');
+        $keys = $r->input('keys', []);
+        $rules = collect(self::SETTINGS)->only($keys)->all();
+        $d = $r->validate($rules);
+        foreach ($rules as $k => $rule) {
+            Setting::put($k, str_contains($rule, 'boolean') ? (int) $r->boolean($k) : ($d[$k] ?? ''));
         }
+        Audit::log('settings.update', $group, array_keys($rules));
 
         return back()->with('ok', 'تنظیمات ذخیره شد.');
     }

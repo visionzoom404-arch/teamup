@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        foreach (['commission_percent', 'service_fee_percent', 'host_response_hours', 'payment_window_minutes', 'min_payout'] as $k) {
+        foreach (['commission_percent', 'host_response_minutes', 'payment_window_minutes', 'offer_minutes', 'min_payout'] as $k) {
             Setting::put($k, config("mija.$k"));
         }
 
@@ -48,6 +48,10 @@ class DatabaseSeeder extends Seeder
             User::updateOrCreate(['phone' => '09121111111'], ['name' => 'علی رضایی', 'bio' => 'هشت سال است در شمال میزبان مسافران هستم. تمیزی و آرامش مهمان‌ها اولویت اول من است؛ هر ساعت از شبانه‌روز پاسخگو هستم.', 'password' => $pw('host1234'), 'role' => 'host', 'host_verified' => true, 'sheba' => 'IR062960000000100324200001', 'bank_owner' => 'علی رضایی', 'city' => 'نوشهر']),
             User::updateOrCreate(['phone' => '09122222222'], ['name' => 'مریم احمدی', 'bio' => 'میزبان اقامتگاه‌های بوم‌گردی و باغ‌ویلا؛ عاشق پذیرایی با چای و شیرینی محلی.', 'password' => $pw('host1234'), 'role' => 'host', 'host_verified' => true, 'city' => 'رشت']),
         ];
+        foreach ($hosts as $i => $h) {   // میزبان‌های نمونه پذیرش‌شده‌اند
+            $h->update(['national_code' => $i ? '0499370899' : '0012345679', 'birth_date' => '1365/04/21', 'id_status' => 'verified', 'host_verified' => true,
+                'card_number' => '6037997000001234', 'bank_name' => 'ملی', 'sheba' => 'IR062960000000100324200001', 'bank_owner' => $h->name, 'host_onboarded_at' => now()]);
+        }
         $guest = User::updateOrCreate(['phone' => '09123333333'], ['name' => 'سارا محمدی', 'password' => $pw('guest1234'), 'role' => 'guest', 'wallet' => 2000000, 'city' => 'تهران']);
         User::updateOrCreate(['phone' => '09124444444'], ['name' => 'رضا کریمی', 'password' => $pw('guest1234'), 'role' => 'guest']);
 
@@ -83,6 +87,8 @@ class DatabaseSeeder extends Seeder
                 'weekly_discount' => 10, 'monthly_discount' => 25, 'min_nights' => 1, 'max_nights' => 30,
                 'instant_booking' => $inst, 'cancellation_policy' => $pol, 'status' => 'approved', 'featured' => $feat,
                 'lat' => 36.6 + $i / 50, 'lng' => 51.5 + $i / 40,
+                'house_rules' => ['pets' => in_array('pet', $am), 'smoking' => false, 'parties' => false, 'loud_music' => false, 'extra_guests' => false, 'shoes' => false, 'kids' => true, 'id_required' => true],
+                'price_seasons' => $i % 2 ? [] : ['summer' => (int) ($wd * 1.15), 'winter' => (int) ($wd * 0.9)],
                 'guide' => "آدرس دقیق: {$prov}، {$city}، انتهای جاده‌ی اصلی.\nکد درب ورودی: ۱۲۳۴ — رمز وای‌فای: mija1234\nکلید در جاکلیدی کنار در قرار دارد. برای هر مشکلی با من تماس بگیرید.",
             ])->save();
             $p->amenities()->sync(collect($am)->map(fn ($k) => $amen[$k])->all());
@@ -107,6 +113,7 @@ class DatabaseSeeder extends Seeder
             $pay = \App\Models\Payment::create(['user_id' => $guest->id, 'booking_id' => $up->id, 'amount' => $up->total, 'gateway' => 'sandbox', 'authority' => \Illuminate\Support\Str::random(32)]);
             BookingService::markPaid($up, $pay, 'S100200');
 
+            \App\Models\CalendarDay::create(['property_id' => $created[3]->id, 'date' => today()->toDateString(), 'discount_pct' => 20]);
             BookingService::create($guest, $created[1], today()->addDays(20), today()->addDays(22), 2, 0, null, 'سلام، ورود زودتر ممکن است؟');
         }
     }

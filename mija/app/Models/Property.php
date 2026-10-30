@@ -21,7 +21,7 @@ class Property extends Model
 
     protected function casts(): array
     {
-        return ['instant_booking' => 'boolean', 'featured' => 'boolean', 'rating_avg' => 'float'];
+        return ['instant_booking' => 'boolean', 'featured' => 'boolean', 'rating_avg' => 'float', 'house_rules' => 'array', 'price_dow' => 'array', 'price_months' => 'array', 'price_seasons' => 'array'];
     }
 
     protected static function booted(): void
@@ -49,7 +49,9 @@ class Property extends Model
     public function images(): HasMany { return $this->hasMany(PropertyImage::class)->orderBy('sort')->orderBy('id'); }
     public function amenities(): BelongsToMany { return $this->belongsToMany(Amenity::class); }
     public function bookings(): HasMany { return $this->hasMany(Booking::class); }
-    public function reviews(): HasMany { return $this->hasMany(Review::class)->where('is_published', true)->latest('id'); }
+    public function reviews(): HasMany { return $this->hasMany(Review::class)->where('status', 'published')->latest('id'); }
+    public function allReviews(): HasMany { return $this->hasMany(Review::class)->latest('id'); }
+    public function ads(): HasMany { return $this->hasMany(\App\Models\Ad::class); }
     public function days(): HasMany { return $this->hasMany(CalendarDay::class); }
 
     public function scopeApproved(Builder $q): Builder { return $q->where('status', 'approved'); }
@@ -71,9 +73,39 @@ class Property extends Model
         return $img ? $img->url() : asset('img/placeholder.svg');
     }
 
+    /** کمترین قیمت شب از دید میزبان (خالص) */
+    public function startingNet(): int
+    {
+        $c = array_filter(array_merge([$this->price_weekday, $this->price_weekend], array_values($this->price_dow ?? []), array_values($this->price_months ?? []), array_values($this->price_seasons ?? [])));
+
+        return (int) min($c);
+    }
+
+    /** کمترین قیمت شب به مهمان (با کمیسیون پنهان) */
     public function startingPrice(): int
     {
-        return (int) min($this->price_weekday, $this->price_weekend);
+        return Pricing::gross($this->startingNet(), Pricing::commissionFor($this->host));
+    }
+
+    /** مختصات تقریبی (حدود ۱٫۵ کیلومتر جابه‌جا) تا مهمان قبل از رزرو محل دقیق را نبیند */
+    public function approxCoords(): ?array
+    {
+        if (! $this->lat || ! $this->lng) {
+            return null;
+        }
+        $h = crc32('mija'.$this->id);
+        $dLat = ((($h % 1000) / 1000) - .5) * 0.02;
+        $dLng = (((intdiv($h, 1000) % 1000) / 1000) - .5) * 0.02;
+
+        return [round((float) $this->lat + $dLat, 5), round((float) $this->lng + $dLng, 5)];
+    }
+
+    /** قوانین اقامت برای نمایش: [کلید، عنوان، مجاز؟] */
+    public function rulesList(): array
+    {
+        $saved = $this->house_rules ?? [];
+
+        return collect(config('mija.house_rules'))->map(fn ($r) => [$r[0], $r[1], (bool) ($saved[$r[0]] ?? $r[2])])->all();
     }
 
     public function isAvailable(Carbon $in, Carbon $out): bool

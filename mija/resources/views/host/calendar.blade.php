@@ -1,7 +1,8 @@
 @extends('layouts.panel')
 @section('title', 'تقویم '.$p->title)
 @section('content')
-<div class="page-h"><div><a href="{{ route('host.properties.index') }}" class="small muted">← اقامتگاه‌ها</a><h1>تقویم و قیمت‌گذاری</h1><div class="muted">{{ $p->title }}</div></div></div>
+<div class="page-h"><div><a href="{{ route('host.properties.index') }}" class="small muted">← اقامتگاه‌ها</a><h1>تقویم و قیمت‌گذاری</h1><div class="muted">{{ $p->title }}</div></div><a class="btn btn-sm btn-blue" href="{{ route('host.pricing', $p) }}"><x-icon name="tag" class="sm"/> سیاست نرخ‌گذاری</a></div>
+@include('partials.help', ['title' => 'راهنمای تقویم', 'text' => 'قیمت زیر هر روز، دریافتی خالص شما برای همان شب است (با اعمال سیاست نرخ‌گذاری). روی روزها بزنید (انتخاب چندتایی) و قیمت دلخواه بگذارید یا آن‌ها را ببندید/باز کنید. رزروهای قطعی با نام مهمان نشان داده می‌شوند.'])
 <div class="card">
   <div class="row between" style="margin-bottom:14px">
     <a class="btn btn-sm btn-light btn-icon" href="{{ route('host.calendar', [$p, 'ym' => $next]) }}" aria-label="ماه بعد"><x-icon name="chev-r" class="sm"/></a>
@@ -17,7 +18,7 @@
         <b>{{ fa($d) }}</b>
         @if($c['booking'])<span class="who">{{ $c['booking']->guest->name }}</span>
         @elseif($c['blocked'])<span class="xs">بسته</span>
-        @else<span class="pr">{{ $c['price'] ? fa(number_format($c['price'] / 1000)).'هز' : '' }}</span>@endif
+        @else<span class="pr">{{ fa(number_format($c['eff'] / 1000)) }}هز</span>@if($c['discount'])<span class="fl-tag">{{ fa($c['discount']) }}٪−</span>@endif @endif
       </div>
     @endforeach
   </div>

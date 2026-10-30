@@ -49,6 +49,10 @@ class User extends Authenticatable
     public function transactions(): HasMany { return $this->hasMany(WalletTransaction::class)->latest('id'); }
     public function notices(): HasMany { return $this->hasMany(Notice::class)->latest('id'); }
     public function payouts(): HasMany { return $this->hasMany(Payout::class, 'host_id')->latest('id'); }
+    public function guestReviews(): HasMany { return $this->hasMany(GuestReview::class, 'guest_id')->latest('id'); }
+    public function cashbackLots(): HasMany { return $this->hasMany(CashbackLot::class)->latest('id'); }
+    public function serviceRequests(): HasMany { return $this->hasMany(ServiceRequest::class)->latest('id'); }
+    public function ads(): HasMany { return $this->hasMany(Ad::class, 'host_id')->latest('id'); }
     public function favorites(): BelongsToMany { return $this->belongsToMany(Property::class, 'favorites')->withTimestamps(); }
 
     public function roleLabel(): string
@@ -131,8 +135,9 @@ class User extends Authenticatable
         $first = $props->first();
 
         return [
+            ['ثبت اطلاعات هویتی', (bool) $this->national_code, route('host.onboard')],
+            ['ثبت شماره کارت و شبا برای تسویه', (bool) ($this->sheba && $this->card_number), route('host.onboard')],
             ['تکمیل پروفایل (عکس و معرفی)', (bool) ($this->avatar && $this->bio), route('profile')],
-            ['ثبت اطلاعات حساب بانکی (شبا)', (bool) $this->sheba, route('profile')],
             ['ثبت اولین اقامتگاه', (bool) $first, route('host.properties.create')],
             ['افزودن حداقل ۵ عکس', $this->properties()->withCount('images')->get()->contains(fn ($p) => $p->images_count >= 5), $first ? route('host.properties.edit', $first) : route('host.properties.create')],
             ['ارسال برای بررسی و تأیید', $this->properties()->where('status', 'approved')->exists(), route('host.properties.index')],
@@ -166,8 +171,42 @@ class User extends Authenticatable
         });
     }
 
-    public function notify(string $title, ?string $body = null, ?string $url = null): void
+    /** اعلان داخل سایت؛ با $sms = true همزمان پیامک (همراه لینک همان موضوع) هم ارسال می‌شود */
+    public function notify(string $title, ?string $body = null, ?string $url = null, bool $sms = false): void
     {
         Notice::create(['user_id' => $this->id, 'title' => $title, 'body' => $body, 'url' => $url]);
+        if ($sms) {
+            \App\Support\Sms::send($this->phone, $title.($body ? ' — '.$body : ''), $url);
+        }
+    }
+
+    /* ---------- میزبان: احراز هویت و حساب بانکی ---------- */
+
+    public function maskedCard(): ?string
+    {
+        return $this->card_number ? substr($this->card_number, 0, 4).' ●●●● ●●●● '.substr($this->card_number, -4) : null;
+    }
+
+    public function isOnboarded(): bool
+    {
+        return (bool) ($this->national_code && $this->sheba && $this->card_number && $this->host_onboarded_at);
+    }
+
+    /* ---------- مهمان: پیشینه و اقساط ---------- */
+
+    public function guestRating(): ?float
+    {
+        return ($n = $this->guestReviews()->count()) ? round((float) $this->guestReviews()->avg('rating'), 1) : null;
+    }
+
+    public function commissionPercent(): int
+    {
+        return \App\Support\Pricing::commissionFor($this);
+    }
+
+    /** رزرو اقساطی: فقط برای مهمانی که امتیاز لازم را کسب کرده (صندوق پنهان کامل شده) */
+    public function canInstallment(): bool
+    {
+        return (bool) setting('installment_enabled') && $this->installment_unlocked;
     }
 }

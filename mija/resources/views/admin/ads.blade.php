@@ -1,0 +1,14 @@
+@extends('layouts.panel')
+@section('title', 'تبلیغات میزبانان')
+@section('content')
+<div class="page-h"><div><h1>تبلیغات میزبانان</h1><div class="muted">درآمد تبلیغات: {{ toman($income) }}</div></div></div>
+<form class="row wrap mb" method="get"><select name="status" style="width:auto" onchange="this.form.submit()"><option value="">همه‌ی وضعیت‌ها</option>@foreach(['pending' => 'در انتظار', 'active' => 'فعال', 'finished' => 'پایان یافته', 'rejected' => 'ردشده'] as $k => $l)<option value="{{ $k }}" @selected(request('status') == $k)>{{ $l }}</option>@endforeach</select><select name="type" style="width:auto" onchange="this.form.submit()"><option value="">همه‌ی انواع</option>@foreach(config('mija.ad_types') as $k => $t)<option value="{{ $k }}" @selected(request('type') == $k)>{{ $t[0] }}</option>@endforeach</select></form>
+@forelse($items as $a)
+<div class="card mb"><div class="row between wrap" style="gap:12px"><div class="grow"><div class="row wrap"><span class="badge orange">{{ $a->typeLabel() }}</span><b>{{ $a->property?->title }}</b><span class="muted small">میزبان: {{ $a->host->name }}</span><span class="badge {{ ['pending' => 'gold', 'active' => 'green', 'finished' => 'dark', 'rejected' => 'red'][$a->status] ?? 'gray' }}">{{ ['pending' => 'در انتظار', 'active' => 'فعال', 'finished' => 'پایان', 'rejected' => 'رد'][$a->status] ?? $a->status }}</span></div>
+  <div class="small muted" style="margin-top:4px">بودجه {{ toman($a->budget) }} · مصرف {{ toman($a->spent) }} · @if(in_array($a->type, ['sms', 'push']))مخاطب {{ fa($a->units) }} ({{ $a->audience }}) · ارسال‌شده {{ fa($a->sent) }}@elseif($a->type === 'click')نمایش {{ fa($a->impressions) }} · کلیک {{ fa($a->clicks) }}@else {{ fa($a->units) }} روز@endif</div>
+  @if($a->title || $a->text)<div class="small" style="margin-top:4px">«{{ $a->title }}» {{ $a->text }}</div>@endif</div>
+  @if($a->status === 'pending')<div class="row wrap" style="gap:6px"><form method="post" action="{{ route('admin.ads.approve', $a) }}">@csrf<button class="btn btn-green btn-sm">{{ in_array($a->type, ['sms', 'push']) ? 'تأیید و ارسال' : 'تأیید و فعال‌سازی' }}</button></form><form method="post" action="{{ route('admin.ads.reject', $a) }}" class="row" style="gap:6px">@csrf<input class="input" name="note" placeholder="دلیل رد" style="padding:6px 10px"><button class="btn btn-sm btn-ghost">رد</button></form></div>
+  @elseif($a->status === 'active')<form method="post" action="{{ route('admin.ads.reject', $a) }}">@csrf<input type="hidden" name="note" value="توقف توسط مدیر"><button class="btn btn-sm btn-ghost">توقف و بازگشت بودجه</button></form>@endif</div></div>
+@empty<div class="card empty"><x-icon name="bolt"/><p>تبلیغی نیست.</p></div>@endforelse
+@include('partials.pager', ['paginator' => $items])
+@endsection

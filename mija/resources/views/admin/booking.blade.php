@@ -16,5 +16,7 @@
     <h4 style="margin-top:14px">پرداخت‌ها</h4>@forelse($b->payments as $pay)<div class="qrow small"><span>{{ $pay->gateway }} · {{ $pay->ref_id }}</span><span>{{ toman($pay->amount) }} · {{ $pay->status }}</span></div>@empty<div class="muted small">—</div>@endforelse
   </div>
 </div>
+<form method="post" action="{{ route('admin.bookings.update', $b) }}" class="card mt">@csrf<h3>ویرایش مدیر</h3><div class="grid3"><div class="field"><label>وضعیت</label><select name="status">@foreach(config('mija.booking_statuses') as $k => $s)<option value="{{ $k }}" @selected($b->status === $k)>{{ $s[0] }}</option>@endforeach</select></div><div class="field"><label>یادداشت مهمان</label><input class="input" name="guest_note" value="{{ $b->guest_note }}"></div><div class="field"><label>دلیل لغو/رد</label><input class="input" name="cancel_reason" value="{{ $b->cancel_reason }}"></div></div><button class="btn btn-sm">ذخیره</button></form>
+<form method="post" action="{{ route('admin.bookings.destroy', $b) }}" onsubmit="return confirm('رزرو حذف شود؟')" style="margin-top:8px">@csrf @method('DELETE')<button class="btn btn-sm btn-danger">حذف رزرو</button></form>
 @if($b->messages->count())<div class="card mt"><h3>گفتگوها</h3><div class="chat">@foreach($b->messages as $m)<div class="msg {{ $m->sender_id === $b->guest_id ? '' : 'mine' }}"><small>{{ $m->sender->name }}</small>{{ $m->body }}</div>@endforeach</div></div>@endif
 @endsection

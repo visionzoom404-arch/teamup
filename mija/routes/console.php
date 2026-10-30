@@ -9,4 +9,4 @@ Artisan::command('mija:tick', function () {
     $this->info("منقضی: {$r['expired']} | تسویه: {$r['settled']} | اتمام: {$r['completed']}");
 })->purpose('انقضای رزروها، تسویه با میزبان و اتمام اقامت‌ها');
 
-Schedule::command('mija:tick')->everyFiveMinutes();
+Schedule::command('mija:tick')->everyMinute();

@@ -1,20 +1,23 @@
 @php
 $u = auth()->user();
 $pending = $u->isHost() ? $u->hostBookings()->where('status', 'pending_host')->count() : ($u->isAdmin() ? \App\Models\Property::where('status', 'pending')->count() : 0);
+$adminBadge = $u->isAdmin() ? ['props' => \App\Models\Property::where('status', 'pending')->count(), 'cards' => \App\Models\Payment::where('status', 'review')->count(), 'reviews' => \App\Models\Review::where('status', 'host_rejected')->count(), 'ads' => \App\Models\Ad::where('status', 'pending')->count(), 'payouts' => \App\Models\Payout::where('status', 'pending')->count()] : [];
 $menus = [
  'guest' => [
   ['guest.dashboard', 'داشبورد', 'home'], ['guest.bookings', 'سفرهای من', 'calendar'], ['guest.favorites', 'علاقه‌مندی‌ها', 'heart'],
-  ['guest.wallet', 'کیف پول', 'wallet'], ['notices', 'اعلان‌ها', 'bell'], ['profile', 'پروفایل', 'user'],
+  ['guest.wallet', 'کیف پول', 'wallet'], ['notices', 'اعلان‌ها', 'bell'], ['profile', 'پروفایل', 'user'], ['help', 'راهنما', 'compass'],
  ],
  'host' => [
   ['host.dashboard', 'داشبورد', 'chart'], ['host.properties.index', 'اقامتگاه‌های من', 'home'], ['host.bookings', 'رزروها', 'calendar', $pending],
-  ['host.wallet', 'کیف پول و برداشت', 'wallet'], ['host.reviews', 'نظرات مهمانان', 'star'], ['host.coupons', 'کد تخفیف', 'tag'],
-  ['notices', 'اعلان‌ها', 'bell'], ['profile', 'پروفایل و حساب بانکی', 'user'],
+  ['host.ads', 'تبلیغات', 'megaphone'], ['host.wallet', 'کیف پول و برداشت', 'wallet'], ['host.reviews', 'نظرات مهمانان', 'star', \App\Models\Review::whereIn('property_id', $u->properties()->pluck('id'))->where('status', 'pending_host')->count()], ['host.coupons', 'کد تخفیف', 'tag'],
+  ['notices', 'اعلان‌ها', 'bell'], ['profile', 'پروفایل و حساب بانکی', 'user'], ['help', 'راهنما', 'compass'],
  ],
  'admin' => [
-  ['admin.dashboard', 'داشبورد', 'chart'], ['admin.properties', 'اقامتگاه‌ها', 'home', $pending], ['admin.bookings', 'رزروها', 'calendar'],
-  ['admin.users', 'کاربران', 'users'], ['admin.payments', 'پرداخت‌ها', 'coins'], ['admin.payouts', 'برداشت‌ها', 'wallet'],
-  ['admin.reviews', 'نظرات', 'star'], ['admin.amenities', 'امکانات', 'list'], ['admin.coupons', 'کد تخفیف', 'tag'],
+  ['admin.dashboard', 'داشبورد', 'chart'], ['admin.properties', 'اقامتگاه‌ها', 'home', $adminBadge['props'] ?? 0], ['admin.bookings', 'رزروها', 'calendar'],
+  ['admin.users', 'کاربران', 'users'], ['admin.payments', 'پرداخت‌ها', 'coins', $adminBadge['cards'] ?? 0], ['admin.payouts', 'برداشت‌ها', 'wallet', $adminBadge['payouts'] ?? 0],
+  ['admin.reviews', 'نظرات', 'star', $adminBadge['reviews'] ?? 0], ['admin.ads', 'تبلیغات', 'megaphone', $adminBadge['ads'] ?? 0], ['admin.amenities', 'امکانات', 'list'], ['admin.coupons', 'کد تخفیف', 'tag'],
+  ['admin.pages', 'صفحه‌ها و متن‌ها', 'file'], ['admin.words', 'کلمات ممنوع', 'ban'], ['admin.broadcast', 'ارسال همگانی', 'mail'], ['admin.sms', 'گزارش پیامک', 'phone'],
+  ['admin.activity', 'گزارش فعالیت', 'activity'], ['admin.pool', 'صندوق اقساط', 'coins'],
   ['admin.settings', 'تنظیمات و کمیسیون', 'settings'], ['profile', 'پروفایل', 'user'],
  ],
 ][$u->role];
@@ -33,6 +36,7 @@ $quick = array_slice($menus, 0, 4);
 <html lang="fa" dir="rtl">
 <head>@include('partials.head')@stack('head')</head>
 <body>
+@include('partials.impersonate')
 @include('partials.i3-defs')
 @include('partials.topbar')
 <div class="container">
@@ -50,6 +54,7 @@ $quick = array_slice($menus, 0, 4);
       <form method="post" action="{{ route('logout') }}">@csrf<button class="item" style="width:100%;background:none;border:0;font:inherit;cursor:pointer;display:flex;align-items:center;gap:12px;padding:11px 14px;font-weight:600;color:var(--red-d)"><x-icon name="logout"/>خروج</button></form>
     </aside>
     <section>
+      @if($u->isAdmin())<form method="get" action="{{ route('admin.search') }}" class="adm-search"><x-icon name="search" class="sm"/><input class="input" name="q" placeholder="جستجوی کاربر، شماره، کد رزرو یا اقامتگاه…"><button class="btn btn-sm">جستجو</button></form>@endif
       <div class="ctx-strip {{ $u->role }}"><x-i3 name="{{ ['guest' => 'user', 'host' => 'key', 'admin' => 'shield'][$u->role] }}" class="sm"/> شما در <b>پنل {{ $roleName }}</b> هستید @if($u->isAdmin())· دسترسی کامل مدیریتی @endif</div>
       @include('partials.flash')
       @yield('content')
@@ -60,7 +65,7 @@ $quick = array_slice($menus, 0, 4);
 <nav class="bottomnav" aria-label="منوی پنل">
   <ul>
     @foreach($quick as $m)
-      <li><a href="{{ route($m[0]) }}" class="{{ $isOn($m[0]) ? 'on' : '' }}"><x-i3 name="{{ ['home'=>'p_house','chart'=>'trend','calendar'=>'p_calendar','heart'=>'p_heart','wallet'=>'p_wallet','bell'=>'p_bell','user'=>'user','users'=>'family','star'=>'p_star','tag'=>'p_tag','coins'=>'p_coin','list'=>'receipt','settings'=>'p_key'][$m[2]] ?? 'sparkle' }}"/><span>{{ \Illuminate\Support\Str::before($m[1], ' ') }}</span>@if(!empty($m[3]))<span class="dot">{{ fa($m[3]) }}</span>@endif</a></li>
+      <li><a href="{{ route($m[0]) }}" class="{{ $isOn($m[0]) ? 'on' : '' }}"><x-i3 name="{{ ['home'=>'p_house','megaphone'=>'p_bell','compass'=>'p_compass','file'=>'receipt','ban'=>'p_shield','mail'=>'p_chat','activity'=>'trend','chart'=>'trend','calendar'=>'p_calendar','heart'=>'p_heart','wallet'=>'p_wallet','bell'=>'p_bell','user'=>'user','users'=>'family','star'=>'p_star','tag'=>'p_tag','coins'=>'p_coin','list'=>'receipt','settings'=>'p_key'][$m[2]] ?? 'sparkle' }}"/><span>{{ \Illuminate\Support\Str::before($m[1], ' ') }}</span>@if(!empty($m[3]))<span class="dot">{{ fa($m[3]) }}</span>@endif</a></li>
     @endforeach
     <li><button type="button" id="more-btn"><x-i3 name="sparkle"/><span>بیشتر</span></button></li>
   </ul>

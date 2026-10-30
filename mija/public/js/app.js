@@ -115,7 +115,8 @@
         if (iso === start) cls.push('start'); if (iso === end) cls.push('end');
         if (start && end && iso > start && iso < end) cls.push('range');
         const pr = prices[iso]; if (pr && base && pr > base * 1.05) cls.push('hot');
-        h += '<button type="button" class="' + cls.join(' ') + '" data-iso="' + iso + '"' + (dis ? ' disabled' : '') + '>' + Jalali.fa(d) + (pr ? '<small>' + short(pr) + '</small>' : '') + '</button>';
+        const booked = unavail.has(iso) && iso >= today; if (booked) cls.push('booked'); else if (iso < today) cls.push('past');
+        h += '<button type="button" class="' + cls.join(' ') + '" data-iso="' + iso + '"' + (dis ? ' disabled' : '') + '>' + Jalali.fa(d) + (booked ? '<small>پر</small>' : (pr && iso >= today ? '<small>' + short(pr) + '</small>' : '')) + '</button>';
       }
       return '<div><div class="rp-head"><span>' + Jalali.months[jm - 1] + ' ' + Jalali.fa(jy) + '</span></div>' + h + '</div></div>';
     }
@@ -124,7 +125,7 @@
       let html = '<div class="rp-head" style="margin-bottom:6px"><button type="button" class="rp-nav" data-nav="1" aria-label="ماه بعد">›</button><span class="muted small">' + (start && !end ? 'تاریخ خروج را انتخاب کنید' : 'تاریخ ورود را انتخاب کنید') + '</span><button type="button" class="rp-nav" data-nav="-1" aria-label="ماه قبل">‹</button></div><div class="rp-months">';
       let y = vy, m = vm;
       for (let i = 0; i < n; i++) { html += month(y, m); if (++m > 12) { m = 1; y++; } }
-      html += '</div><div class="rp-foot"><button type="button" class="btn btn-sm btn-ghost" data-clear>پاک کردن</button><button type="button" class="btn btn-sm" data-close>تأیید</button></div>';
+      html += '</div><div class="rp-legend"><span><i class="free"></i>خالی (قیمت شب)</span><span><i class="hot"></i>گران‌تر</span><span><i class="booked"></i>پر / غیرقابل رزرو</span></div><div class="rp-foot"><button type="button" class="btn btn-sm btn-ghost" data-clear>پاک کردن</button><button type="button" class="btn btn-sm" data-close>تأیید</button></div>';
       pop.innerHTML = html;
     }
     const open = () => { render(); pop.classList.add('open'); };
@@ -225,3 +226,21 @@ document.addEventListener('click', async e => {
   try { await navigator.clipboard.writeText(el.textContent.trim()); } catch (_) { const r = document.createRange(); r.selectNode(el); getSelection().removeAllRanges(); getSelection().addRange(r); document.execCommand('copy'); }
   const t = b.innerHTML; b.textContent = 'کپی شد'; setTimeout(() => b.innerHTML = t, 1600);
 });
+
+/* ---------- شمارش معکوس فارسی (حلقه‌ی پیشرفت) ---------- */
+(function () {
+  const fa = s => String(s).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+  document.querySelectorAll('[data-cd]').forEach(el => {
+    const end = new Date(el.dataset.cd).getTime(), total = +el.dataset.total || 1800;
+    const t = el.querySelector('[data-cd-t]'), fg = el.querySelector('.fg'), C = 327;
+    const skew = (+el.dataset.left * 1000) - (end - Date.now());   // اختلاف ساعت سرور و مرورگر
+    const tick = () => {
+      const left = Math.max(0, Math.round((end - Date.now() + skew) / 1000));
+      t.textContent = fa(String(Math.floor(left / 60)).padStart(2, '0') + ':' + String(left % 60).padStart(2, '0'));
+      if (fg) fg.style.strokeDashoffset = C * (1 - Math.min(1, left / total));
+      el.classList.toggle('low', left < 300); el.classList.toggle('done', left === 0);
+      if (left === 0) { clearInterval(iv); setTimeout(() => location.reload(), 2500); }
+    };
+    const iv = setInterval(tick, 1000); tick();
+  });
+})();

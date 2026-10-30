@@ -87,8 +87,21 @@ class ProfileController extends Controller
     {
         abort_unless($user->isHost() && $user->is_active, 404);
         $props = $user->properties()->approved()->with('images')->latest('id')->get();
-        $reviews = \App\Models\Review::with(['guest', 'property'])->where('is_published', true)->whereIn('property_id', $props->pluck('id'))->latest('id')->take(8)->get();
+        $reviews = \App\Models\Review::with(['guest', 'property'])->published()->whereIn('property_id', $props->pluck('id'))->latest('id')->take(8)->get();
 
         return view('host-public', ['h' => $user, 'hs' => $user->hostStats(), 'props' => $props, 'reviews' => $reviews]);
+    }
+
+    /** صفحه‌ی عمومی مهمان: اقامتگاه‌های رزروکرده، نظرها و عکس‌های منتشرشده */
+    public function publicGuest(User $user)
+    {
+        abort_unless($user->isGuest() && $user->is_active, 404);
+        $reviews = \App\Models\Review::with('property')->published()->where('guest_id', $user->id)->latest('id')->get();
+        $trips = $user->bookings()->with('property.images')->where('status', 'completed')->latest('check_out')->get()->unique('property_id');
+
+        return view('guest-public', [
+            'g' => $user, 'lv' => $user->level(), 'reviews' => $reviews, 'trips' => $trips,
+            'photos' => $reviews->flatMap(fn ($r) => $r->photoUrls())->take(12),
+        ]);
     }
 }

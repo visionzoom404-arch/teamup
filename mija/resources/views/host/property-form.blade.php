@@ -1,17 +1,20 @@
 @extends('layouts.panel')
 @section('title', $p->exists ? 'ویرایش اقامتگاه' : 'ثبت اقامتگاه')
+@push('head')<link rel="stylesheet" href="{{ asset('vendor/leaflet/leaflet.css') }}">@endpush
+@push('vendor')<script src="{{ asset('vendor/leaflet/leaflet.js') }}"></script>@endpush
 @section('content')
 @php
+ $pre = auth()->user()->isAdmin() ? 'admin.' : 'host.';
  $v = fn ($k, $d = null) => old($k, $p->$k ?? $d);
  $selAm = old('amenities', $p->exists ? $p->amenities->pluck('id')->all() : []);
  $groups = ['feature' => 'امکانات ویژه', 'basic' => 'امکانات پایه', 'service' => 'خدمات', 'rules' => 'قوانین و پذیرش'];
 @endphp
 <div class="page-h"><h1>{{ $p->exists ? 'ویرایش: '.$p->title : 'ثبت اقامتگاه جدید' }}</h1>
-  @if($p->exists)<div class="row"><a class="btn btn-sm btn-blue" href="{{ route('host.calendar', $p) }}"><x-icon name="calendar" class="sm"/> تقویم</a>@if(in_array($p->status, ['draft','rejected']))<form method="post" action="{{ route('host.properties.submit', $p) }}">@csrf<button class="btn btn-sm btn-green">ارسال برای بررسی</button></form>@endif</div>@endif</div>
+  @if($p->exists)<div class="row wrap"><a class="btn btn-sm btn-blue" href="{{ route($pre.'pricing', $p) }}"><x-icon name="tag" class="sm"/> سیاست نرخ‌گذاری</a>@if(! auth()->user()->isAdmin())<a class="btn btn-sm btn-blue" href="{{ route('host.calendar', $p) }}"><x-icon name="calendar" class="sm"/> تقویم</a>@if(in_array($p->status, ['draft','rejected']))<form method="post" action="{{ route('host.properties.submit', $p) }}">@csrf<button class="btn btn-sm btn-green">ارسال برای بررسی</button></form>@endif @endif</div>@endif</div>
 @if($p->exists && $p->reject_reason)<div class="alert bad"><x-icon name="info"/>دلیل عدم تأیید: {{ $p->reject_reason }}</div>@endif
 
 <div class="pf-steps" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i><i></i><i></i></div>
-<form id="pform" method="post" enctype="multipart/form-data" action="{{ $p->exists ? route('host.properties.update', $p) : route('host.properties.store') }}" class="stack">
+<form id="pform" method="post" enctype="multipart/form-data" action="{{ $p->exists ? route($pre.'properties.update', $p) : route('host.properties.store') }}" class="stack">
   @csrf
   <div class="card pf-step on"><h3>۱. اطلاعات اصلی</h3>
     <div class="field"><label>عنوان آگهی</label><input class="input" name="title" value="{{ $v('title') }}" required placeholder="مثلاً: ویلای استخردار با ویوی جنگل در نوشهر"></div>
@@ -21,7 +24,11 @@
       <div class="field"><label>شهر / منطقه</label><input class="input" name="city" id="city" list="cities" value="{{ $v('city') }}" required><datalist id="cities">@foreach(config('mija.provinces') as $cs)@foreach($cs as $c)<option value="{{ $c }}">@endforeach @endforeach</datalist></div>
     </div>
     <div class="field"><label>آدرس (فقط پس از قطعی شدن رزرو نمایش داده می‌شود)</label><input class="input" name="address" value="{{ $v('address') }}"></div>
-    <div class="grid2"><div class="field"><label>عرض جغرافیایی (اختیاری)</label><input class="input" dir="ltr" name="lat" value="{{ $v('lat') }}" placeholder="36.6500"></div><div class="field"><label>طول جغرافیایی (اختیاری)</label><input class="input" dir="ltr" name="lng" value="{{ $v('lng') }}" placeholder="51.5000"></div></div>
+    <div class="field"><label>موقعیت دقیق روی نقشه</label>
+      <div class="map-pick" data-map-pick></div>
+      <div class="row wrap" style="gap:8px;margin-top:8px"><button type="button" class="btn btn-sm btn-light" id="map-me"><x-icon name="pin" class="sm"/> موقعیت فعلی من</button><span class="xs muted">روی نقشه بزنید یا نشانگر را بکشید. این موقعیت فقط پس از پرداخت مهمان دقیق نمایش داده می‌شود؛ پیش از آن، محدوده‌ای تقریبی دیده می‌شود.</span></div>
+      <input type="hidden" name="lat" id="lat" value="{{ $v('lat') }}"><input type="hidden" name="lng" id="lng" value="{{ $v('lng') }}">
+      @error('lat')<div class="msg-e">موقعیت را روی نقشه مشخص کنید.</div>@enderror</div>
     <div class="field"><label>توضیحات</label><textarea class="input" name="description" required minlength="30" style="min-height:150px">{{ $v('description') }}</textarea></div>
   </div>
 
@@ -32,12 +39,11 @@
       <div class="field"><label>اتاق خواب</label><input class="input" type="number" min="0" name="bedrooms" value="{{ $v('bedrooms') }}" required></div>
       <div class="field"><label>تعداد تخت</label><input class="input" type="number" min="1" name="beds" value="{{ $v('beds') }}" required></div>
       <div class="field"><label>سرویس بهداشتی</label><input class="input" type="number" min="0" name="bathrooms" value="{{ $v('bathrooms') }}" required></div>
-      <div class="field"><label>متراژ بنا</label><input class="input" type="number" name="area" value="{{ $v('area') }}"></div>
-      <div class="field"><label>متراژ زمین</label><input class="input" type="number" name="land_area" value="{{ $v('land_area') }}"></div>
     </div>
   </div>
 
   <div class="card pf-step"><h3>۳. قیمت‌گذاری (تومان، هر شب)</h3>
+    <div class="alert info"><x-icon name="info"/><div><b>عددی که وارد می‌کنید، دریافتی خالص شماست.</b> می‌جا کمیسیون خود را به قیمتِ نمایشی مهمان اضافه می‌کند. زیر هر کادر می‌بینید مهمان چه قیمتی را می‌بیند. قیمت روزهای هفته، ماهانه و فصلی را بعد از ذخیره در «سیاست نرخ‌گذاری» تنظیم کنید.</div></div>
     <div class="grid3">
       <div class="field"><label>میان‌هفته (شنبه تا چهارشنبه)</label><input class="input" dir="ltr" type="number" name="price_weekday" value="{{ $v('price_weekday') }}" required data-money></div>
       <div class="field"><label>آخر هفته (پنجشنبه و جمعه)</label><input class="input" dir="ltr" type="number" name="price_weekend" value="{{ $v('price_weekend') }}" required data-money></div>
@@ -60,6 +66,9 @@
     <div class="field"><label>سیاست لغو</label>
       <div class="stack">@foreach(config('mija.cancellation_policies') as $k => $pl)<label class="check" style="align-items:flex-start"><input type="radio" name="cancellation_policy" value="{{ $k }}" @checked($v('cancellation_policy') === $k)><div><b>{{ $pl['name'] }}</b><div class="xs muted" style="font-weight:500">{{ $pl['desc'] }}</div></div></label>@endforeach</div></div>
     <label class="check"><input type="checkbox" name="instant_booking" value="1" @checked($v('instant_booking'))><div><b><x-icon name="bolt" class="sm"/> رزرو فوری</b><div class="xs muted" style="font-weight:500">مهمان بدون انتظار برای تأیید شما رزرو و پرداخت می‌کند (نرخ رزرو بیشتر).</div></div></label>
+    <h4 class="muted" style="margin:16px 0 8px">قوانین اقامت (مهمان پیش از رزرو می‌بیند)</h4>
+    <div class="rules-edit">@foreach(config('mija.house_rules') as [$rk, $rl, $rd])@php $cur = old('house_rules.'.$rk, ($p->house_rules[$rk] ?? $rd) ? 1 : 0); @endphp<div class="rule-row"><span>{{ $rl }}</span><div class="seg2"><label><input type="radio" name="house_rules[{{ $rk }}]" value="1" @checked($cur == 1)><i class="ok">مجاز</i></label><label><input type="radio" name="house_rules[{{ $rk }}]" value="0" @checked($cur == 0)><i class="no">ممنوع</i></label></div></div>@endforeach</div>
+    <p class="xs muted">رعایت قوانین جمهوری اسلامی ایران و ثبت مشخصات مسافران برای همه‌ی اقامتگاه‌ها الزامی است.</p>
     <div class="field mt"><label>راهنمای ورود (فقط پس از قطعی شدن رزرو به مهمان نمایش داده می‌شود)</label><textarea class="input" name="guide" placeholder="آدرس دقیق، مسیر، کد درب، رمز وای‌فای، نحوه تحویل کلید…">{{ $v('guide') }}</textarea></div>
     <div class="field mt"><label>قوانین خاص اقامتگاه</label><textarea class="input" name="rules" placeholder="مثلاً: استعمال دخانیات در داخل ساختمان ممنوع…">{{ $v('rules') }}</textarea></div>
   </div>
@@ -68,7 +77,7 @@
     @foreach($groups as $gk => $gl)<h4 class="muted" style="margin:12px 0 8px">{{ $gl }}</h4><div class="amen-grid">@foreach($amenities->where('grp', $gk) as $a)<label class="check"><input type="checkbox" name="amenities[]" value="{{ $a->id }}" @checked(in_array($a->id, $selAm))><x-i3 :name="$a->i3()" class="sm"/> {{ $a->name }}</label>@endforeach</div>@endforeach
   </div>
 
-  <div class="card pf-step"><h3>۶. عکس‌ها</h3>
+  <div class="card pf-step"><h3>۶. عکس‌های واقعی اقامتگاه</h3><div class="alert info"><x-icon name="info"/>حداقل ۳ عکس واقعی که خودتان از اقامتگاه گرفته‌اید بارگذاری کنید؛ بدون عکس، اقامتگاه برای بررسی ارسال نمی‌شود.</div>
     @if($p->exists && $p->images->count())<div class="imgs" style="margin-bottom:14px">@foreach($p->images as $i => $im)<div class="im"><img src="{{ $im->url() }}" alt="">
       <button class="btn btn-sm btn-icon btn-dark x" type="submit" form="del-{{ $im->id }}" aria-label="حذف"><x-icon name="trash" class="sm"/></button>
       @if($i > 0)<button class="btn btn-sm btn-light c" type="submit" form="cov-{{ $im->id }}">عکس شاخص</button>@else<span class="badge gold c" style="justify-content:center">شاخص</span>@endif</div>@endforeach</div>@endif
@@ -85,9 +94,9 @@
 </form>
 @if($p->exists)
   @foreach($p->images as $im)
-    <form id="del-{{ $im->id }}" method="post" action="{{ route('host.properties.images.destroy', [$p, $im]) }}">@csrf @method('DELETE')</form>
-    <form id="cov-{{ $im->id }}" method="post" action="{{ route('host.properties.images.cover', [$p, $im]) }}">@csrf</form>
+    <form id="del-{{ $im->id }}" method="post" action="{{ route($pre.'properties.images.destroy', [$p, $im]) }}">@csrf @method('DELETE')</form>
+    <form id="cov-{{ $im->id }}" method="post" action="{{ route($pre.'properties.images.cover', [$p, $im]) }}">@csrf</form>
   @endforeach
-  <form method="post" action="{{ route('host.properties.destroy', $p) }}" class="mt2" onsubmit="return confirm('اقامتگاه برای همیشه حذف شود؟')">@csrf @method('DELETE')<button class="btn btn-sm btn-ghost"><x-icon name="trash" class="sm"/> حذف اقامتگاه</button></form>
+  <form method="post" action="{{ route($pre.'properties.destroy', $p) }}" class="mt2" onsubmit="return confirm('اقامتگاه برای همیشه حذف شود؟')">@csrf @method('DELETE')<button class="btn btn-sm btn-ghost"><x-icon name="trash" class="sm"/> حذف اقامتگاه</button></form>
 @endif
 @endsection

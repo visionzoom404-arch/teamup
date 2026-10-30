@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Booking;
 use App\Models\Message;
+use App\Rules\Clean;
+use App\Support\BookingService;
+use App\Support\Payments;
 use Illuminate\Http\Request;
 
 class NoticeController extends Controller
@@ -22,7 +25,9 @@ class NoticeController extends Controller
         $u = auth()->user();
         abort_unless($u->isAdmin() || in_array($u->id, [$b->guest_id, $b->host_id]), 404);
 
-        return $b->load(['property.host', 'guest', 'payments']);
+        BookingService::lazy($b);
+
+        return $b->load(['property.host', 'guest', 'payments', 'installments']);
     }
 
     /** فایل تقویم (.ics) برای افزودن سفر به تقویم گوشی */
@@ -44,7 +49,10 @@ class NoticeController extends Controller
     /** فاکتور قابل چاپ */
     public function invoice(Booking $booking)
     {
-        return view('invoice', ['b' => $this->related($booking)]);
+        $b = $this->related($booking);
+        $isGuest = auth()->id() === $b->guest_id;
+
+        return view('invoice', ['b' => $b, 'isGuest' => $isGuest, 'cards' => Payments::cards(), 'cardOn' => Payments::cardEnabled(), 'online' => \App\Support\Zibal::enabled() ? 'زیبال' : 'درگاه پرداخت']);
     }
 
     /** پیام‌رسانی درون رزرو بین مهمان و میزبان */
@@ -52,7 +60,7 @@ class NoticeController extends Controller
     {
         $u = $r->user();
         abort_unless(in_array($u->id, [$booking->guest_id, $booking->host_id]), 404);
-        $d = $r->validate(['body' => 'required|string|max:1000']);
+        $d = $r->validate(['body' => ['required', 'string', 'max:1000', new Clean]]);
         Message::create(['booking_id' => $booking->id, 'sender_id' => $u->id, 'body' => $d['body']]);
         $to = $u->id === $booking->guest_id ? $booking->host : $booking->guest;
         $to->notify('پیام جدید', "رزرو {$booking->code}", $u->id === $booking->guest_id ? route('host.bookings.show', $booking) : route('guest.bookings.show', $booking));

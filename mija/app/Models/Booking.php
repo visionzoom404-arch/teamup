@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 
 class Booking extends Model
 {
-    public const ACTIVE = ['pending_host', 'awaiting_payment', 'confirmed', 'completed'];
+    public const ACTIVE = ['pending_host', 'awaiting_payment', 'payment_review', 'confirmed', 'completed'];
 
     protected $guarded = [];
 
@@ -18,7 +18,8 @@ class Booking extends Model
         return [
             'check_in' => 'date:Y-m-d', 'check_out' => 'date:Y-m-d', 'breakdown' => 'array',
             'respond_by' => 'datetime', 'pay_by' => 'datetime', 'paid_at' => 'datetime',
-            'settled_at' => 'datetime', 'cancelled_at' => 'datetime',
+            'settled_at' => 'datetime', 'cancelled_at' => 'datetime', 'offer_check_in' => 'date:Y-m-d', 'offer_check_out' => 'date:Y-m-d',
+            'offer_expires_at' => 'datetime', 'is_installment' => 'boolean', 'survey_sent_at' => 'datetime', 'reminded_at' => 'datetime',
         ];
     }
 
@@ -39,6 +40,38 @@ class Booking extends Model
     public function review(): HasOne { return $this->hasOne(Review::class); }
     public function messages(): HasMany { return $this->hasMany(Message::class)->oldest('id'); }
     public function payments(): HasMany { return $this->hasMany(Payment::class); }
+    public function installments(): HasMany { return $this->hasMany(Installment::class)->orderBy('seq'); }
+    public function serviceRequests(): HasMany { return $this->hasMany(ServiceRequest::class)->latest('id'); }
+    public function guestReview(): HasOne { return $this->hasOne(GuestReview::class); }
+
+    public function isPaid(): bool { return in_array($this->status, ['confirmed', 'completed'], true); }
+
+    /** اطلاعات دقیق (آدرس، تلفن میزبان/مهمان) فقط پس از پرداخت موفق دیده می‌شود */
+    public function detailsUnlocked(): bool { return $this->isPaid(); }
+
+    /**
+     * وضعیت نوار مراحل برای $who = guest|host: [شماره‌ی مرحله‌ی جاری، خراب شده؟]
+     * مراحل: ۱ ثبت · ۲ تأیید میزبان · ۳ پرداخت · ۴ قطعی · ۵ اقامت · ۶ نظر / امتیاز
+     */
+    public function stepState(string $who = 'guest'): array
+    {
+        $end = $who === 'guest' ? (bool) $this->review : (bool) $this->guestReview;
+        return match ($this->status) {
+            'pending_host', 'offered' => [2, false],
+            'awaiting_payment', 'payment_review' => [3, false],
+            'confirmed' => [5, false],
+            'completed' => [$end ? 7 : 6, false],
+            'rejected' => [2, true],
+            'expired' => [$this->responded_at ? 3 : 2, true],
+            'cancelled_guest', 'cancelled_host', 'cancelled_system' => [$this->paid_at ? 5 : 3, true],
+            default => [1, false],
+        };
+    }
+
+    public function canRespondOffer(): bool
+    {
+        return $this->status === 'offered' && $this->offer_expires_at && $this->offer_expires_at->isFuture();
+    }
 
     public function scopeActive(Builder $q): Builder { return $q->whereIn('status', self::ACTIVE); }
 

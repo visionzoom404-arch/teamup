@@ -75,6 +75,13 @@ $p = [
  'compass' => '<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>',
  'suitcase' => '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2M3 13h18"/>',
  'receipt' => '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6"/>',
+ 'card' => '<rect x="3" y="6" width="18" height="12" rx="3"/><path d="M3 10h18M7 15h3"/>',
+ 'megaphone' => '<path d="M4 10v4l12 5V5zM16 9a3 3 0 010 6M6 14v4"/>',
+ 'ban' => '<circle cx="12" cy="12" r="9"/><path d="M6 6l12 12"/>',
+ 'file' => '<path d="M6 3h8l4 4v14H6zM14 3v4h4M9 12h6M9 16h6"/>',
+ 'mail' => '<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 8l9 6 9-6"/>',
+ 'activity' => '<path d="M3 12h4l3-8 4 16 3-8h4"/>',
+ 'pool_' => '<circle cx="12" cy="12" r="9"/>',
  'trend' => '<path d="M3 17l6-6 4 4 8-8M15 7h6v6"/>',
 ];
 @endphp

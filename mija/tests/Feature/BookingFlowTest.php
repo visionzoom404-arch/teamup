@@ -47,10 +47,14 @@ class BookingFlowTest extends TestCase
         $in = today()->next('Thursday');
         $q = $p->quote($in, $in->copy()->addDays(2), 5);
         $this->assertTrue($q['ok']);
-        $this->assertSame(3000000, $q['base']);
-        $this->assertSame(2 * 100000, $q['extra']);
-        $this->assertSame(3000000 + 200000 + 200000, $q['subtotal']);
-        $this->assertSame(intdiv($q['subtotal'] * 10, 100), $q['commission']);
+        // مبلغ نمایشی = دریافتی میزبان + کمیسیون پنهان (۱۰٪ از کل)
+        $g = fn ($n) => \App\Support\Pricing::gross($n, 10);
+        $this->assertSame(2 * $g(1500000), $q['base']);
+        $this->assertSame($g(200000), $q['extra']);
+        $this->assertSame(0, $q['service_fee']);
+        $this->assertSame(3000000 + 200000 + 200000, $q['host_payout']);   // میزبان دقیقاً عدد خودش را می‌گیرد
+        $this->assertGreaterThanOrEqual($q['host_payout'] / 0.9, $q['total']);
+        $this->assertSame($q['total'] - $q['host_payout'], $q['commission']);
     }
 
     public function test_instant_booking_pay_and_settle(): void
@@ -116,7 +120,7 @@ class BookingFlowTest extends TestCase
         $this->assertSame(config('mija.referral_bonus'), $ref->fresh()->wallet);
     }
 
-    public function test_loyalty_level_and_cashback(): void
+    public function test_loyalty_level_no_longer_pays_cashback(): void
     {
         $p = $this->property(true);
         $g = $this->guest();
@@ -128,7 +132,10 @@ class BookingFlowTest extends TestCase
         $b = BookingService::create($g, $p, today()->addDays(10), today()->addDays(11), 2, 0, null, null);
         $b->update(['status' => 'confirmed', 'check_in' => today()->subDays(3), 'check_out' => today()->subDay(), 'settled_at' => now()]);
         BookingService::tick();
-        $this->assertSame(intdiv($b->total * 1, 100), $g->fresh()->wallet);
+        $this->assertSame('completed', $b->fresh()->status);
+        $this->assertSame(0, $g->fresh()->wallet);           // هدیه فقط با انتشار نظر
+        $this->assertNotNull($b->fresh()->survey_sent_at);   // نظرسنجی پیامکی
+        $this->assertDatabaseHas('sms_logs', ['phone' => $g->phone]);
     }
 
     public function test_role_profiles_ics_invoice_and_public_host(): void

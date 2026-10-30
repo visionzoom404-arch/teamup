@@ -1,5 +1,5 @@
-@php $fav = auth()->check() && auth()->user()->favorites->contains('id', $p->id); @endphp
-<a href="{{ route('property', $p) }}" class="pcard">
+@php $fav = auth()->check() && auth()->user()->favorites->contains('id', $p->id); $wrap = ($noLink ?? false) ? 'div' : 'a'; @endphp
+<{{ $wrap }} @if(! ($noLink ?? false)) href="{{ route('property', $p) }}" @endif class="pcard">
   <div class="ph">
     <img src="{{ $p->cover() }}" alt="{{ $p->title }}" loading="lazy">
     <span class="pp">@if(isset($p->quote_total)){{ toman($p->quote_total, false) }}@else{{ toman($p->startingPrice(), false) }}@endif <small>تومان</small></span>
@@ -19,4 +19,4 @@
     <div class="meta"><span><x-icon name="users" class="sm"/>تا {{ fa($p->capacity_max) }} نفر</span><span><x-icon name="bed" class="sm"/>{{ fa($p->bedrooms) }} خواب</span>@if($p->area)<span><x-icon name="ruler" class="sm"/>{{ fa($p->area) }} متر</span>@endif</div>
     @if(isset($p->quote_total))<div class="price"><small>{{ fa($p->quote_nights) }} شب، قیمت نهایی</small><div><b>{{ toman($p->quote_total, false) }}</b> <small>تومان</small></div></div>@else<div class="price"><small>شروع از هر شب</small><div><b>{{ toman($p->startingPrice(), false) }}</b> <small>تومان</small></div></div>@endif
   </div>
-</a>
+</{{ $wrap }}>

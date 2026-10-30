@@ -59,9 +59,9 @@ class AuthController extends Controller
         unset($data['ref']);
         $user = User::create($data + ['referred_by' => $referrer?->id]);
         Auth::login($user);
-        $user->notify('به می‌جا خوش آمدید', $user->isHost() ? 'اولین اقامتگاه خود را ثبت کنید.' : 'اقامتگاه رویایی‌تان را پیدا کنید.');
+        $user->notify('به می‌جا خوش آمدید', $user->isHost() ? 'ابتدا اطلاعات هویتی و بانکی را تکمیل کنید.' : 'اقامتگاه رویایی‌تان را پیدا کنید.');
 
-        return redirect($user->isHost() ? route('host.properties.create') : $user->homeRoute());
+        return redirect($user->isHost() ? route('host.onboard') : $user->homeRoute());
     }
 
     public function logout(Request $r)

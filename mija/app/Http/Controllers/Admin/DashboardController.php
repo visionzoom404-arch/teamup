@@ -35,7 +35,10 @@ class DashboardController extends Controller
             'queue' => [
                 'properties' => Property::where('status', 'pending')->count(),
                 'payouts' => Payout::where('status', 'pending')->count(),
-                'unverified' => User::where('role', 'host')->where('host_verified', false)->count(),
+                'unverified' => User::where('role', 'host')->where('id_status', 'pending')->count(),
+                'cards' => Payment::where('status', 'review')->count(),
+                'reviews' => \App\Models\Review::where('status', 'host_rejected')->count(),
+                'ads' => \App\Models\Ad::where('status', 'pending')->count(),
             ],
             'pendingProps' => Property::with('host')->where('status', 'pending')->latest('id')->take(5)->get(),
             'recent' => Booking::with(['property', 'guest'])->latest('id')->take(8)->get(),
@@ -48,6 +51,6 @@ class DashboardController extends Controller
     {
         $r = BookingService::tick();
 
-        return back()->with('ok', "اجرا شد — منقضی: {$r['expired']}، تسویه: {$r['settled']}، اتمام: {$r['completed']}");
+        return back()->with('ok', "اجرا شد — منقضی: {$r['expired']}، تسویه: {$r['settled']}، اتمام: {$r['completed']}، یادآوری: {$r['reminded']}");
     }
 }
