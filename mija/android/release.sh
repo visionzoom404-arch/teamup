@@ -4,7 +4,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 V="${1:?versionName}"; C="${2:?versionCode}"; NOTES="${3:-}"
-bash android/build.sh "$V" "$C" android/out
+bash android/build.sh "$V" "$C" out
 mkdir -p storage/app/apk
 cp android/out/mija-direct-$V.apk android/out/mija-store-$V.apk storage/app/apk/
 python3 - "$V" "$C" "$NOTES" <<'PY'
