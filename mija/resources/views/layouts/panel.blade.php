@@ -1,7 +1,7 @@
 @php
 $u = auth()->user();
 $pending = $u->isHost() ? $u->hostBookings()->where('status', 'pending_host')->count() : ($u->isAdmin() ? \App\Models\Property::where('status', 'pending')->count() : 0);
-$adminBadge = $u->isAdmin() ? ['props' => \App\Models\Property::where('status', 'pending')->count(), 'cards' => \App\Models\Payment::where('status', 'review')->count(), 'reviews' => \App\Models\Review::where('status', 'host_rejected')->count(), 'ads' => \App\Models\Ad::where('status', 'pending')->count(), 'payouts' => \App\Models\Payout::where('status', 'pending')->count()] : [];
+$adminBadge = $u->isAdmin() ? ['props' => \App\Models\Property::where('status', 'pending')->count(), 'cards' => \App\Models\Payment::where('status', 'review')->count(), 'reviews' => \App\Models\Review::where('status', 'host_rejected')->count(), 'ads' => \App\Models\Ad::where('status', 'pending')->count(), 'docs' => \App\Models\User::where('role', 'host')->where('id_status', 'pending')->count(), 'payouts' => \App\Models\Payout::where('status', 'pending')->count()] : [];
 $menus = [
  'guest' => [
   ['guest.dashboard', 'داشبورد', 'home'], ['guest.bookings', 'سفرهای من', 'calendar'], ['guest.favorites', 'علاقه‌مندی‌ها', 'heart'],
@@ -14,7 +14,7 @@ $menus = [
  ],
  'admin' => [
   ['admin.dashboard', 'داشبورد', 'chart'], ['admin.properties', 'اقامتگاه‌ها', 'home', $adminBadge['props'] ?? 0], ['admin.bookings', 'رزروها', 'calendar'],
-  ['admin.users', 'کاربران', 'users'], ['admin.payments', 'پرداخت‌ها', 'coins', $adminBadge['cards'] ?? 0], ['admin.payouts', 'برداشت‌ها', 'wallet', $adminBadge['payouts'] ?? 0],
+  ['admin.users', 'کاربران', 'users'], ['admin.documents', 'مدارک میزبانان', 'shield', $adminBadge['docs'] ?? 0], ['admin.payments', 'پرداخت‌ها', 'coins', $adminBadge['cards'] ?? 0], ['admin.payouts', 'برداشت‌ها', 'wallet', $adminBadge['payouts'] ?? 0],
   ['admin.reviews', 'نظرات', 'star', $adminBadge['reviews'] ?? 0], ['admin.ads', 'تبلیغات', 'megaphone', $adminBadge['ads'] ?? 0], ['admin.amenities', 'امکانات', 'list'], ['admin.coupons', 'کد تخفیف', 'tag'],
   ['admin.pages', 'صفحه‌ها و متن‌ها', 'file'], ['admin.words', 'کلمات ممنوع', 'ban'], ['notices', 'اعلان‌ها', 'bell'], ['admin.broadcast', 'ارسال اعلان', 'mail'], ['admin.sms', 'گزارش پیامک', 'phone'],
   ['admin.activity', 'گزارش فعالیت', 'activity'], ['admin.errors', 'گزارش خطاها', 'info'], ['admin.pool', 'صندوق اقساط', 'coins'],

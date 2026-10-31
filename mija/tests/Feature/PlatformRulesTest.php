@@ -210,7 +210,7 @@ class PlatformRulesTest extends TestCase
         $this->assertTrue(Iran::sheba('IR062960000000100324200001'));
         $h = User::factory()->create(['role' => 'host', 'phone' => '09125550000']);
         $this->actingAs($h)->get('/host/properties/create')->assertRedirect('/host/onboard');
-        $this->actingAs($h)->post('/host/onboard/identity', ['name' => 'علی محمدی', 'national_code' => '0499370899', 'birth_date' => '1365/04/21'])->assertRedirect();
+        $this->actingAs($h)->post('/host/onboard/identity', ['name' => 'علی محمدی', 'national_code' => '0499370899', 'birth_date' => '1365/04/21', 'id_photo' => \Illuminate\Http\UploadedFile::fake()->image('c.jpg')])->assertRedirect();
         $this->assertSame('0499370899', $h->fresh()->national_code);
     }
 

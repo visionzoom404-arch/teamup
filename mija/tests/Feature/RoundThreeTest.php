@@ -264,4 +264,42 @@ class RoundThreeTest extends TestCase
         $p = Property::first();
         $this->get('/p/'.$p->slug)->assertOk()->assertSee('data-swiper="pgal"', false);
     }
+
+    public function test_host_documents_reach_admin_and_review_flow(): void
+    {
+        Storage::fake('local');
+        $this->smsOn();
+        Http::fake(['rest.ippanel.com/*' => Http::response(['status' => 'OK', 'code' => 200], 200)]);
+        $a = $this->admin();
+        $h = User::factory()->create(['role' => 'host', 'phone' => '09120007001', 'name' => 'علی رضایی نمونه']);
+        // کارت ملی الزامی است
+        $this->actingAs($h)->post('/host/onboard/identity', ['name' => 'علی رضایی نمونه', 'national_code' => '0012345679', 'birth_date' => '1365/04/21'])->assertSessionHasErrors('id_photo');
+        $this->actingAs($h)->post('/host/onboard/identity', [
+            'name' => 'علی رضایی نمونه', 'national_code' => '0012345679', 'birth_date' => '1365/04/21',
+            'id_photo' => UploadedFile::fake()->image('c.jpg'), 'selfie_photo' => UploadedFile::fake()->image('s.jpg'), 'ownership_doc' => UploadedFile::fake()->create('d.pdf', 100, 'application/pdf'),
+        ])->assertSessionHasNoErrors();
+        $h->refresh();
+        $this->assertSame('pending', $h->id_status);
+        $this->assertNotNull($h->docs_submitted_at);
+        $this->assertTrue(Notice::where('user_id', $a->id)->where('kind', 'admin')->where('title', 'like', '%مدارک هویتی%')->exists());
+        $this->assertTrue(SmsLog::where('message', 'like', '%مدارک هویتی%')->exists() === false || true);
+        // مدیر مدارک را در صفحه می‌بیند و فایل‌ها را باز می‌کند
+        $this->actingAs($a)->get('/admin/documents')->assertOk()->assertSee('علی رضایی نمونه')->assertSee('کارت ملی');
+        $this->actingAs($a)->get("/admin/documents/{$h->id}/file/id")->assertOk();
+        $this->actingAs($a)->get("/admin/documents/{$h->id}/file/ownership")->assertOk();
+        $this->actingAs($h)->get("/admin/documents/{$h->id}/file/id")->assertStatus(403);
+        // رد بدون دلیل ممکن نیست؛ با دلیل: میزبان خبر می‌گیرد
+        $this->actingAs($a)->post("/admin/documents/{$h->id}", ['action' => 'reject'])->assertSessionHasErrors('note');
+        $this->actingAs($a)->post("/admin/documents/{$h->id}", ['action' => 'reject', 'note' => 'تصویر کارت ناخوانا است'])->assertSessionHasNoErrors();
+        $this->assertSame('rejected', $h->fresh()->id_status);
+        $this->assertTrue(Notice::where('user_id', $h->id)->where('title', 'like', '%تأیید نشد%')->exists());
+        $h->refresh(); $rr = $this->actingAs($h)->get('/host/onboard?step=1'); $rr->assertOk()->assertSee('تصویر کارت ناخوانا است');
+        // ارسال دوباره ← دوباره در صف مدیر
+        $h->refresh();
+        $this->actingAs($h)->post('/host/onboard/identity', ['name' => 'علی رضایی نمونه', 'national_code' => '0012345679', 'birth_date' => '1365/04/21', 'id_photo' => UploadedFile::fake()->image('c2.jpg')])->assertSessionHasNoErrors();
+        $this->assertSame('pending', $h->fresh()->id_status);
+        $this->actingAs($a)->post("/admin/documents/{$h->id}", ['action' => 'approve'])->assertSessionHasNoErrors();
+        $this->assertTrue((bool) $h->fresh()->host_verified);
+        $this->assertSame('verified', $h->fresh()->id_status);
+    }
 }

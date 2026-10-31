@@ -155,6 +155,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/users/{user}/wallet', [Admin\UserController::class, 'wallet'])->name('users.wallet');
     Route::post('/users/{user}/settle', [Admin\UserController::class, 'settle'])->name('users.settle');
     Route::post('/users/{user}/impersonate', [Admin\UserController::class, 'impersonate'])->name('users.impersonate');
+    Route::get('/documents', [Admin\DocumentController::class, 'index'])->name('documents');
+    Route::get('/documents/{user}/file/{type}', [Admin\DocumentController::class, 'file'])->name('documents.file');
+    Route::post('/documents/{user}', [Admin\DocumentController::class, 'decide'])->name('documents.decide');
     Route::get('/users/{user}/id-photo', [Admin\UserController::class, 'idPhoto'])->name('users.idphoto');
 
     // رزروها و پرداخت‌ها
