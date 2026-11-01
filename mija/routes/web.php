@@ -25,7 +25,14 @@ Route::get('/help', fn () => view('help'))->name('help');
 Route::get('/u/{user}', [ProfileController::class, 'publicGuest'])->name('guest.public');
 Route::get('/ad/{ad}/go', [AdClickController::class, 'go'])->name('ad.go');
 Route::get('/ical/{property}/{token}', [Host\PropertyController::class, 'ical'])->name('ical');
+Route::get('/s/{code}', function (string $code) {
+    $l = \App\Models\ShortLink::where('code', $code)->firstOrFail();
+    $l->increment('clicks');
+
+    return redirect()->away($l->url);
+})->where('code', '[a-z0-9]{4,12}')->name('short');
 Route::get('/pay/callback', [GatewayController::class, 'callback'])->name('gateway.callback');
+Route::match(['get', 'post'], '/pay/bitpay', [GatewayController::class, 'bitpay'])->name('gateway.bitpay');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');

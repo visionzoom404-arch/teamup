@@ -137,7 +137,7 @@ class UserController extends Controller
             ]);
         });
         Audit::log('payout.settle', "#{$user->id}", ['amount' => $po->amount]);
-        $user->notify('مبلغ کیف پول شما واریز شد — رسید را ببینید', toman($po->amount).($po->tracking_code ? ' · کد پیگیری '.fa($po->tracking_code) : ''), route('payout.receipt', $po), true);
+        $user->notify('مبلغ کیف پول شما واریز شد — رسید را ببینید', toman($po->amount).($po->tracking_code ? ' · کد پیگیری '.fa($po->tracking_code) : ''), route('payout.receipt', $po), true, event: 'payout_paid', vars: ['amount' => toman($po->amount)]);
 
         return back()->with('ok', 'واریز ثبت شد، موجودی میزبان صفر/به‌روز شد و رسید برایش ارسال گردید.');
     }

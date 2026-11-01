@@ -38,7 +38,7 @@ class LoginCode
         }
         $code = (string) random_int(10000, 99999);
         $id = DB::table('login_codes')->insertGetId(['phone' => $phone, 'code_hash' => self::hash($phone, $code), 'expires_at' => now()->addMinutes(self::TTL), 'created_at' => now(), 'updated_at' => now()]);
-        $ok = Sms::send($phone, 'کد ورود شما به می‌جا: '.$code."\nاین کد را به کسی ندهید.");
+        $ok = Sms::event('login_code', $phone, ['code' => $code], route('login'));
         if (! $ok) {
             DB::table('login_codes')->where('id', $id)->delete();
             // مدیر باید بداند ورود پیامکی کار نمی‌کند (حداکثر هر ۳۰ دقیقه یک بار)

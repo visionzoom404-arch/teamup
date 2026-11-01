@@ -46,6 +46,17 @@ class RoundThreeTest extends TestCase
         foreach (['sms_enabled' => 1, 'sms_token' => str_repeat('a', 40), 'sms_originator' => '3000505'] as $k => $v) {
             Setting::put($k, $v);
         }
+        foreach (array_keys(\App\Support\SmsEvents::all()) as $ev) {
+            Setting::put('sms_pat_'.$ev, 'pat'.$ev);
+        }
+    }
+
+    /** لینک کوتاه داخل پیامک را به آدرس اصلی برمی‌گرداند */
+    private function longLink(string $msg): string
+    {
+        preg_match('~/s/(\w+)~', $msg, $m);
+
+        return (string) \App\Models\ShortLink::where('code', $m[1] ?? '')->value('url');
     }
 
     public function test_booking_request_notifies_host_in_site_and_by_sms(): void
@@ -58,7 +69,7 @@ class RoundThreeTest extends TestCase
         BookingService::create($guest, $p, today()->addDays(5), today()->addDays(7), 2, 0, null, null);
         $this->assertTrue(Notice::where('user_id', $host->id)->exists());
         $this->assertSame('sent', SmsLog::where('phone', $host->phone)->first()->status);
-        Http::assertSent(fn ($r) => str_contains($r->url(), '/messages') && $r['originator'] === '+983000505' && $r['recipient'] === ['+989120005011']);
+        Http::assertSent(fn ($r) => str_contains($r->url(), '/messages/patterns/send') && $r['pattern_code'] === 'patbooking_request_host' && $r['originator'] === '+983000505' && $r['recipient'] === '+989120005011' && str_contains(((array) $r['values'])['link'], '/s/') && ((array) $r['values'])['property'] !== '');
     }
 
     public function test_sms_errors_are_explained_in_persian(): void
@@ -170,7 +181,7 @@ class RoundThreeTest extends TestCase
         $n = Notice::where('user_id', $h->id)->where('title', 'like', '%واریز شد%')->first();
         $this->assertNotNull($n);
         $this->assertStringContainsString('/wallet/receipt/'.$po->id, $n->url);
-        $this->assertStringContainsString('/wallet/receipt/'.$po->id, SmsLog::where('phone', $h->phone)->latest('id')->first()->message);
+        $this->assertStringContainsString('/wallet/receipt/'.$po->id, $this->longLink(SmsLog::where('phone', $h->phone)->latest('id')->first()->message));
         $this->actingAs($h)->get("/wallet/receipt/{$po->id}")->assertOk()->assertSee('واریز شد');
         $this->actingAs($h)->get('/host/wallet')->assertOk()->assertSee('atm-card', false);
         // میزبان دیگر رسید را نمی‌بیند

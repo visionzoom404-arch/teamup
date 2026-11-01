@@ -162,7 +162,7 @@ class PanelController extends Controller
         abort_unless($req->booking->host_id === auth()->id(), 404);
         $d = $r->validate(['status' => 'required|in:accepted,declined,done', 'host_reply' => ['nullable', 'string', 'max:300', new Clean]]);
         $req->update($d);
-        $req->booking->guest->notify('پاسخ میزبان به درخواست شما', ['accepted' => 'میزبان می‌تواند تأمین کند', 'declined' => 'میزبان نمی‌تواند تأمین کند', 'done' => 'انجام شد'][$d['status']].($d['host_reply'] ? ' — '.$d['host_reply'] : ''), route('guest.bookings.show', $req->booking), true);
+        $req->booking->guest->notify('پاسخ میزبان به درخواست شما', ['accepted' => 'میزبان می‌تواند تأمین کند', 'declined' => 'میزبان نمی‌تواند تأمین کند', 'done' => 'انجام شد'][$d['status']].($d['host_reply'] ? ' — '.$d['host_reply'] : ''), route('guest.bookings.show', $req->booking), true, event: 'service_reply_guest', vars: ['status' => ['accepted' => 'میزبان می‌تواند تأمین کند', 'declined' => 'میزبان نمی‌تواند تأمین کند', 'done' => 'انجام شد'][$d['status']]]);
 
         return back()->with('ok', 'پاسخ شما برای مهمان ارسال شد.');
     }

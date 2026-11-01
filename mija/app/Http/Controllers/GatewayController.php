@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Payment;
+use App\Models\User;
+use App\Support\BitPay;
+use App\Support\Gateways;
 use App\Support\Payments;
 use App\Support\Zibal;
 use Illuminate\Http\Request;
@@ -12,18 +15,27 @@ use Illuminate\Http\Request;
  */
 class GatewayController extends Controller
 {
-    /** شروع پرداخت آنلاین یک تراکنش و هدایت کاربر */
+    /** شروع پرداخت آنلاین یک تراکنش (بر اساس $pay->gateway) و هدایت کاربر */
     public static function begin(Payment $pay)
     {
-        if (Zibal::enabled()) {
-            try {
+        try {
+            if ($pay->gateway === 'zibal' && Zibal::enabled()) {
                 return redirect()->away(Zibal::start($pay, route('gateway.callback'), auth()->user()?->phone));
-            } catch (\Throwable $e) {
-                $pay->update(['status' => 'failed', 'note' => mb_substr($e->getMessage(), 0, 200)]);
-
-                return back()->withErrors(['pay' => 'اتصال به درگاه برقرار نشد؛ لطفاً دوباره تلاش کنید یا روش دیگری انتخاب کنید.']);
             }
+            if ($pay->gateway === 'bitpay' && BitPay::enabled()) {
+                return redirect()->away(BitPay::start($pay, route('gateway.bitpay'), auth()->user()?->name));
+            }
+        } catch (\Throwable $e) {
+            $pay->update(['status' => 'failed', 'note' => mb_substr($e->getMessage(), 0, 200)]);
+            report($e);
+            $msg = $e instanceof \RuntimeException ? $e->getMessage() : 'اتصال به درگاه برقرار نشد؛ لطفاً دوباره تلاش کنید یا روش دیگری انتخاب کنید.';
+            if ($e instanceof \RuntimeException) {
+                User::notifyAdmins('خطا در اتصال به درگاه '.Gateways::label($pay->gateway), $msg, route('admin.settings', ['tab' => 'gateway']));
+            }
+
+            return back()->withErrors(['pay' => 'اتصال به درگاه '.Gateways::label($pay->gateway).' برقرار نشد؛ روش دیگری انتخاب کنید یا چند دقیقه بعد تلاش کنید.']);
         }
+        abort_unless(Gateways::on('sandbox'), 422, 'این روش پرداخت فعلاً غیرفعال است.');
 
         return redirect()->route('gateway.show', $pay->authority);
     }
@@ -55,12 +67,36 @@ class GatewayController extends Controller
         return self::back($pay, 'پرداخت ناموفق بود یا لغو شد.', false);
     }
 
+    /** بازگشت از بیت‌پی (POST یا GET با trans_id و id_get) */
+    public function bitpay(Request $r)
+    {
+        $idGet = (string) ($r->input('id_get') ?? $r->query('id_get'));
+        $trans = (string) ($r->input('trans_id') ?? $r->query('trans_id'));
+        $pay = Payment::where('track_id', $idGet)->where('gateway', 'bitpay')->firstOrFail();
+        if ($pay->status === 'paid') {
+            return self::back($pay, 'پرداخت قبلاً ثبت شده است.', true);
+        }
+        if ($trans !== '' && $pay->status === 'pending') {
+            $err = null;
+            if ($ref = BitPay::verify($pay, $trans, $err)) {
+                Payments::complete($pay, $ref);
+
+                return self::back($pay, 'پرداخت موفق بود'.($pay->purpose === 'topup' ? ' و کیف پول شما شارژ شد.' : ' و رزرو شما قطعی شد.'), true);
+            }
+            $pay->update(['status' => 'failed', 'note' => mb_substr((string) $err, 0, 200)]);
+        } else {
+            $pay->update(['status' => 'failed']);
+        }
+
+        return self::back($pay, 'پرداخت ناموفق بود یا لغو شد.', false);
+    }
+
     /* ---------- درگاه آزمایشی ---------- */
 
     private function pending(string $authority): Payment
     {
         $p = Payment::where('authority', $authority)->where('user_id', auth()->id())->firstOrFail();
-        abort_unless($p->status === 'pending' && ! Zibal::enabled(), 404);
+        abort_unless($p->status === 'pending' && $p->gateway === 'sandbox' && Gateways::on('sandbox'), 404);
 
         return $p;
     }

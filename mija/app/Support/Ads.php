@@ -78,7 +78,7 @@ class Ads
             return;
         }
         $ad->update(['status' => 'active', 'starts_on' => $ad->starts_on ?? today(), 'ends_on' => $ad->type === 'click' ? today()->addDays(30) : $ad->ends_on]);
-        $ad->host->notify('تبلیغ شما تأیید و فعال شد', $ad->typeLabel().' — '.$ad->title, route('host.ads'), true);
+        $ad->host->notify('تبلیغ شما تأیید و فعال شد', $ad->typeLabel().' — '.$ad->title, route('host.ads'), true, event: 'ad_status_host', vars: ['type' => $ad->typeLabel(), 'status' => 'تأیید و فعال شد']);
     }
 
     public static function reject(Ad $ad, ?string $note = null): void
@@ -91,7 +91,7 @@ class Ads
             }
             $ad->update(['status' => 'rejected', 'admin_note' => $note, 'spent' => $ad->budget]);
         });
-        $ad->host->notify('تبلیغ شما تأیید نشد', $note, route('host.ads'), true);
+        $ad->host->notify('تبلیغ شما تأیید نشد', $note, route('host.ads'), true, event: 'ad_status_host', vars: ['type' => $ad->typeLabel(), 'status' => 'تأیید نشد']);
     }
 
     /** توقف تبلیغ توسط خود میزبان؛ باقی‌مانده‌ی بودجه برمی‌گردد */
@@ -117,7 +117,7 @@ class Ads
         $url = route('property', $ad->property);
         $text = ($ad->title ? $ad->title.' — ' : '').($ad->text ?: $ad->property->title);
         foreach ($guests as $g) {
-            $ad->type === 'sms' ? Sms::send($g->phone, $text, $url) : $g->notify($ad->title ?: 'پیشنهاد ویژه', $ad->text ?: $ad->property->title, $url);
+            $ad->type === 'sms' ? Sms::event('ad_promo', $g->phone, ['text' => $text], $url) : $g->notify($ad->title ?: 'پیشنهاد ویژه', $ad->text ?: $ad->property->title, $url);
         }
         $each = $ad->type === 'sms' ? (int) setting('ad_sms_each') : (int) setting('ad_push_each');
         $spent = $guests->count() * $each;

@@ -48,13 +48,13 @@ class DocumentController extends Controller
             }
             $user->update(['id_status' => 'rejected', 'id_note' => $d['note'], 'host_verified' => false]);
             Audit::log('docs.reject', "#{$user->id}", ['note' => $d['note']]);
-            $user->notify('مدارک شما تأیید نشد', $d['note'].' — لطفاً مدارک را اصلاح و دوباره ارسال کنید.', route('host.onboard', ['step' => 1]), true);
+            $user->notify('مدارک شما تأیید نشد', $d['note'].' — لطفاً مدارک را اصلاح و دوباره ارسال کنید.', route('host.onboard', ['step' => 1]), true, event: 'docs_rejected_host', vars: ['reason' => $d['note']]);
 
             return back()->with('ok', 'مدارک رد شد و دلیل برای میزبان (اعلان + پیامک) ارسال گردید.');
         }
         $user->update(['id_status' => 'verified', 'id_note' => null, 'host_verified' => true]);
         Audit::log('docs.approve', "#{$user->id}");
-        $user->notify('هویت شما تأیید شد', 'اکنون می‌توانید اقامتگاه ثبت و منتشر کنید.', route('host.properties.create'), true);
+        $user->notify('هویت شما تأیید شد', 'اکنون می‌توانید اقامتگاه ثبت و منتشر کنید.', route('host.properties.create'), true, event: 'docs_approved_host');
 
         return back()->with('ok', 'مدارک تأیید شد و میزبان خبردار شد.');
     }

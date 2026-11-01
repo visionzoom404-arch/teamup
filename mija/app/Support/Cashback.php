@@ -30,7 +30,7 @@ class Cashback
             $b->guest->walletChange($amount, "هدیه‌ی ثبت نظر — اعتبار تا {$days} روز", $b);
             $b->update(['cashback' => $amount]);
         });
-        $b->guest->notify('هدیه‌ی نظر شما به کیف پول اضافه شد', toman($amount).' — تا '.fa($days).' روز برای رزرو بعدی قابل استفاده است.', route('guest.wallet'), true);
+        $b->guest->notify('هدیه‌ی نظر شما به کیف پول اضافه شد', toman($amount).' — تا '.fa($days).' روز برای رزرو بعدی قابل استفاده است.', route('guest.wallet'), true, event: 'cashback_guest', vars: ['amount' => toman($amount), 'days' => fa($days)]);
     }
 
     /** مصرف اعتبار هدیه به‌ترتیب انقضا هنگام برداشت از کیف پول */

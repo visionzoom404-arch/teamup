@@ -18,7 +18,7 @@ class Zibal
 
     public static function enabled(): bool
     {
-        return setting('gateway_driver') === 'zibal' && self::merchants() !== [];
+        return (bool) (int) setting('pay_zibal_on') && self::merchants() !== [];
     }
 
     /** ایجاد تراکنش و بازگرداندن آدرس پرداخت؛ خطا ← استثنا */

@@ -14,6 +14,8 @@
 <div class="card atm-screen mt">
   <div class="atm-screen-h"><b><x-icon name="coins" class="sm"/> افزایش موجودی</b><span class="muted xs">پرداخت امن از درگاه بانکی</span></div>
   <form method="post" action="{{ route('guest.wallet.topup') }}" class="atm-form">@csrf
+    @php $gws = \App\Support\Gateways::online(); @endphp
+    @if(count($gws) > 1)<div class="atm-chips" style="margin-top:0">@foreach($gws as $gi => $gk)<label class="gw-pick"><input type="radio" name="gateway" value="{{ $gk }}" @checked($gi === 0)><span>{{ $gk === 'sandbox' ? 'آزمایشی' : \App\Support\Gateways::label($gk) }}</span></label>@endforeach</div>@elseif(empty($gws))<div class="alert warn"><x-icon name="info"/>درگاه پرداخت آنلاین فعلاً فعال نیست.</div>@endif
     <div class="atm-display"><small>مبلغ شارژ</small><div class="ad-line"><div class="ad-in"><input id="po-amt" name="amount" dir="ltr" inputmode="numeric" placeholder="0" min="10000" autocomplete="off" required data-money></div><em>تومان</em></div></div>
     <div class="atm-chips" data-fixed="1">@foreach([100000, 200000, 500000, 1000000, 2000000] as $v)<button type="button" data-v="{{ $v }}">{{ fa(number_format($v)) }}</button>@endforeach</div>
     @error('amount')<div class="msg-e">{{ $message }}</div>@enderror

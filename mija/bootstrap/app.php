@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // پشت Cloudflare/nginx: تشخیص https و IP واقعی
         $middleware->trustProxies(at: '*');
+        $middleware->validateCsrfTokens(except: ['pay/bitpay']);   // بیت‌پی با POST از سایت بانک برمی‌گردد
         $middleware->web(prepend: [\App\Http\Middleware\CanonicalHost::class]);
         $middleware->web(append: [\App\Http\Middleware\TrackAppClient::class]);
         $middleware->alias(['role' => EnsureRole::class, 'onboarded' => EnsureHostOnboarded::class]);

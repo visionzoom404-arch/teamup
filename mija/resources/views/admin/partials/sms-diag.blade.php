@@ -1,13 +1,14 @@
 @php
   $diag = session('sms_diag');
-  $cr = \Illuminate\Support\Facades\Cache::get('mija.sms.credit');
+  $st = \App\Support\Sms::status();
+  $cr = $st['state'] === 'ok' ? ['v' => $st['credit'], 'at' => $st['at']] : null;
   $icon = ['ok' => 'check', 'fail' => 'x', 'warn' => 'info', 'skip' => 'clock'];
   $lbl = ['ok' => 'درست', 'fail' => 'اشتباه', 'warn' => 'بررسی کنید', 'skip' => 'انجام نشد'];
 @endphp
 <div class="card mb sd">
   <div class="sd-h">
     <div><h3 style="margin:0"><x-i3 name="p_shield" class="sm"/> بررسی اتصال پنل پیامک</h3><div class="muted small">با یک لمس، مرحله‌ی اشتباه را پیدا کنید</div></div>
-    <div class="sd-credit {{ $cr ? 'on' : '' }}"><small>اعتبار پنل</small><b>{{ $cr ? fa(number_format($cr['v'])) : '—' }}</b>@if($cr)<em>{{ jdate(\Illuminate\Support\Carbon::parse($cr['at']), 'H:i') }}</em>@endif</div>
+    <div class="sd-credit {{ $cr ? 'on' : ($st['state'] === 'fail' ? 'off' : '') }}"><small>@if($cr)متصل ✓ — اعتبار پنل@elseif($st['state'] === 'fail')اتصال برقرار نیست@else توکن وارد نشده@endif</small><b>{{ $cr ? fa(number_format($cr['v'])) : '—' }}</b>@if($cr)<em>{{ jdate(\Illuminate\Support\Carbon::parse($cr['at']), 'H:i') }}</em>@elseif($st['state'] === 'fail')<em>{{ \Illuminate\Support\Str::limit($st['error'], 70) }}</em>@endif</div>
   </div>
   <form method="post" action="{{ route('admin.sms.check') }}" class="sd-form">@csrf
     <input class="input" dir="ltr" name="test" value="{{ old('test', auth()->user()->phone) }}" placeholder="شماره برای پیامک آزمایشی (اختیاری)" inputmode="numeric">

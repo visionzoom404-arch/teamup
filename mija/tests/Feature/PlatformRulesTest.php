@@ -42,7 +42,8 @@ class PlatformRulesTest extends TestCase
         $this->assertSame('pending_host', $b->status);
         $this->assertEqualsWithDelta(30, now()->diffInMinutes($b->respond_by), 1);
         $this->assertDatabaseHas('sms_logs', ['phone' => $host->phone]);
-        $this->assertStringContainsString('/host/bookings/'.$b->code, \App\Models\SmsLog::where('phone', $host->phone)->first()->message);
+        preg_match('~/s/(\w+)~', \App\Models\SmsLog::where('phone', $host->phone)->first()->message, $m);
+        $this->assertStringContainsString('/host/bookings/'.$b->code, (string) \App\Models\ShortLink::where('code', $m[1] ?? '')->value('url'));
 
         $this->travel(31)->minutes();
         BookingService::tick();

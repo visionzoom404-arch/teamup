@@ -37,20 +37,14 @@
 @elseif($tab === 'sms')
 @include('admin.partials.sms-diag')
 <form class="card mb" method="post" action="{{ route('admin.settings.update') }}">@csrf<input type="hidden" name="group" value="sms"><h3><x-i3 name="p_phone" class="sm"/> پنل پیامک (ippanel)</h3>
-  @include('partials.help', ['title' => 'راهنمای اتصال', 'text' => 'از پنل ippanel، «توکن دسترسی (AccessKey)» و شماره‌ی خط ارسال را بردارید و اینجا وارد کنید، سپس «ارسال فعال باشد» را بزنید. تا زمانی که خاموش یا خالی باشد، پیامک‌ها فقط در «گزارش پیامک» ثبت می‌شوند و ارسال واقعی انجام نمی‌شود. در هر پیامک لینک همان موضوع هم قرار می‌گیرد.'])
+  @include('partials.help', ['title' => 'راهنمای اتصال', 'text' => 'از پنل ippanel، «توکن دسترسی (AccessKey)» و شماره‌ی خط ارسال را بردارید و اینجا وارد کنید، سپس «ارسال فعال باشد» را بزنید. تا زمانی که خاموش یا خالی باشد، پیامک‌ها فقط در «گزارش پیامک» ثبت می‌شوند و ارسال واقعی انجام نمی‌شود. همه‌ی پیامک‌ها «پترن‌دار» ارسال می‌شوند و لینک همان موضوع (کوتاه‌شده) در متغیر %link% می‌آید؛ متن و کد پترن هر پیامک را در بخش «پترن‌های پیامک» پایین همین صفحه بردارید.'])
   @php $chk('sms_enabled', 'ارسال پیامک فعال باشد') @endphp
   @php $chk('admin_sms_alerts', 'برای رویدادهای مهم، پیامک به مدیران هم برود (درخواست برداشت، پرداخت کارت‌به‌کارت…)') @endphp
-  <div class="grid2 mt">@php $txt('sms_token', 'توکن (AccessKey)') @endphp @php $txt('sms_originator', 'شماره خط ارسال', 'مثلاً +983000505') @endphp @php $txt('sms_base_url', 'آدرس API', 'پیش‌فرض: https://rest.ippanel.com/v1/messages') @endphp @php $txt('sms_provider', 'سرویس‌دهنده') @endphp</div>
-  <button class="btn mt">ذخیره</button> <a class="btn btn-light mt" href="{{ route('admin.sms') }}">گزارش پیامک‌ها</a></form>
+  <div class="grid2 mt">@php $txt('sms_token', 'توکن (AccessKey)') @endphp @php $txt('sms_originator', 'شماره خط ارسال', 'مثلاً +983000505') @endphp @php $txt('sms_base_url', 'آدرس API', 'پیش‌فرض: https://rest.ippanel.com/v1 (معمولاً دست نزنید)') @endphp @php $txt('sms_provider', 'سرویس‌دهنده') @endphp</div>
+  <button class="btn mt">ذخیره و بررسی اتصال</button> <a class="btn btn-light mt" href="{{ route('admin.sms') }}">گزارش پیامک‌ها</a></form>
+@include('admin.partials.sms-patterns')
 @elseif($tab === 'gateway')
-<form class="card mb" method="post" action="{{ route('admin.settings.update') }}">@csrf<input type="hidden" name="group" value="gateway"><h3><x-i3 name="p_wallet" class="sm"/> درگاه پرداخت و کارت‌به‌کارت</h3>
-  <input type="hidden" name="keys[]" value="gateway_driver">
-  <div class="field"><label>درگاه آنلاین</label><select name="gateway_driver"><option value="sandbox" @selected(setting('gateway_driver') === 'sandbox')>آزمایشی (هر پرداختی موفق می‌شود — فقط برای تست)</option><option value="zibal" @selected(setting('gateway_driver') === 'zibal')>زیبال (پرداخت واقعی)</option></select></div>
-  <input type="hidden" name="keys[]" value="zibal_merchants"><div class="field"><label>مرچنت‌کدهای زیبال (هر خط یک کد)</label><textarea class="input" dir="ltr" name="zibal_merchants" rows="3" placeholder="zibal">{{ setting('zibal_merchants') }}</textarea><div class="help">چند کد بنویسید تا پرداخت‌ها بین آن‌ها تقسیم شود. کد «zibal» حالت آزمایشی خود زیبال است.</div></div>
-  <hr class="divider">
-  @php $chk('card_to_card_enabled', 'کارت‌به‌کارت فعال باشد', 'پس از واریز مهمان، شما در «پرداخت‌ها ← کارت‌به‌کارت» تأیید می‌کنید تا رزرو قطعی شود.') @endphp
-  <input type="hidden" name="keys[]" value="cards"><div class="field mt"><label>کارت‌های دریافت (هر خط: شماره کارت | نام صاحب کارت | بانک)</label><textarea class="input" dir="ltr" name="cards" rows="3" placeholder="6037997000001234 | علی رضایی | ملی">{{ setting('cards') }}</textarea><div class="help">می‌توانید چند کارت اضافه یا هر زمان تغییر دهید.</div></div>
-  <button class="btn mt">ذخیره</button></form>
+@include('admin.partials.gateways')
 @elseif($tab === 'texts')
 <form class="card mb" method="post" action="{{ route('admin.settings.update') }}">@csrf<input type="hidden" name="group" value="texts"><h3>متن‌های سایت و تماس</h3>
   <div class="grid2">@php $txt('support_phone', 'تلفن اصلی پشتیبانی (برای پیامک‌ها و تماس سریع)') @endphp @php $txt('support_email', 'ایمیل پشتیبانی') @endphp</div>

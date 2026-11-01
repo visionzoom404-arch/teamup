@@ -49,10 +49,10 @@ class BookingService
 
         $when = jdate($in, 'j F').' تا '.jdate($out, 'j F');
         if ($b->status === 'pending_host') {
-            $b->host->notify('درخواست رزرو جدید — '.fa(setting('host_response_minutes')).' دقیقه فرصت پاسخ', "{$p->title} · {$when} · {$guest->name}", route('host.bookings.show', $b), true);
-            $guest->notify('درخواست شما برای میزبان ارسال شد', 'میزبان تا '.fa(setting('host_response_minutes')).' دقیقه پاسخ می‌دهد.', route('guest.bookings.show', $b), true);
+            $b->host->notify('درخواست رزرو جدید — '.fa(setting('host_response_minutes')).' دقیقه فرصت پاسخ', "{$p->title} · {$when} · {$guest->name}", route('host.bookings.show', $b), true, event: 'booking_request_host', vars: ['property' => $p->title, 'dates' => $when, 'guest' => $guest->name, 'minutes' => fa(setting('host_response_minutes'))]);
+            $guest->notify('درخواست شما برای میزبان ارسال شد', 'میزبان تا '.fa(setting('host_response_minutes')).' دقیقه پاسخ می‌دهد.', route('guest.bookings.show', $b), true, event: 'booking_request_guest', vars: ['property' => $p->title, 'minutes' => fa(setting('host_response_minutes'))]);
         } else {
-            $b->host->notify('رزرو فوری جدید', "{$p->title} · {$when} · {$guest->name}", route('host.bookings.show', $b), true);
+            $b->host->notify('رزرو فوری جدید', "{$p->title} · {$when} · {$guest->name}", route('host.bookings.show', $b), true, event: 'booking_instant_host', vars: ['property' => $p->title, 'dates' => $when, 'guest' => $guest->name]);
         }
 
         return $b;
@@ -71,7 +71,7 @@ class BookingService
     {
         abort_unless($b->status === 'pending_host', 422);
         $b->update(['responded_at' => now(), 'status' => 'awaiting_payment', 'respond_by' => null, 'pay_by' => now()->addMinutes(self::windowMinutes())]);
-        $b->guest->notify('درخواست شما تأیید شد؛ برای پرداخت '.fa(self::windowMinutes()).' دقیقه فرصت دارید', $b->property->title, route('guest.bookings.show', $b), true);
+        $b->guest->notify('درخواست شما تأیید شد؛ برای پرداخت '.fa(self::windowMinutes()).' دقیقه فرصت دارید', $b->property->title, route('guest.bookings.show', $b), true, event: 'booking_accepted_guest', vars: ['property' => $b->property->title, 'minutes' => fa(self::windowMinutes())]);
     }
 
     /**
@@ -91,12 +91,12 @@ class BookingService
                 'offer_status' => 'offered', 'offer_check_in' => $offer['check_in']->toDateString(), 'offer_check_out' => $offer['check_out']->toDateString(),
                 'offer_discount' => $offer['discount'], 'offer_expires_at' => now()->addMinutes((int) setting('offer_minutes')),
             ]);
-            $b->guest->notify('میزبان روز دیگری با '.fa($offer['discount']).'٪ تخفیف پیشنهاد داد', 'برای پذیرش یا رد پیشنهاد '.fa(setting('offer_minutes')).' دقیقه فرصت دارید.', route('guest.bookings.show', $b), true);
+            $b->guest->notify('میزبان روز دیگری با '.fa($offer['discount']).'٪ تخفیف پیشنهاد داد', 'برای پذیرش یا رد پیشنهاد '.fa(setting('offer_minutes')).' دقیقه فرصت دارید.', route('guest.bookings.show', $b), true, event: 'booking_offer_guest', vars: ['property' => $b->property->title, 'discount' => fa($offer['discount'])]);
 
             return;
         }
         $b->update(['responded_at' => now(), 'status' => 'rejected', 'cancel_reason' => $reason, 'cancelled_at' => now()]);
-        $b->guest->notify('درخواست شما رد شد', $reason ?: 'می‌توانید اقامتگاه دیگری را رزرو کنید.', route('search'), true);
+        $b->guest->notify('درخواست شما رد شد', $reason ?: 'می‌توانید اقامتگاه دیگری را رزرو کنید.', route('search'), true, event: 'booking_rejected_guest', vars: ['property' => $b->property->title]);
     }
 
     /** پاسخ مهمان به پیشنهاد روز جایگزین */
@@ -120,7 +120,7 @@ class BookingService
                 'pay_by' => now()->addMinutes(self::windowMinutes()),
             ]);
         });
-        $b->host->notify('مهمان پیشنهاد شما را پذیرفت', 'منتظر پرداخت مهمان هستیم.', route('host.bookings.show', $b), true);
+        $b->host->notify('مهمان پیشنهاد شما را پذیرفت', 'منتظر پرداخت مهمان هستیم.', route('host.bookings.show', $b), true, event: 'booking_offer_accepted_host', vars: ['property' => $b->property->title]);
     }
 
     /** هدیه‌ی دعوت: با اولین پرداخت موفق کاربر دعوت‌شده، به دعوت‌کننده و دعوت‌شده اعتبار کیف پول داده می‌شود */
@@ -152,8 +152,8 @@ class BookingService
     private static function confirmedNotices(Booking $b): void
     {
         $p = $b->property;
-        $b->host->notify('رزرو قطعی شد — مشخصات مهمان را ببینید', "{$p->title} · ".jdate($b->check_in), route('host.bookings.show', $b), true);
-        $b->guest->notify('رزرو شما قطعی شد — آدرس و تلفن میزبان در لینک', "کد رزرو {$b->code}", route('guest.bookings.show', $b), true);
+        $b->host->notify('رزرو قطعی شد — مشخصات مهمان را ببینید', "{$p->title} · ".jdate($b->check_in), route('host.bookings.show', $b), true, event: 'booking_confirmed_host', vars: ['property' => $p->title, 'dates' => jdate($b->check_in), 'guest' => $b->guest->name]);
+        $b->guest->notify('رزرو شما قطعی شد — آدرس و تلفن میزبان در لینک', "کد رزرو {$b->code}", route('guest.bookings.show', $b), true, event: 'booking_confirmed_guest', vars: ['property' => $p->title, 'code' => $b->code]);
     }
 
     /* ---------- اقساط ---------- */
@@ -236,7 +236,7 @@ class BookingService
             $b->installments()->where('status', 'due')->update(['status' => 'late']);
             $b->update(['status' => 'cancelled_guest', 'cancelled_at' => now(), 'refund_amount' => $refund, 'settled_at' => $b->settled_at]);
         });
-        $b->host->notify('رزرو توسط مهمان لغو شد', $b->property->title, route('host.bookings.show', $b), true);
+        $b->host->notify('رزرو توسط مهمان لغو شد', $b->property->title, route('host.bookings.show', $b), true, event: 'booking_cancelled_host', vars: ['property' => $b->property->title]);
 
         return $refund;
     }
@@ -253,7 +253,7 @@ class BookingService
             }
             $b->update(['status' => 'cancelled_host', 'cancelled_at' => now(), 'refund_amount' => $refund, 'cancel_reason' => $reason]);
         });
-        $b->guest->notify('رزرو توسط میزبان لغو شد', 'مبلغ پرداختی به کیف پول شما بازگشت داده شد.', route('guest.bookings.show', $b), true);
+        $b->guest->notify('رزرو توسط میزبان لغو شد', 'مبلغ پرداختی به کیف پول شما بازگشت داده شد.', route('guest.bookings.show', $b), true, event: 'booking_cancelled_guest', vars: ['property' => $b->property->title]);
     }
 
     /** انقضای لحظه‌ای هنگام مشاهده‌ی رزرو (بدون انتظار برای cron) */
@@ -280,7 +280,7 @@ class BookingService
 
         Booking::where('status', 'pending_host')->where('respond_by', '<', now())->get()->each(function ($b) use (&$r) {
             $b->update(['status' => 'expired']);
-            $b->guest->notify('درخواست رزرو منقضی شد', 'میزبان در مهلت مقرر پاسخ نداد؛ اقامتگاه‌های مشابه را ببینید.', route('property', $b->property), true);
+            $b->guest->notify('درخواست رزرو منقضی شد', 'میزبان در مهلت مقرر پاسخ نداد؛ اقامتگاه‌های مشابه را ببینید.', route('property', $b->property), true, event: 'booking_expired_guest', vars: ['property' => $b->property->title]);
             $r['expired']++;
         });
         Booking::where('status', 'awaiting_payment')->where('pay_by', '<', now())->get()->each(function ($b) use (&$r) {
@@ -303,7 +303,7 @@ class BookingService
                 $b->installments()->where('status', 'due')->update(['status' => 'late']);
                 $b->update(['status' => 'cancelled_system', 'cancelled_at' => now(), 'refund_amount' => $paid]);
             });
-            $b->guest->notify('رزرو به‌دلیل عدم پرداخت قسط لغو شد', 'مبلغ پرداختی به کیف پول بازگشت.', route('guest.bookings.show', $b), true);
+            $b->guest->notify('رزرو به‌دلیل عدم پرداخت قسط لغو شد', 'مبلغ پرداختی به کیف پول بازگشت.', route('guest.bookings.show', $b), true, event: 'booking_cancelled_guest', vars: ['property' => $b->property->title]);
             $b->host->notify('رزرو اقساطی لغو شد', $b->code, route('host.bookings.show', $b));
             $r['late']++;
         });
@@ -311,7 +311,7 @@ class BookingService
         // یادآوری یک روز قبل از ورود (با آدرس دقیق)
         Booking::where('status', 'confirmed')->whereNull('reminded_at')->whereDate('check_in', '<=', today()->addDay())->whereDate('check_in', '>=', today())->get()->each(function ($b) use (&$r) {
             $b->update(['reminded_at' => now()]);
-            $b->guest->notify('فردا سفر شماست! ', "{$b->property->title} — ورود ساعت {$b->property->check_in_time}", route('guest.bookings.show', $b), true);
+            $b->guest->notify('فردا سفر شماست! ', "{$b->property->title} — ورود ساعت {$b->property->check_in_time}", route('guest.bookings.show', $b), true, event: 'booking_reminder_guest', vars: ['property' => $b->property->title, 'time' => fa($b->property->check_in_time)]);
             $r['reminded']++;
         });
 
@@ -329,7 +329,7 @@ class BookingService
         // پایان اقامت + نظرسنجی پیامکی
         Booking::where('status', 'confirmed')->whereDate('check_out', '<', today())->get()->each(function ($b) use (&$r) {
             $b->update(['status' => 'completed', 'survey_sent_at' => now()]);
-            $b->guest->notify('اقامت شما چطور بود؟ نظرتان را بنویسید و هدیه بگیرید', $b->property->title, route('guest.bookings.show', $b).'#review', true);
+            $b->guest->notify('اقامت شما چطور بود؟ نظرتان را بنویسید و هدیه بگیرید', $b->property->title, route('guest.bookings.show', $b).'#review', true, event: 'review_request_guest', vars: ['property' => $b->property->title]);
             $b->host->notify('اقامت مهمان تمام شد؛ به مهمان امتیاز دهید', $b->guest->name, route('host.bookings.show', $b));
             $r['completed']++;
         });

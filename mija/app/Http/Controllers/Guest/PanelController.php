@@ -57,8 +57,12 @@ class PanelController extends Controller
 
     public function topup(Request $r)
     {
-        $d = $r->validate(['amount' => 'required|integer|min:10000|max:100000000']);
-        $pay = Payment::create(['user_id' => auth()->id(), 'purpose' => 'topup', 'amount' => $d['amount'], 'gateway' => \App\Support\Zibal::enabled() ? 'zibal' : 'sandbox', 'authority' => Str::random(32)]);
+        $d = $r->validate(['amount' => 'required|integer|min:10000|max:100000000', 'gateway' => 'nullable|in:zibal,bitpay,sandbox']);
+        $gw = $d['gateway'] ?? (\App\Support\Gateways::online()[0] ?? null);
+        if (! $gw || ! \App\Support\Gateways::on($gw)) {
+            return back()->withErrors(['amount' => 'درگاه پرداخت آنلاین فعلاً فعال نیست.']);
+        }
+        $pay = Payment::create(['user_id' => auth()->id(), 'purpose' => 'topup', 'amount' => $d['amount'], 'gateway' => $gw, 'authority' => Str::random(32)]);
 
         return GatewayController::begin($pay);
     }

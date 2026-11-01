@@ -64,7 +64,7 @@ class Payments
                 $free = $b->property->isAvailable($b->check_in, $b->check_out);
                 $b->update(['status' => $free ? 'awaiting_payment' : 'expired', 'pay_by' => now()->addMinutes(BookingService::windowMinutes())]);
             }
-            $b->guest->notify('پرداخت کارت‌به‌کارت تأیید نشد', $note ?: 'لطفاً دوباره پرداخت کنید.', route('guest.bookings.show', $b), true);
+            $b->guest->notify('پرداخت کارت‌به‌کارت تأیید نشد', $note ?: 'لطفاً دوباره پرداخت کنید.', route('guest.bookings.show', $b), true, event: 'card_rejected_guest', vars: ['code' => $b->code]);
         } else {
             $pay->user->notify('پرداخت تأیید نشد', $note);
         }

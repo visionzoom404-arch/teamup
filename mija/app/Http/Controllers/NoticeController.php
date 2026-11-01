@@ -76,7 +76,7 @@ class NoticeController extends Controller
         $b = $this->related($booking);
         $isGuest = auth()->id() === $b->guest_id;
 
-        return view('invoice', ['b' => $b, 'isGuest' => $isGuest, 'cards' => Payments::cards(), 'cardOn' => Payments::cardEnabled(), 'online' => \App\Support\Zibal::enabled() ? 'زیبال' : 'درگاه پرداخت']);
+        return view('invoice', ['b' => $b, 'isGuest' => $isGuest, 'cards' => Payments::cards(), 'cardOn' => Payments::cardEnabled(), 'onlineList' => \App\Support\Gateways::online(), 'walletOn' => \App\Support\Gateways::on('wallet')]);
     }
 
     /** پیام‌رسانی درون رزرو بین مهمان و میزبان */

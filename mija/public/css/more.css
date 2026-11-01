@@ -248,3 +248,36 @@
 .dc-act{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}.dc-act .input{flex:1 1 220px;min-width:0}
 @media(max-width:860px){.dc-grid{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:480px){.dc-docs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.gw-pick{flex:1 1 auto;position:relative;cursor:pointer}.gw-pick input{position:absolute;opacity:0}
+.gw-pick span{display:block;text-align:center;padding:9px 14px;border-radius:14px;border:1px solid rgba(232,134,12,.35);background:linear-gradient(180deg,#fff,#FFF1D6);font-weight:700;font-size:13px;color:var(--brand-d)}
+.gw-pick input:checked+span{background:linear-gradient(135deg,#F8BE55,#E07F08);color:#fff;border-color:transparent;box-shadow:0 12px 20px -12px rgba(224,127,8,.9)}
+
+/* ---- روشن/خاموش روش‌های پرداخت ---- */
+.gw-h{margin-bottom:12px}
+.gw-card{padding:14px;border-radius:20px;margin-bottom:12px;background:linear-gradient(180deg,rgba(255,255,255,.85),rgba(255,255,255,.5));border:1px solid rgba(255,255,255,.95);box-shadow:0 14px 28px -22px rgba(168,95,5,.6);min-width:0}
+.gw-card.live{border-color:rgba(31,138,91,.45);box-shadow:0 0 0 2px rgba(31,138,91,.15),0 14px 28px -22px rgba(31,138,91,.7)}
+.gw-card.sandbox{background:linear-gradient(180deg,rgba(255,244,236,.9),rgba(255,255,255,.5))}
+.gw-card>header{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.gw-t{display:flex;flex-direction:column;min-width:0}.gw-t b{font-size:15px}.gw-t span{font-size:12px;color:var(--muted)}
+.gw-sw{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.tgl{position:relative;display:inline-block;width:52px;height:30px;flex:none;cursor:pointer}.tgl input{position:absolute;opacity:0;inset:0;width:100%;height:100%;cursor:pointer;z-index:2;margin:0}
+.tgl .tr{position:absolute;inset:0;border-radius:99px;background:#D6D3CC;transition:.25s;box-shadow:inset 0 2px 5px rgba(0,0,0,.2)}
+.tgl .tr::after{content:"";position:absolute;top:3px;inset-inline-start:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 3px 8px rgba(0,0,0,.3);transition:.25s}
+.tgl input:checked+.tr{background:linear-gradient(135deg,#34D399,#1F8A5B)}.tgl input:checked+.tr::after{transform:translateX(-22px)}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* ---------- پترن‌های پیامک ---------- */
+.sd-credit.off{background:linear-gradient(135deg,#FEF2F2,#FEE2E2);border:1px solid rgba(220,38,38,.35)}.sd-credit.off b{color:#B42318}.sd-credit.off em{max-width:200px;text-align:center;line-height:1.5}
+.sp-steps{margin:0 0 12px;padding-inline-start:20px;line-height:2;font-size:13px}
+.sp-rules{margin:0 0 14px;padding:10px 14px;border-radius:14px;background:#FFF8E6;border:1px solid rgba(232,134,12,.3);font-size:12.5px;line-height:1.9}
+.sp-card{padding:14px;border-radius:20px;margin-bottom:12px;background:linear-gradient(180deg,rgba(255,255,255,.88),rgba(255,255,255,.5));border:1px solid rgba(255,255,255,.95);box-shadow:0 14px 28px -22px rgba(168,95,5,.6);min-width:0}
+.sp-card.set{border-color:rgba(31,138,91,.4)}
+.sp-card>header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.sp-card h4{margin:0;font-size:14.5px}.sp-card small{color:var(--muted);font-size:12px}
+.sp-tag{padding:2px 10px;border-radius:99px;font-size:11px;font-weight:700;background:#FEE2E2;color:#B42318;white-space:nowrap}.sp-card.set .sp-tag{background:#DCFCE7;color:#166534}
+.sp-text{position:relative;margin:8px 0;padding:10px 12px;border-radius:14px;background:#FFFBF2;border:1px dashed rgba(184,106,6,.4);font-size:13px;line-height:2;white-space:pre-wrap;overflow-wrap:anywhere;direction:rtl}
+.sp-vars{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.sp-vars code{padding:2px 8px;border-radius:99px;background:#fff;border:1px solid rgba(184,106,6,.25);font-size:11.5px;direction:ltr}
+.sp-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center;margin-top:8px}
+.sp-row .input{min-width:0}
+@media(max-width:560px){.sp-row{grid-template-columns:minmax(0,1fr)}.sp-row .btn{width:100%}}

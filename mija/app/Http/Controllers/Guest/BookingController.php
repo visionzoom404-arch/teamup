@@ -13,6 +13,7 @@ use App\Models\ServiceRequest;
 use App\Rules\Clean;
 use App\Support\BookingService;
 use App\Support\Cashback;
+use App\Support\Gateways;
 use App\Support\Payments;
 use App\Support\ReviewService;
 use Illuminate\Http\Request;
@@ -60,7 +61,7 @@ class BookingController extends Controller
     public function pay(Request $r, Booking $booking)
     {
         $b = $this->mine($booking);
-        $d = $r->validate(['plan' => 'nullable|in:full,installment', 'method' => 'required|in:online,wallet,card']);
+        $d = $r->validate(['plan' => 'nullable|in:full,installment', 'method' => 'required|in:zibal,bitpay,sandbox,online,wallet,card']);
         $inst = null;
         if (($d['plan'] ?? 'full') === 'installment') {
             abort_unless($b->canPay() || $b->is_installment, 422);
@@ -79,7 +80,7 @@ class BookingController extends Controller
     {
         $b = $this->mine($installment->booking);
         abort_unless($b->status === 'confirmed' && $installment->status === 'due', 422);
-        $d = $r->validate(['method' => 'required|in:online,wallet,card']);
+        $d = $r->validate(['method' => 'required|in:zibal,bitpay,sandbox,online,wallet,card']);
 
         return $this->charge($r, $b, $installment->amount, $d['method'], $installment);
     }
@@ -89,6 +90,12 @@ class BookingController extends Controller
         $user = auth()->user()->fresh();
         $base = ['user_id' => $user->id, 'booking_id' => $b->id, 'amount' => $amount, 'installment_id' => $inst?->id, 'authority' => Str::random(32)];
 
+        if ($method === 'online') {   // سازگاری با فرم‌های قدیمی: اولین درگاه فعال
+            $method = Gateways::online()[0] ?? 'none';
+        }
+        if (! Gateways::on($method)) {
+            return back()->withErrors(['method' => 'این روش پرداخت فعلاً غیرفعال است؛ روش دیگری انتخاب کنید.']);
+        }
         if ($method === 'wallet') {
             if ($user->wallet < $amount) {
                 return back()->withErrors(['method' => 'موجودی کیف پول کافی نیست.']);
@@ -118,7 +125,7 @@ class BookingController extends Controller
             return redirect()->route('guest.bookings.show', $b)->with('ok', 'پرداخت شما ثبت شد؛ پس از تأیید مدیر (معمولاً چند ساعت) رزرو قطعی می‌شود.');
         }
 
-        $pay = Payment::create($base + ['gateway' => \App\Support\Zibal::enabled() ? 'zibal' : 'sandbox']);
+        $pay = Payment::create($base + ['gateway' => $method]);
 
         return GatewayController::begin($pay);
     }
@@ -147,7 +154,7 @@ class BookingController extends Controller
         abort_unless($b->detailsUnlocked(), 422, 'پس از قطعی شدن رزرو می‌توانید درخواست ثبت کنید.');
         $d = $r->validate(['category' => 'required|in:'.implode(',', array_keys(config('mija.service_categories'))), 'text' => ['required', 'string', 'min:3', 'max:400', new Clean]]);
         ServiceRequest::create($d + ['booking_id' => $b->id, 'user_id' => auth()->id()]);
-        $b->host->notify('درخواست جدید از مهمان', config('mija.service_categories')[$d['category']].' — '.$d['text'], route('host.bookings.show', $b), true);
+        $b->host->notify('درخواست جدید از مهمان', config('mija.service_categories')[$d['category']].' — '.$d['text'], route('host.bookings.show', $b), true, event: 'service_request_host', vars: ['category' => config('mija.service_categories')[$d['category']], 'text' => $d['text']]);
 
         return back()->with('ok', 'درخواست شما برای میزبان ارسال شد. هزینه‌ی آن را مستقیماً با میزبان تسویه می‌کنید.');
     }

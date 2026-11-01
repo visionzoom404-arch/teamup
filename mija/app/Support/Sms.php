@@ -55,7 +55,7 @@ class Sms
         return Http::withHeaders(['Authorization' => 'AccessKey '.trim((string) setting('sms_token'))])->timeout(10)->acceptJson();
     }
 
-    public static function send(?string $phone, string $text, ?string $url = null, bool $signature = true): bool
+    public static function send(?string $phone, string $text, ?string $url = null, bool $signature = true, ?SmsLog $existing = null): bool
     {
         self::$lastError = null;
         if (! $phone || ! preg_match('/^09\d{9}$/', $phone)) {
@@ -64,7 +64,7 @@ class Sms
             return false;
         }
         $msg = $text.($url ? "\n".$url : '').($signature ? "\nمی‌جا" : '');
-        $log = SmsLog::create(['phone' => $phone, 'message' => $msg, 'status' => 'logged']);
+        $log = $existing ?: SmsLog::create(['phone' => $phone, 'message' => $msg, 'status' => 'logged']);
 
         if (! (int) setting('sms_enabled')) {
             self::$lastError = 'ارسال پیامک در تنظیمات خاموش است.';
@@ -98,6 +98,81 @@ class Sms
         }
     }
 
+    /**
+     * ارسال پیامک «پترن‌دار» (روش اصلی سایت): متن در پنل ippanel ساخته و تأیید شده، اینجا فقط
+     * «کد پترن» و مقدار متغیرها فرستاده می‌شود. لینک همیشه کوتاه است و در متغیر link می‌رود.
+     * ippanel: POST /messages/patterns/send {pattern_code, originator, recipient, values}
+     */
+    public static function event(string $key, ?string $phone, array $vars = [], ?string $url = null): bool
+    {
+        self::$lastError = null;
+        $ev = SmsEvents::get($key) ?? SmsEvents::get('general');
+        $key = SmsEvents::get($key) ? $key : 'general';
+        if (! $phone || ! preg_match('/^09\d{9}$/', $phone)) {
+            self::$lastError = 'شماره‌ی گیرنده معتبر نیست.';
+
+            return false;
+        }
+        if ($url) {
+            try {
+                $vars['link'] = \App\Models\ShortLink::make($url);
+            } catch (\Throwable $e) {
+                $vars['link'] = $url;
+            }
+        }
+        $values = [];
+        foreach (SmsEvents::vars($key) as $name) {
+            $v = trim(preg_replace('/\s+/u', ' ', (string) ($vars[$name] ?? '')));
+            $values[$name] = $name === 'link' ? $v : mb_substr($v, 0, 60);
+            if ($values[$name] === '') {
+                $values[$name] = '-';
+            }
+        }
+        $text = SmsEvents::render($key, $values);
+        $log = SmsLog::create(['phone' => $phone, 'message' => $text, 'status' => 'logged']);
+
+        if (! (int) setting('sms_enabled')) {
+            self::$lastError = 'ارسال پیامک در تنظیمات خاموش است.';
+
+            return false;
+        }
+        if (trim((string) setting('sms_token')) === '') {
+            self::$lastError = 'توکن پنل پیامک وارد نشده است.';
+
+            return false;
+        }
+        if (self::originator() === '') {
+            self::$lastError = 'شماره‌ی خط ارسال‌کننده وارد نشده است.';
+
+            return false;
+        }
+        $code = SmsEvents::patternCode($key);
+        if ($code === '') {
+            if ((int) setting('sms_plain_fallback')) {
+                return self::send($phone, preg_replace('/\s*'.preg_quote($values['link'] ?? '', '/').'$/u', '', $text), $values['link'] ?? null, true, $log);
+            }
+            self::$lastError = 'کد پترنِ «'.$ev[0].'» در تنظیمات پیامک وارد نشده است.';
+            $log->update(['status' => 'failed', 'response' => self::$lastError]);
+
+            return false;
+        }
+        try {
+            $res = self::http()->post(self::base().'/messages/patterns/send', ['pattern_code' => $code, 'originator' => self::originator(), 'recipient' => self::e164($phone), 'values' => (object) $values]);
+            $ok = $res->successful() && self::bodyOk($res->json());
+            if (! $ok) {
+                self::$lastError = self::explain($res->status(), $res->json(), $res->body(), true);
+            }
+            $log->update(['status' => $ok ? 'sent' : 'failed', 'response' => mb_substr(($ok ? '' : self::$lastError.' | ').'pattern '.$code.' | '.$res->body(), 0, 250)]);
+
+            return $ok;
+        } catch (\Throwable $e) {
+            self::$lastError = 'اتصال به سرور پنل پیامک برقرار نشد (اینترنت سرور یا آدرس پنل را بررسی کنید).';
+            $log->update(['status' => 'failed', 'response' => mb_substr(self::$lastError.' | '.$e->getMessage(), 0, 250)]);
+
+            return false;
+        }
+    }
+
     private static function bodyOk($j): bool
     {
         if (! is_array($j)) {
@@ -109,11 +184,20 @@ class Sms
     }
 
     /** پیام خطای ippanel را به فارسی قابل‌فهم تبدیل می‌کند */
-    public static function explain(int $http, $json, string $raw = ''): string
+    public static function explain(int $http, $json, string $raw = '', bool $pattern = false): string
     {
         $m = is_array($json) ? trim((string) ($json['error_message'] ?? ($json['message'] ?? (is_string($json['data'] ?? null) ? $json['data'] : '')))) : '';
         $hay = strtolower($m.' '.$raw);
         $code = is_array($json) ? (int) ($json['code'] ?? 0) : 0;
+        if ($pattern && (str_contains($hay, 'pattern') || str_contains($hay, 'الگو') || str_contains($hay, 'template'))) {
+            if (str_contains($hay, 'approv') || str_contains($hay, 'pending') || str_contains($hay, 'تایید') || str_contains($hay, 'تأیید')) {
+                return 'این پترن هنوز توسط ippanel/اپراتور تأیید نشده است؛ پس از تأیید دوباره امتحان کنید.';
+            }
+            if (str_contains($hay, 'variable') || str_contains($hay, 'value') || str_contains($hay, 'متغیر')) {
+                return 'نام یا تعداد متغیرهای پترن با متن ساخته‌شده در ippanel یکی نیست؛ متن پترن را دقیقاً از همین صفحه کپی کنید.';
+            }
+            return 'کد پترن اشتباه است یا در پنل ippanel وجود ندارد؛ کد را دوباره از بخش «الگوها» کپی کنید.';
+        }
         if ($http === 401 || $http === 403 || $code === 401 || str_contains($hay, 'unauthor') || str_contains($hay, 'access key') || str_contains($hay, 'accesskey') || str_contains($hay, 'invalid token')) {
             return 'توکن (AccessKey) پنل پیامک اشتباه، منقضی یا بدون دسترسی است. توکن را از پنل ippanel دوباره بسازید.';
         }
@@ -142,6 +226,24 @@ class Sms
         return 'پنل پیامک خطا برگرداند'.($m !== '' ? ': '.$m : " (کد $http)").'.';
     }
 
+    /** وضعیت اتصال و اعتبار با کش کوتاه (برای نمایش خودکار هنگام باز شدن تب پیامک) */
+    public static function status(bool $fresh = false): array
+    {
+        if (trim((string) setting('sms_token')) === '') {
+            return ['state' => 'none', 'credit' => null, 'error' => null, 'at' => null];
+        }
+        $key = 'mija.sms.status.'.md5((string) setting('sms_token').(string) setting('sms_base_url'));
+        if ($fresh) {
+            Cache::forget($key);
+        }
+
+        return Cache::remember($key, 60, function () {
+            $c = self::credit();
+
+            return ['state' => $c !== null ? 'ok' : 'fail', 'credit' => $c, 'error' => $c !== null ? null : self::$lastError, 'at' => now()->toIso8601String()];
+        });
+    }
+
     /** اعتبار پنل (عدد) یا null و پیام خطا در lastError */
     public static function credit(): ?float
     {
@@ -166,7 +268,7 @@ class Sms
      * بررسی مرحله‌به‌مرحله‌ی تنظیمات؛ هر مرحله: [key, عنوان، وضعیت ok|fail|warn|skip، پیام فارسی]
      * اگر $test شماره‌ای باشد، پیامک آزمایشی هم می‌فرستد.
      */
-    public static function diagnose(?string $test = null): array
+    public static function diagnose(?string $test = null, string $event = 'login_code'): array
     {
         $steps = [];
         $on = (bool) (int) setting('sms_enabled');
@@ -198,8 +300,10 @@ class Sms
             if (! $okAll) {
                 $steps[] = ['test', 'پیامک آزمایشی', 'skip', 'تا مراحل بالا درست نشود پیامک آزمایشی ارسال نمی‌شود.'];
             } else {
-                $sent = self::send($test, 'پیامک آزمایشی از پنل مدیریت می‌جا', route('home'));
-                $steps[] = ['test', 'پیامک آزمایشی', $sent ? 'ok' : 'fail', $sent ? 'پیامک آزمایشی به '.fa($test).' ارسال شد؛ گوشی را بررسی کنید.' : (self::$lastError ?: 'ارسال ناموفق بود.')];
+                $ev = SmsEvents::get($event) ?? SmsEvents::get('login_code');
+                $sample = $ev[5] ?? [];
+                $sent = self::event($event, $test, $sample, route('home'));
+                $steps[] = ['test', 'پیامک آزمایشی ('.$ev[0].')', $sent ? 'ok' : 'fail', $sent ? 'پیامک آزمایشی به '.fa($test).' ارسال شد؛ گوشی را بررسی کنید.' : (self::$lastError ?: 'ارسال ناموفق بود.')];
             }
         }
 

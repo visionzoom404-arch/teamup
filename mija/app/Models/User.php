@@ -171,19 +171,26 @@ class User extends Authenticatable
         });
     }
 
-    /** اعلان داخل سایت (و اپ)؛ با $sms = true همزمان پیامک (همراه لینک همان موضوع) هم ارسال می‌شود */
-    public function notify(string $title, ?string $body = null, ?string $url = null, bool $sms = false, string $kind = 'system'): void
+    /**
+     * اعلان داخل سایت (و اپ)؛ با $sms = true همزمان پیامک «پترن‌دار» هم می‌رود.
+     * $event کلید پترن در SmsEvents است (پیش‌فرض general: عنوان/متن/لینک) و $vars مقدار متغیرهای آن؛
+     * لینک (%link%) از $url ساخته و کوتاه می‌شود.
+     */
+    public function notify(string $title, ?string $body = null, ?string $url = null, bool $sms = false, string $kind = 'system', ?string $event = null, array $vars = []): void
     {
         Notice::create(['user_id' => $this->id, 'title' => mb_substr($title, 0, 250), 'body' => $body ? mb_substr($body, 0, 250) : null, 'url' => $url, 'kind' => $kind]);
         if ($sms) {
-            \App\Support\Sms::send($this->phone, $title.($body ? ' — '.$body : ''), $url);
+            \App\Support\Sms::event($event ?: 'general', $this->phone, $vars + ['title' => $title, 'body' => (string) $body], $url ?: route('home'));
         }
     }
 
     /** اعلان برای همه‌ی مدیران سایت (در بخش «اعلان‌ها»ی پنل مدیر) */
     public static function notifyAdmins(string $title, ?string $body = null, ?string $url = null, bool $sms = false): void
     {
-        static::where('role', 'admin')->where('is_active', true)->get()->each(fn ($a) => $a->notify($title, $body, $url ?: route('admin.dashboard'), $sms && (int) setting('admin_sms_alerts'), 'admin'));
+        static::where('role', 'admin')->where('is_active', true)->get()->each(function ($a) use ($title, $body, $url, $sms) {
+            $url = $url ?: route('admin.dashboard');
+            $a->notify($title, $body, $url, $sms && (int) setting('admin_sms_alerts'), 'admin', 'admin_alert');
+        });
     }
 
     /* ---------- میزبان: احراز هویت و حساب بانکی ---------- */

@@ -268,7 +268,7 @@ public class MainActivity extends Activity {
     }
 
     private void openFromPopup(final String url) {
-        h.post(new Runnable() { @Override public void run() { if (!route(url)) web.loadUrl(url); } });
+        h.post(new Runnable() { @Override public void run() { if (!route(url)) loadWithReferer(url); } });
     }
 
     private static String hostOf(String url) {
@@ -315,6 +315,14 @@ public class MainActivity extends Activity {
             return true;
         }
         return true; // طرح‌های ناشناخته را نادیده بگیر
+    }
+
+    /** صفحه‌هایی مثل اینماد از روی Referer می‌فهمند درخواست از سایت ما آمده؛ در پنجره‌ی بازشو Referer نمی‌رفت و «آدرس اشتباه» می‌داد */
+    private void loadWithReferer(String url) {
+        java.util.HashMap<String, String> h2 = new java.util.HashMap<String, String>();
+        String cur = web.getUrl();
+        h2.put("Referer", cur != null && cur.startsWith("http") ? cur : Cfg.BASE + "/");
+        web.loadUrl(url, h2);
     }
 
     private void external(Intent i) {

@@ -73,8 +73,11 @@
           <p class="xs muted" style="margin:6px 0 10px">این گزینه به‌دلیل امتیاز بالای شما در می‌جا برایتان فعال شده است.</p>
           @endif
           <div class="pm-title">روش پرداخت</div>
-          <label class="pm"><input type="radio" name="method" value="online" checked><div class="pm-b"><b><x-icon name="card" class="sm"/> پرداخت آنلاین ({{ $online }})</b><small>با تمام کارت‌های عضو شتاب</small></div></label>
-          <label class="pm @if($wallet < $b->total && ! $inst) dis @endif"><input type="radio" name="method" value="wallet"><div class="pm-b"><b><x-icon name="wallet" class="sm"/> کیف پول</b><small>موجودی: {{ toman($wallet) }}</small></div></label>
+          @foreach($onlineList as $gi => $gk)
+          <label class="pm"><input type="radio" name="method" value="{{ $gk }}" @checked($gi === 0)><div class="pm-b"><b><x-icon name="card" class="sm"/> {{ $gk === 'sandbox' ? 'درگاه آزمایشی (تست)' : 'پرداخت آنلاین با '.\App\Support\Gateways::label($gk) }}</b><small>{{ $gk === 'sandbox' ? 'فقط برای آزمایش — پولی کم نمی‌شود' : 'با تمام کارت‌های عضو شتاب' }}</small></div></label>
+          @endforeach
+          @if($walletOn)<label class="pm @if($wallet < $b->total && ! $inst) dis @endif"><input type="radio" name="method" value="wallet" @checked(empty($onlineList))><div class="pm-b"><b><x-icon name="wallet" class="sm"/> کیف پول</b><small>موجودی: {{ toman($wallet) }}</small></div></label>@endif
+          @if(empty($onlineList) && ! $walletOn && ! $cardOn)<div class="alert warn"><x-icon name="info"/>فعلاً هیچ روش پرداختی فعال نیست؛ لطفاً با پشتیبانی تماس بگیرید.</div>@endif
           @if($cardOn)
           <label class="pm"><input type="radio" name="method" value="card"><div class="pm-b"><b><x-icon name="receipt" class="sm"/> کارت‌به‌کارت</b><small>پس از واریز، کد پیگیری را ثبت کنید؛ با تأیید مدیر رزرو قطعی می‌شود</small></div></label>
           <div class="pm-card" hidden>

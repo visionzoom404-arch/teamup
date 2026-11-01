@@ -23,7 +23,11 @@
         <div><h4>می‌جا</h4><a href="{{ route('page', 'about') }}">درباره ما</a><a href="{{ route('page', 'rules') }}">قوانین و مقررات</a><a href="{{ route('page', 'privacy') }}">حریم خصوصی</a><a href="{{ route('page', 'contact') }}">تماس با ما</a>@unless(app_client())<a href="{{ route('app') }}">دانلود اپلیکیشن</a>@endunless</div>
       </div>
     </div>
-    @php $enamad = trim((string) setting('enamad_html')) ?: trim((string) config('mija.enamad_html')); @endphp
+    @php
+      $enamad = trim((string) setting('enamad_html')) ?: trim((string) config('mija.enamad_html'));
+      // داخل اپ اندروید، لینک نماد در همان صفحه باز شود تا مرورگر داخلی Referer سایت را بفرستد (اینماد بدون آن «آدرس اشتباه» می‌دهد)
+      if ($enamad && app_client()) { $enamad = preg_replace('/target\s*=\s*(["\'])_blank\1/i', 'target="_self"', $enamad); }
+    @endphp
     @if($enamad)<div class="f2-trust" id="enamad-box">{!! $enamad !!}</div>@endif
     <div class="f2-copy">© {{ fa(jdate(now(), 'Y')) }} می‌جا — تمامی حقوق محفوظ است.</div>
   </div>

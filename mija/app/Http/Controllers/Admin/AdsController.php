@@ -25,7 +25,7 @@ class AdsController extends Controller
         $r->validate(['image' => 'required|image|mimes:jpg,jpeg,png,webp|max:3072'], ['image.required' => 'تصویر بنر را انتخاب کنید.']);
         $ad->update(['image' => $r->file('image')->store('ads', 'public')]);
         Audit::log('ad.image', "#{$ad->id}");
-        $ad->host->notify('بنر سفارشی شما آماده شد', 'پس از تأیید نهایی مدیر در صفحه‌ی اول نمایش داده می‌شود.', route('host.ads'), true);
+        $ad->host->notify('بنر سفارشی شما آماده شد', 'پس از تأیید نهایی مدیر در صفحه‌ی اول نمایش داده می‌شود.', route('host.ads'), true, event: 'ad_status_host', vars: ['type' => $ad->typeLabel(), 'status' => 'بنر سفارشی‌اش آماده شد']);
 
         return back()->with('ok', 'بنر بارگذاری شد؛ حالا می‌توانید تبلیغ را تأیید کنید.');
     }
