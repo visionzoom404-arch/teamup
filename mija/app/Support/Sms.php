@@ -113,7 +113,7 @@ class Sms
 
             return false;
         }
-        if ($url) {
+        if ($url && SmsEvents::withLink()) {
             try {
                 $vars['link'] = \App\Models\ShortLink::make($url);
             } catch (\Throwable $e) {

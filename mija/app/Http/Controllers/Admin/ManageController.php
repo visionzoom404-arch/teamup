@@ -306,13 +306,13 @@ class ManageController extends Controller
         'ads_enabled' => 'boolean', 'ad_banner_day' => 'required|integer|min:0', 'ad_click_cpc' => 'required|integer|min:0', 'ad_click_min' => 'required|integer|min:0', 'ad_ladder' => 'required|integer|min:0', 'ad_sms_each' => 'required|integer|min:0', 'ad_push_each' => 'required|integer|min:0',
         'sms_enabled' => 'boolean', 'admin_sms_alerts' => 'boolean', 'sms_provider' => 'nullable|string|max:20', 'sms_token' => 'nullable|string|max:300', 'sms_originator' => 'nullable|string|max:30', 'sms_base_url' => 'nullable|url|max:200',
         'pay_zibal_on' => 'boolean', 'pay_bitpay_on' => 'boolean', 'pay_wallet_on' => 'boolean', 'pay_sandbox_on' => 'boolean', 'bitpay_api' => 'nullable|string|max:1000', 'bitpay_test' => 'boolean', 'gateway_driver' => 'nullable|in:sandbox,zibal', 'zibal_merchants' => 'nullable|string|max:1000', 'cards' => 'nullable|string|max:2000', 'card_to_card_enabled' => 'boolean',
-        'enamad_html' => 'nullable|string|max:3000', 'ga4_id' => ['nullable', 'regex:/^G-[A-Z0-9]{4,15}$/'], 'google_verify' => 'nullable|string|max:120', 'bing_verify' => 'nullable|string|max:120', 'support_phone' => 'nullable|string|max:40', 'contact_phones' => 'nullable|string|max:1500', 'contact_addresses' => 'nullable|string|max:2000', 'support_email' => 'nullable|email|max:80', 'footer_about' => 'nullable|string|max:300',
+        'enamad_html' => 'nullable|string|max:3000', 'ga4_id' => ['nullable', 'regex:/^G-[A-Z0-9]{4,15}$/'], 'google_verify' => 'nullable|string|max:400', 'google_verify_file' => ['nullable', 'regex:/^(google[a-zA-Z0-9]{8,40}\.html)?$/'], 'bing_verify' => 'nullable|string|max:120', 'support_phone' => 'nullable|string|max:40', 'contact_phones' => 'nullable|string|max:1500', 'contact_addresses' => 'nullable|string|max:2000', 'support_email' => 'nullable|email|max:80', 'footer_about' => 'nullable|string|max:300',
     ];
 
     /** قوانین ثابت + کد پترن هر پیامک (sms_pat_*) */
     public static function rules(): array
     {
-        $r = self::SETTINGS + ['sms_plain_fallback' => 'boolean'];
+        $r = self::SETTINGS + ['sms_plain_fallback' => 'boolean', 'sms_use_link' => 'boolean'];
         foreach (\App\Support\SmsEvents::all() as $k => $_) {
             $r['sms_pat_'.$k] = ['nullable', 'string', 'max:60', 'regex:/^[A-Za-z0-9_\-]*$/'];
         }
@@ -326,6 +326,12 @@ class ManageController extends Controller
         $keys = $r->input('keys', []);
         $rules = collect(self::rules())->only($keys)->all();
         $d = $r->validate($rules);
+        if (isset($d['google_verify'])) {
+            $d['google_verify'] = \App\Support\SeoStatus::cleanToken($d['google_verify']);
+        }
+        if (isset($d['google_verify_file'])) {
+            $d['google_verify_file'] = trim($d['google_verify_file']);
+        }
         foreach ($rules as $k => $rule) {
             Setting::put($k, (is_string($rule) && str_contains($rule, 'boolean')) ? (int) $r->boolean($k) : ($d[$k] ?? ''));
         }

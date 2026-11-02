@@ -42,6 +42,7 @@ return [
     // پیامک (ippanel) و درگاه و کارت
     'sms_enabled' => 0,
     'sms_plain_fallback' => 0,
+    'sms_use_link' => 0,
     'admin_sms_alerts' => 0,
     'sms_provider' => 'ippanel',
     'sms_token' => '',

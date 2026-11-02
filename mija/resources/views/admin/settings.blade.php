@@ -3,7 +3,7 @@
 @section('content')
 @php
   $tab = request('tab', 'finance');
-  $tabs = ['finance' => 'مالی و زمان‌بندی', 'cash' => 'هدیه و اقساط', 'ads' => 'تبلیغات', 'sms' => 'پیامک', 'gateway' => 'درگاه و کارت‌ها', 'texts' => 'متن‌ها و تماس', 'peaks' => 'ایام پیک'];
+  $tabs = ['finance' => 'مالی و زمان‌بندی', 'cash' => 'هدیه و اقساط', 'ads' => 'تبلیغات', 'sms' => 'پیامک', 'gateway' => 'درگاه و کارت‌ها', 'texts' => 'متن‌ها و تماس', 'seo' => 'گوگل و سئو', 'peaks' => 'ایام پیک'];
   $num = function ($k, $l, $help = null) { echo '<div class="field"><label>'.$l.'</label><input class="input" dir="ltr" type="number" name="'.$k.'" value="'.e(setting($k)).'">'.($help ? '<div class="help">'.$help.'</div>' : '').'</div><input type="hidden" name="keys[]" value="'.$k.'">'; };
   $txt = function ($k, $l, $help = null, $dir = 'ltr') { echo '<div class="field"><label>'.$l.'</label><input class="input" dir="'.$dir.'" name="'.$k.'" value="'.e(setting($k)).'">'.($help ? '<div class="help">'.$help.'</div>' : '').'</div><input type="hidden" name="keys[]" value="'.$k.'">'; };
   $chk = function ($k, $l, $help = null) { echo '<input type="hidden" name="keys[]" value="'.$k.'"><input type="hidden" name="'.$k.'" value="0"><label class="check"><input type="checkbox" name="'.$k.'" value="1" '.((int) setting($k) ? 'checked' : '').'><div><b>'.$l.'</b>'.($help ? '<div class="xs muted" style="font-weight:500">'.$help.'</div>' : '').'</div></label>'; };
@@ -37,7 +37,7 @@
 @elseif($tab === 'sms')
 @include('admin.partials.sms-diag')
 <form class="card mb" method="post" action="{{ route('admin.settings.update') }}">@csrf<input type="hidden" name="group" value="sms"><h3><x-i3 name="p_phone" class="sm"/> پنل پیامک (ippanel)</h3>
-  @include('partials.help', ['title' => 'راهنمای اتصال', 'text' => 'از پنل ippanel، «توکن دسترسی (AccessKey)» و شماره‌ی خط ارسال را بردارید و اینجا وارد کنید، سپس «ارسال فعال باشد» را بزنید. تا زمانی که خاموش یا خالی باشد، پیامک‌ها فقط در «گزارش پیامک» ثبت می‌شوند و ارسال واقعی انجام نمی‌شود. همه‌ی پیامک‌ها «پترن‌دار» ارسال می‌شوند و لینک همان موضوع (کوتاه‌شده) در متغیر %link% می‌آید؛ متن و کد پترن هر پیامک را در بخش «پترن‌های پیامک» پایین همین صفحه بردارید.'])
+  @include('partials.help', ['title' => 'راهنمای اتصال', 'text' => 'از پنل ippanel، «توکن دسترسی (AccessKey)» و شماره‌ی خط ارسال را بردارید و اینجا وارد کنید، سپس «ارسال فعال باشد» را بزنید. تا زمانی که خاموش یا خالی باشد، پیامک‌ها فقط در «گزارش پیامک» ثبت می‌شوند و ارسال واقعی انجام نمی‌شود. همه‌ی پیامک‌ها «پترن‌دار» ارسال می‌شوند و پیش‌فرض بدون لینک است (ippanel پترن دارای لینک را رد می‌کند)؛ متن و کد پترن هر پیامک را در بخش «پترن‌های پیامک» پایین همین صفحه بردارید.'])
   @php $chk('sms_enabled', 'ارسال پیامک فعال باشد') @endphp
   @php $chk('admin_sms_alerts', 'برای رویدادهای مهم، پیامک به مدیران هم برود (درخواست برداشت، پرداخت کارت‌به‌کارت…)') @endphp
   <div class="grid2 mt">@php $txt('sms_token', 'توکن (AccessKey)') @endphp @php $txt('sms_originator', 'شماره خط ارسال', 'مثلاً +983000505') @endphp @php $txt('sms_base_url', 'آدرس API', 'پیش‌فرض: https://rest.ippanel.com/v1 (معمولاً دست نزنید)') @endphp @php $txt('sms_provider', 'سرویس‌دهنده') @endphp</div>
@@ -51,10 +51,11 @@
   <input type="hidden" name="keys[]" value="contact_phones"><div class="field"><label>شماره‌های «تماس با ما» (هر خط یک شماره: عنوان | شماره)</label><textarea class="input" name="contact_phones" rows="4" dir="rtl" placeholder="پشتیبانی (موبایل) | 09123456789&#10;تلفن ثابت | 02634430536">{{ setting('contact_phones') }}</textarea><div class="help">هر تعداد شماره بنویسید؛ در صفحه‌ی «تماس با ما» و فوتر نمایش داده می‌شوند.</div></div>
   <input type="hidden" name="keys[]" value="contact_addresses"><div class="field"><label>آدرس‌ها (هر خط یک آدرس: عنوان | آدرس)</label><textarea class="input" name="contact_addresses" rows="4" dir="rtl" placeholder="دفتر مرکزی | کرج، جهانشهر، میدان سپاه …">{{ setting('contact_addresses') }}</textarea></div>
   @php $txt('footer_about', 'متن کوتاه پایین سایت (فوتر)', null, 'rtl') @endphp
-  <hr class="divider"><h3>اینماد و سئو</h3>
+  <hr class="divider"><h3>اینماد</h3>
   <input type="hidden" name="keys[]" value="enamad_html"><div class="field"><label>کد نماد اعتماد الکترونیکی (اینماد)</label><textarea class="input" dir="ltr" name="enamad_html" rows="3" placeholder="کد HTML نماد را از پنل اینماد کپی و اینجا بچسبانید">{{ setting('enamad_html') }}</textarea><div class="help">پس از دریافت، در پایین همه‌ی صفحه‌ها نمایش داده می‌شود. (کد زرین‌پال/زیبال هم اگر نماد داشت همین‌جا اضافه شود.)</div></div>
-  <div class="grid3">@php $txt('ga4_id', 'شناسه‌ی گوگل آنالیتیکس (G-XXXX)') @endphp @php $txt('google_verify', 'کد تأیید گوگل سرچ کنسول (content)') @endphp @php $txt('bing_verify', 'کد تأیید بینگ') @endphp</div>
   <button class="btn">ذخیره</button> <a class="btn btn-light" href="{{ route('admin.pages') }}">ویرایش صفحه‌ها (قوانین، درباره ما …)</a> <a class="btn btn-light" target="_blank" href="{{ url('/sitemap.xml') }}">sitemap.xml</a></form>
+@elseif($tab === 'seo')
+@include('admin.partials.search-console')
 @else
 <div class="card"><h3>ایام پیک (قیمت ویژه)</h3>
   <form method="post" action="{{ route('admin.peaks.store') }}" class="row wrap mb">@csrf<input class="input" style="max-width:200px" name="title" placeholder="عنوان (نوروز)" required><input class="input" style="max-width:150px" dir="ltr" name="from" placeholder="1406/01/01" required><input class="input" style="max-width:150px" dir="ltr" name="to" placeholder="1406/01/15" required><button class="btn btn-sm">افزودن</button></form>

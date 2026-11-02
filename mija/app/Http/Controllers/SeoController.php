@@ -18,6 +18,14 @@ class SeoController extends Controller
         return response($body, 200, ['Content-Type' => 'text/plain; charset=utf-8']);
     }
 
+    /** فایل تأیید مالکیت گوگل (روش «HTML file» در سرچ کنسول) */
+    public function googleFile(string $file)
+    {
+        abort_unless(trim((string) setting('google_verify_file')) === $file, 404);
+
+        return response('google-site-verification: '.$file, 200, ['Content-Type' => 'text/html; charset=utf-8']);
+    }
+
     public function sitemap()
     {
         $u = [];

@@ -37,6 +37,7 @@ class PlatformRulesTest extends TestCase
 
     public function test_host_response_window_is_30_minutes_and_sms_goes_to_host(): void
     {
+        \App\Models\Setting::put('sms_use_link', 1);
         [$host, $p, $guest] = $this->setup3();
         $b = BookingService::create($guest, $p, today()->addDays(5), today()->addDays(7), 2, 0, null, null);
         $this->assertSame('pending_host', $b->status);

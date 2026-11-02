@@ -13,7 +13,7 @@ $menus = [
   ['notices', 'اعلان‌ها', 'bell'], ['profile', 'پروفایل و حساب بانکی', 'user'], ['help', 'راهنما', 'compass'],
  ],
  'admin' => [
-  ['admin.dashboard', 'داشبورد', 'chart'], ['admin.properties', 'اقامتگاه‌ها', 'home', $adminBadge['props'] ?? 0], ['admin.bookings', 'رزروها', 'calendar'],
+  ['admin.dashboard', 'داشبورد', 'chart'], ['admin.analytics', 'آمار بازدید', 'activity'], ['admin.properties', 'اقامتگاه‌ها', 'home', $adminBadge['props'] ?? 0], ['admin.bookings', 'رزروها', 'calendar'],
   ['admin.users', 'کاربران', 'users'], ['admin.documents', 'مدارک میزبانان', 'shield', $adminBadge['docs'] ?? 0], ['admin.payments', 'پرداخت‌ها', 'coins', $adminBadge['cards'] ?? 0], ['admin.payouts', 'برداشت‌ها', 'wallet', $adminBadge['payouts'] ?? 0],
   ['admin.reviews', 'نظرات', 'star', $adminBadge['reviews'] ?? 0], ['admin.ads', 'تبلیغات', 'megaphone', $adminBadge['ads'] ?? 0], ['admin.amenities', 'امکانات', 'list'], ['admin.coupons', 'کد تخفیف', 'tag'],
   ['admin.pages', 'صفحه‌ها و متن‌ها', 'file'], ['admin.words', 'کلمات ممنوع', 'ban'], ['notices', 'اعلان‌ها', 'bell'], ['admin.broadcast', 'ارسال اعلان', 'mail'], ['admin.sms', 'گزارش پیامک', 'phone'],

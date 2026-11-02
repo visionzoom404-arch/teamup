@@ -103,17 +103,24 @@ class RoundFourTest extends TestCase
         $this->get('/s/zzzzzz')->assertNotFound();
     }
 
-    public function test_every_sms_event_has_link_or_documented_vars_and_unique_template(): void
+    public function test_every_sms_event_vars_match_template_in_both_modes(): void
     {
-        foreach (SmsEvents::all() as $k => $e) {
-            preg_match_all('/%(\w+)%/', $e[4], $m);
-            foreach ($m[1] as $v) {
-                $this->assertArrayHasKey($v, $e[3], "$k: متغیر $v تعریف نشده");
-            }
-            foreach (array_keys($e[3]) as $v) {
-                $this->assertStringContainsString('%'.$v.'%', $e[4], "$k: متغیر $v در متن نیامده");
+        foreach ([0, 1] as $withLink) {
+            Setting::put('sms_use_link', $withLink);
+            foreach (SmsEvents::all() as $k => $e) {
+                $t = SmsEvents::template($k);
+                preg_match_all('/%(\w+)%/', $t, $m);
+                foreach ($m[1] as $v) {
+                    $this->assertContains($v, SmsEvents::vars($k), "$k: متغیر $v تعریف نشده");
+                }
+                foreach (SmsEvents::vars($k) as $v) {
+                    $this->assertStringContainsString('%'.$v.'%', $t, "$k: متغیر $v در متن نیامده");
+                }
+                $this->assertSame($withLink ? true : false, str_contains($t, '%link%'), "$k link mode $withLink");
+                $this->assertDoesNotMatchRegularExpression('~https?://|www\.|\.(com|ir|click)\b~i', $t);
             }
         }
+        Setting::put('sms_use_link', 0);
         $this->assertCount(count(SmsEvents::all()), array_unique(array_column(SmsEvents::all(), 4)));
     }
 
@@ -133,13 +140,22 @@ class RoundFourTest extends TestCase
         $this->smsOn();
         Setting::put('sms_pat_booking_rejected_guest', 'abc123');
         Http::fake(['*' => Http::response(['status' => 'OK', 'code' => 200, 'data' => ['message_id' => 9]], 200)]);
+        // پیش‌فرض: بدون لینک
         $this->assertTrue(Sms::event('booking_rejected_guest', '09120006011', ['property' => 'ویلای جنگلی'], 'https://mija.click/search'));
         Http::assertSent(function ($r) {
             $v = (array) $r['values'];
 
             return str_ends_with($r->url(), '/messages/patterns/send') && $r['pattern_code'] === 'abc123' && $r['recipient'] === '+989120006011'
-                && $v['property'] === 'ویلای جنگلی' && preg_match('~/s/\w+$~', $v['link']);
+                && $v === ['property' => 'ویلای جنگلی'];
         });
+        $this->assertStringNotContainsString('http', SmsLog::latest('id')->first()->message);
+        // با روشن‌کردن گزینه‌ی لینک، لینک کوتاه در متغیر link می‌رود
+        Setting::put('sms_use_link', 1);
+        Http::swap(new \Illuminate\Http\Client\Factory);
+        Http::fake(['*' => Http::response(['status' => 'OK', 'code' => 200], 200)]);
+        $this->assertTrue(Sms::event('booking_rejected_guest', '09120006011', ['property' => 'ویلای جنگلی'], 'https://mija.click/search'));
+        Http::assertSent(fn ($r) => preg_match('~/s/\w+$~', ((array) $r['values'])['link'] ?? ''));
+        Setting::put('sms_use_link', 0);
         Http::swap(new \Illuminate\Http\Client\Factory);
         Http::fake(['*' => Http::response(['status' => 'ERROR', 'code' => 400, 'error_message' => 'pattern not found'], 400)]);
         $this->assertFalse(Sms::event('booking_rejected_guest', '09120006011', ['property' => 'x'], null));
@@ -154,7 +170,7 @@ class RoundFourTest extends TestCase
             'sms_token' => str_repeat('t', 30), 'sms_originator' => '3000505', 'sms_pat_login_code' => 'LOGIN01'])->assertSessionHasNoErrors();
         $this->assertSame('LOGIN01', SmsEvents::patternCode('login_code'));
         $page = $this->actingAs($a)->followingRedirects()->get('/admin/settings?tab=sms');
-        $page->assertOk()->assertSee('پترن‌های پیامک')->assertSee('%link%', false)->assertSee('LOGIN01', false);
+        $page->assertOk()->assertSee('پترن‌های پیامک')->assertDontSee('<bdi dir="ltr">%link%</bdi>', false)->assertSee('LOGIN01', false);
         $this->assertStringContainsString('۱,۲۳۴,۵۶۷', $page->getContent());
         $this->actingAs($a)->post('/admin/settings', ['group' => 'sms', 'keys' => ['sms_pat_login_code'], 'sms_pat_login_code' => 'bad code!'])->assertSessionHasErrors('sms_pat_login_code');
     }
@@ -167,5 +183,42 @@ class RoundFourTest extends TestCase
         $app = $this->withHeaders(['User-Agent' => 'Mozilla/5.0 MijaApp/1.3.0 (code 5; flavor store)'])->get('/')->getContent();
         $this->assertStringNotContainsString('trustseal.enamad.ir/?id=1&amp;Code=x" target', $app);
         $this->assertMatchesRegularExpression('/target=["\']_self["\'][^>]*href=["\']https:\/\/trustseal|href=["\']https:\/\/trustseal[^>]*target=["\']_self["\']/', $app);
+    }
+
+    public function test_visits_are_tracked_and_shown_to_admin(): void
+    {
+        $ua = 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Mobile Safari/537.36';
+        $this->withHeaders(['User-Agent' => $ua, 'Referer' => 'https://www.google.com/'])->get('/')->assertOk();
+        $this->withHeaders(['User-Agent' => $ua])->get('/search?q='.rawurlencode('نوشهر'))->assertOk();
+        $this->withHeaders(['User-Agent' => 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'])->get('/')->assertOk();
+        $this->assertSame(2, \App\Models\Visit::where('is_bot', false)->count());
+        $v = \App\Models\Visit::where('path', '/')->where('is_bot', false)->first();
+        $this->assertSame('google', $v->source);
+        $this->assertSame('mobile', $v->device);
+        $this->assertSame('Chrome', $v->browser);
+        $this->assertSame('Android', $v->os);
+        $this->assertTrue($v->is_new);
+        $this->assertNotEmpty($v->visitor);
+        $this->assertSame('Googlebot', \App\Models\Visit::where('is_bot', true)->value('bot_name'));
+        $this->assertSame('نوشهر', \App\Models\Visit::where('path', '/search')->value('search'));
+
+        $a = $this->admin();
+        $this->actingAs($a)->get('/')->assertOk();
+        $this->assertSame(2, \App\Models\Visit::where('is_bot', false)->count());   // بازدید مدیر شمرده نمی‌شود
+        $this->actingAs($a)->get('/admin/analytics?days=7')->assertOk()->assertSee('آمار بازدید سایت')->assertSee('گوگل')->assertSee('Googlebot');
+        $this->actingAs($a)->get('/admin/analytics?days=1')->assertOk();
+    }
+
+    public function test_search_console_verification_tag_file_and_tab(): void
+    {
+        $a = $this->admin();
+        $this->actingAs($a)->post('/admin/settings', ['group' => 'seo', 'keys' => ['google_verify', 'google_verify_file'],
+            'google_verify' => '<meta name="google-site-verification" content="AbC123_xyz-TOKEN" />', 'google_verify_file' => 'google0123456789abcdef.html'])->assertSessionHasNoErrors();
+        $this->assertSame('AbC123_xyz-TOKEN', setting('google_verify'));
+        $this->get('/')->assertSee('<meta name="google-site-verification" content="AbC123_xyz-TOKEN">', false);
+        $this->get('/google0123456789abcdef.html')->assertOk()->assertSee('google-site-verification: google0123456789abcdef.html', false);
+        $this->get('/google9999999999999999.html')->assertNotFound();
+        $this->actingAs($a)->get('/admin/settings?tab=seo')->assertOk()->assertSee('آمادگی برای گوگل سرچ کنسول')->assertSee('sitemap.xml');
+        $this->actingAs($a)->post('/admin/settings', ['group' => 'seo', 'keys' => ['google_verify_file'], 'google_verify_file' => 'evil.php'])->assertSessionHasErrors('google_verify_file');
     }
 }

@@ -43,7 +43,7 @@ class RoundThreeTest extends TestCase
 
     private function smsOn(): void
     {
-        foreach (['sms_enabled' => 1, 'sms_token' => str_repeat('a', 40), 'sms_originator' => '3000505'] as $k => $v) {
+        foreach (['sms_use_link' => 1, 'sms_enabled' => 1, 'sms_token' => str_repeat('a', 40), 'sms_originator' => '3000505'] as $k => $v) {
             Setting::put($k, $v);
         }
         foreach (array_keys(\App\Support\SmsEvents::all()) as $ev) {

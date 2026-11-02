@@ -74,6 +74,46 @@ class SmsEvents
             "%title% — %body% %link%", ['title' => 'اطلاعیه می‌جا', 'body' => 'تخفیف ویژه آخر هفته']],
     ];
 
+    /** متن پترن بدون لینک (پیش‌فرض): ippanel پترن دارای لینک را رد می‌کند */
+    public const PLAIN = [
+        'login_code' => "کد ورود شما به می‌جا: %code%\nاین کد را به کسی ندهید.",
+        'booking_request_host' => "درخواست رزرو جدید برای %property% (%dates%) از %guest% ثبت شد. تا %minutes% دقیقه فرصت پاسخ دارید. برای پاسخ وارد پنل می‌جا شوید.",
+        'booking_request_guest' => "درخواست شما برای %property% به میزبان ارسال شد و تا %minutes% دقیقه پاسخ می‌دهد. پیگیری در پنل می‌جا.",
+        'booking_instant_host' => "رزرو فوری جدید برای %property% (%dates%) از %guest% ثبت شد. جزئیات در پنل می‌جا.",
+        'booking_accepted_guest' => "درخواست شما برای %property% تأیید شد. تا %minutes% دقیقه برای پرداخت در پنل می‌جا فرصت دارید.",
+        'booking_rejected_guest' => "متأسفانه درخواست شما برای %property% پذیرفته نشد. اقامتگاه‌های دیگر را در می‌جا ببینید.",
+        'booking_offer_guest' => "میزبان %property% روز دیگری با %discount% درصد تخفیف پیشنهاد داد. برای پاسخ وارد پنل می‌جا شوید.",
+        'booking_offer_accepted_host' => "مهمان پیشنهاد شما برای %property% را پذیرفت و منتظر پرداخت است.",
+        'booking_confirmed_host' => "رزرو %property% از تاریخ %dates% برای %guest% قطعی شد. مشخصات مهمان در پنل می‌جا است.",
+        'booking_confirmed_guest' => "رزرو شما برای %property% قطعی شد (کد %code%). آدرس و تلفن میزبان در پنل می‌جا است.",
+        'booking_cancelled_host' => "رزرو %property% توسط مهمان لغو شد.",
+        'booking_cancelled_guest' => "رزرو شما برای %property% لغو شد و مبلغ پرداختی به کیف پول شما برگشت.",
+        'booking_expired_guest' => "درخواست شما برای %property% منقضی شد چون میزبان در مهلت پاسخ نداد.",
+        'booking_reminder_guest' => "فردا سفر شماست! %property% — ورود ساعت %time%. جزئیات در پنل می‌جا.",
+        'review_request_guest' => "اقامت شما در %property% چطور بود؟ نظرتان را در پنل می‌جا بنویسید و هدیه بگیرید.",
+        'card_rejected_guest' => "پرداخت کارت‌به‌کارت رزرو %code% تأیید نشد. لطفاً دوباره پرداخت کنید.",
+        'service_request_host' => "درخواست جدید مهمان (%category%): %text%. پاسخ در پنل می‌جا.",
+        'service_reply_guest' => "پاسخ میزبان به درخواست شما: %status%.",
+        'review_new_host' => "نظر جدید برای %property% ثبت شد؛ در پنل می‌جا تأیید کنید.",
+        'review_published_guest' => "نظر شما درباره %property% منتشر شد. ممنون!",
+        'cashback_guest' => "هدیه‌ی نظر شما (%amount%) به کیف پول اضافه شد و تا %days% روز قابل استفاده است.",
+        'property_status_host' => "اقامتگاه %property% %status%. جزئیات در پنل می‌جا.",
+        'docs_approved_host' => "هویت شما در می‌جا تأیید شد؛ اکنون می‌توانید اقامتگاه خود را ثبت کنید.",
+        'docs_rejected_host' => "مدارک شما تأیید نشد: %reason%. لطفاً در پنل می‌جا اصلاح و دوباره ارسال کنید.",
+        'payout_paid' => "مبلغ %amount% به حساب شما واریز شد. رسید در پنل می‌جا است.",
+        'payout_rejected' => "درخواست برداشت %amount% رد شد و مبلغ به کیف پول برگشت.",
+        'ad_status_host' => "تبلیغ %type% شما %status%.",
+        'ad_promo' => "%text%",
+        'admin_alert' => "هشدار مدیریت می‌جا: %title% — %body%",
+        'general' => "%title% — %body%",
+    ];
+
+    /** آیا لینک در پیامک‌ها بیاید؟ (پیش‌فرض خیر) */
+    public static function withLink(): bool
+    {
+        return (bool) (int) setting('sms_use_link');
+    }
+
     public static function all(): array
     {
         return self::E;
@@ -87,11 +127,28 @@ class SmsEvents
     /** نام متغیرها (لاتین) برای ippanel */
     public static function vars(string $k): array
     {
-        return array_keys(self::E[$k][3] ?? []);
+        $v = array_keys(self::E[$k][3] ?? []);
+
+        return self::withLink() ? $v : array_values(array_diff($v, ['link']));
+    }
+
+    /** توضیح متغیرها برای نمایش در پنل (بدون link در حالت بدون لینک) */
+    public static function varDocs(string $k): array
+    {
+        $d = self::E[$k][3] ?? [];
+        if (! self::withLink()) {
+            unset($d['link']);
+        }
+
+        return $d;
     }
 
     public static function template(string $k): string
     {
+        if (! self::withLink()) {
+            return self::PLAIN[$k] ?? '%title% %body%';
+        }
+
         return self::E[$k][4] ?? '%title% %body% %link%';
     }
 

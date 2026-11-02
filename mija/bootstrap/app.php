@@ -18,7 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
         $middleware->validateCsrfTokens(except: ['pay/bitpay']);   // بیت‌پی با POST از سایت بانک برمی‌گردد
         $middleware->web(prepend: [\App\Http\Middleware\CanonicalHost::class]);
-        $middleware->web(append: [\App\Http\Middleware\TrackAppClient::class]);
+        $middleware->web(append: [\App\Http\Middleware\TrackAppClient::class, \App\Http\Middleware\TrackVisit::class]);
         $middleware->alias(['role' => EnsureRole::class, 'onboarded' => EnsureHostOnboarded::class]);
         $middleware->redirectGuestsTo(fn () => route('login'));
         $middleware->redirectUsersTo(fn () => auth()->user()->homeRoute());

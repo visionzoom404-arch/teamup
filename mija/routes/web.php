@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Route;
 /* ---------- عمومی ---------- */
 Route::get('/robots.txt', [\App\Http\Controllers\SeoController::class, 'robots']);
 Route::get('/sitemap.xml', [\App\Http\Controllers\SeoController::class, 'sitemap']);
+Route::get('/{file}', [\App\Http\Controllers\SeoController::class, 'googleFile'])->where('file', 'google[a-zA-Z0-9]{8,40}\.html');
 Route::get('/', [PublicController::class, 'home'])->name('home');
 Route::get('/search', [PublicController::class, 'search'])->name('search');
 Route::get('/p/{property}', [PublicController::class, 'show'])->name('property');
@@ -211,6 +212,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/sms', [Admin\ContentController::class, 'sms'])->name('sms');
     Route::get('/errors', [Admin\ErrorLogController::class, 'index'])->name('errors');
     Route::get('/activity', [Admin\ContentController::class, 'activity'])->name('activity');
+    Route::get('/analytics', [Admin\AnalyticsController::class, 'index'])->name('analytics');
     Route::get('/broadcast', [Admin\ContentController::class, 'broadcast'])->name('broadcast');
     Route::post('/broadcast', [Admin\ContentController::class, 'broadcastSend'])->name('broadcast.send');
     Route::post('/sms/check', [Admin\ManageController::class, 'smsCheck'])->name('sms.check');
