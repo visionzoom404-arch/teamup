@@ -12,6 +12,8 @@ use App\Http\Controllers\PublicController;
 use Illuminate\Support\Facades\Route;
 
 /* ---------- عمومی ---------- */
+Route::get('/blog', [\App\Http\Controllers\BlogController::class, 'index'])->name('blog');
+Route::get('/blog/{article}', [\App\Http\Controllers\BlogController::class, 'show'])->name('blog.show');
 Route::get('/robots.txt', [\App\Http\Controllers\SeoController::class, 'robots']);
 Route::get('/sitemap.xml', [\App\Http\Controllers\SeoController::class, 'sitemap']);
 Route::get('/{file}', [\App\Http\Controllers\SeoController::class, 'googleFile'])->where('file', 'google[a-zA-Z0-9]{8,40}\.html');
@@ -219,6 +221,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/errors/fix', [Admin\ErrorLogController::class, 'fix'])->name('errors.fix');
     Route::post('/errors/clear', [Admin\ErrorLogController::class, 'clear'])->name('errors.clear');
     Route::get('/activity', [Admin\ContentController::class, 'activity'])->name('activity');
+    Route::get('/articles', [Admin\ArticleController::class, 'index'])->name('articles');
+    Route::get('/articles/create', [Admin\ArticleController::class, 'create'])->name('articles.create');
+    Route::post('/articles', [Admin\ArticleController::class, 'store'])->name('articles.store');
+    Route::get('/articles/{article}/edit', [Admin\ArticleController::class, 'edit'])->name('articles.edit');
+    Route::post('/articles/{article}', [Admin\ArticleController::class, 'update'])->name('articles.update');
+    Route::delete('/articles/{article}', [Admin\ArticleController::class, 'destroy'])->name('articles.destroy');
     Route::get('/marketing', [Admin\MarketingController::class, 'index'])->name('marketing');
     Route::post('/marketing', [Admin\MarketingController::class, 'store'])->name('marketing.store');
     Route::post('/marketing/template', [Admin\MarketingController::class, 'template_save'])->name('marketing.template');

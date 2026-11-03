@@ -44,6 +44,10 @@ class SeoController extends Controller
         foreach (Property::approved()->select('city')->distinct()->pluck('city') as $c) {
             $add(url('/search').'?city='.rawurlencode($c), null, 'daily', '0.7');
         }
+        $add(route('blog'), now()->toDateString(), 'weekly', '0.8');
+        foreach (\App\Models\Article::published()->get() as $ar) {
+            $add($ar->url(), $ar->updated_at->toDateString(), 'monthly', '0.8', [['loc' => $ar->imageUrl(), 'title' => $ar->image_alt ?: $ar->title]]);
+        }
         foreach (array_keys(DefaultPages::SLUGS) as $slug) {
             $add(route('page', $slug), null, 'monthly', '0.4');
         }

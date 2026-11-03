@@ -39,7 +39,7 @@
 
     <div>
       <div class="row between wrap mb">
-        <div><h1 style="font-size:22px;margin:0">{{ request('province') ?: (request('city') ?: (config('mija.regions.'.request('region').'.name') ?: 'همه‌ی اقامتگاه‌ها')) }}</h1><div class="muted small">{{ fa($items->total()) }} اقامتگاه یافت شد @if($in && $out)· {{ jdate($in, 'j F') }} تا {{ jdate($out, 'j F') }}@endif</div></div>
+        <div><h1 style="font-size:22px;margin:0">{{ $seo['h1'] ?? request('province') ?: (request('city') ?: (config('mija.regions.'.request('region').'.name') ?: 'همه‌ی اقامتگاه‌ها')) }}</h1><div class="muted small">{{ fa($items->total()) }} اقامتگاه یافت شد @if($in && $out)· {{ jdate($in, 'j F') }} تا {{ jdate($out, 'j F') }}@endif</div></div>
         <div class="row" style="gap:8px">
           <button type="button" class="btn btn-sm btn-light filters-toggle" data-toggle-filters><x-icon name="filter" class="sm"/> فیلتر</button>
           <select name="sort" onchange="this.form.submit()" style="width:auto;min-height:36px;padding-block:5px"><option value="">پیشنهادی</option><option value="cheap" @selected(request('sort')=='cheap')>ارزان‌ترین</option><option value="expensive" @selected(request('sort')=='expensive')>گران‌ترین</option><option value="rating" @selected(request('sort')=='rating')>بالاترین امتیاز</option><option value="new" @selected(request('sort')=='new')>جدیدترین</option></select>
@@ -55,5 +55,14 @@
     </div>
   </div>
   </form>
+  @if(! empty($seo['label']) && ($seo['robots'] ?? '') === 'index,follow')
+  @php $arts = \App\Models\Article::published()->latest('published_at')->limit(3)->get(); @endphp
+  <section class="seo-txt card">
+    <h2>{{ $seo['h1'] }}</h2>
+    <p>در می‌جا می‌توانید {{ $seo['label'] }} را به‌صورت آنلاین و مستقیم از میزبان رزرو کنید. هر اقامتگاه عکس واقعی، قیمت شب‌های مختلف، تقویم خالی و پر، قوانین، سیاست لغو و نظر مهمانان قبلی دارد؛ آدرس دقیق و تلفن میزبان بعد از قطعی‌شدن رزرو برایتان نمایش داده می‌شود.@if(($seo['total'] ?? 0) > 0) هم‌اکنون {{ fa($seo['total']) }} اقامتگاه در این دسته آماده‌ی رزرو است.@endif برای مقایسه‌ی بهتر، تاریخ ورود و خروج و تعداد نفرات را وارد کنید تا قیمت نهایی هر اقامتگاه را ببینید.</p>
+    <p>اگر برای انتخاب کمک می‌خواهید، <a href="{{ route('blog.show', 'ejare-villa') }}">راهنمای کامل اجاره ویلا</a> را بخوانید و برای دیدن مقصدهای دیگر، <a href="{{ route('search', ['region' => 'north']) }}">ویلا در شمال</a> و <a href="{{ route('search', ['region' => 'tehran']) }}">ویلا اطراف تهران</a> را ببینید.</p>
+    @if($arts->count())<div class="seo-arts">@foreach($arts as $ar)<a href="{{ $ar->url() }}">{{ $ar->title }}</a>@endforeach</div>@endif
+  </section>
+  @endif
 </div>
 @endsection

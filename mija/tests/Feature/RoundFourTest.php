@@ -352,4 +352,34 @@ class RoundFourTest extends TestCase
         $this->post('/register', ['name' => 'علی', 'phone' => '09111111111', 'password' => 'secret123', 'password_confirmation' => 'secret123', 'role' => 'host']);
         $this->assertSame('registered', \App\Models\MarketingContact::where('phone', '09111111111')->value('status'));
     }
+
+    public function test_blog_seo_pages_sitemap_and_admin_editor(): void
+    {
+        $this->assertGreaterThanOrEqual(8, \App\Models\Article::count());
+        $this->get('/blog')->assertOk()->assertSee('مجله‌ی می‌جا')->assertSee('اجاره ویلا');
+        $r = $this->get('/blog/ejare-villa')->assertOk();
+        $r->assertSee('<h1>', false)->assertSee('application/ld+json', false)->assertSee('"@type":"Article"', false)->assertSee('BreadcrumbList', false)->assertSee('<link rel="canonical" href="'.url('/blog/ejare-villa').'">', false);
+        $r->assertSee('og:type" content="article"', false)->assertSee('فهرست مطالب');
+        $this->get('/blog/nope')->assertNotFound();
+        $sm = $this->get('/sitemap.xml')->assertOk()->getContent();
+        $this->assertStringContainsString(url('/blog/ejare-villa'), $sm);
+        $this->assertStringContainsString(url('/blog'), $sm);
+
+        $a = $this->admin();
+        $this->actingAs($a)->get('/admin/articles')->assertOk()->assertSee('مقاله‌های مجله');
+        $body = '<h2>تست</h2><p>'.str_repeat('متن آزمایشی مقاله ', 30).'</p><script>alert(1)</script><a href="javascript:alert(2)" onclick="x()">لینک</a>';
+        $this->actingAs($a)->post('/admin/articles', ['title' => 'مقاله‌ی آزمایشی برای تست', 'excerpt' => str_repeat('خلاصه‌ی مقاله ', 6), 'category' => 'تست', 'body' => $body, 'status' => 'draft', 'slug' => 'test-article', 'keyword' => 'تست'])->assertRedirect(route('admin.articles'));
+        $art = \App\Models\Article::where('slug', 'test-article')->first();
+        $this->assertStringNotContainsString('<script', $art->body);
+        $this->assertStringNotContainsString('onclick', $art->body);
+        $this->assertStringNotContainsString('javascript:', $art->body);
+        auth()->logout();
+        $this->get('/blog/test-article')->assertNotFound();           // پیش‌نویس
+        $this->actingAs($a)->post('/admin/articles/'.$art->slug, ['title' => 'مقاله‌ی آزمایشی برای تست', 'excerpt' => str_repeat('خلاصه‌ی مقاله ', 6), 'category' => 'تست', 'body' => $body, 'status' => 'published', 'slug' => 'test-article'])->assertRedirect();
+        auth()->logout();
+        $this->get('/blog/test-article')->assertOk();
+        $this->actingAs($a)->post('/admin/articles', ['title' => 'مقاله‌ی تکراری برای تست', 'excerpt' => str_repeat('خلاصه‌ی مقاله ', 6), 'category' => 'تست', 'body' => $body, 'status' => 'draft', 'slug' => 'test-article'])->assertSessionHasErrors('slug');
+        $this->actingAs($a)->delete('/admin/articles/'.$art->slug)->assertRedirect();
+        $this->assertDatabaseMissing('articles', ['slug' => 'test-article']);
+    }
 }

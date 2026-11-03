@@ -146,6 +146,14 @@
     </div>
   </section>
 
+  @php $homeArts = \App\Models\Article::published()->latest('published_at')->limit(3)->get(); @endphp
+  @if($homeArts->count())
+  <section class="sec">
+    <div class="sec-h"><h2>از مجله‌ی می‌جا</h2><a href="{{ route('blog') }}" class="small">همه‌ی مقاله‌ها</a></div>
+    <div class="bl-grid">@foreach($homeArts as $ha)<a class="bl-card" href="{{ $ha->url() }}"><div class="bl-img"><img src="{{ $ha->imageUrl() }}" alt="{{ $ha->image_alt ?: $ha->title }}" width="600" height="338" loading="lazy"></div><div class="bl-b"><h3>{{ $ha->title }}</h3><small>{{ fa($ha->readMinutes()) }} دقیقه مطالعه</small></div></a>@endforeach</div>
+  </section>
+  @endif
+
   <section class="sec">
     <div class="cta"><div class="row wrap between" style="gap:20px">
       <div style="max-width:560px"><h2>ملک دارید؟ میزبان می‌جا شوید.</h2><p>اقامتگاه را رایگان ثبت کنید، تقویم و قیمت را خودتان مدیریت کنید و درآمد را مستقیم به حساب بانکی‌تان بگیرید.</p></div>

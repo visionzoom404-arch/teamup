@@ -117,6 +117,9 @@ class PublicController extends Controller
             'desc' => $simple ? "رزرو آنلاین و اجاره روزانه {$label}؛ مشاهده‌ی عکس، قیمت شبانه، تقویم و نظرات مهمانان و رزرو مستقیم از میزبان در می‌جا." : 'جستجوی ویلا، کلبه و اقامتگاه در سراسر ایران؛ فیلتر براساس شهر، قیمت، ظرفیت و امکانات و رزرو آنلاین در می‌جا.',
             'canonical' => $simple ? url('/search').'?'.http_build_query($only->all()) : url('/search'),
             'robots' => ($only->isEmpty() || $simple) ? 'index,follow' : 'noindex,follow',
+            'h1' => $simple ? ($r->filled('city') ? "اجاره ویلا و کلبه در {$label}" : ($r->filled('region') ? "رزرو ویلا و کلبه در {$label}" : "رزرو و اجاره {$label}")) : null,
+            'label' => $simple ? $label : null,
+            'total' => $items->total(),
         ];
 
         return view('search', [
