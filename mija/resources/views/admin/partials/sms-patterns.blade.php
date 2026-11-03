@@ -6,19 +6,19 @@
   <input type="hidden" name="group" value="sms">
   <h3><x-i3 name="p_phone" class="sm"/> پترن‌های پیامک ({{ fa($done) }} از {{ fa(count($events)) }} ثبت شده)</h3>
   <div class="sp-rules"><b>چطور کار می‌کند؟</b>
-    <ol class="sp-steps">
-      <li>در پنل ippanel وارد «پیامک ← الگوها (پترن‌ها) ← ایجاد الگو» شوید.</li>
-      <li>متن آماده‌ی هر پیامک را از همین صفحه با دکمه‌ی «کپی متن» کپی و در ippanel بچسبانید. متغیرها به شکل <code dir="ltr">%نام%</code> هستند و باید <b>دقیقاً همین نام‌ها</b> بمانند.</li>
-      <li>پس از تأیید ippanel، «کد پترن» را بردارید و در کادر همان پیامک بنویسید، بعد «ذخیره‌ی کد پترن‌ها» را بزنید.</li>
-      <li>با «ارسال آزمایشی» همان پیامک را روی شماره‌ی خودتان تست کنید.</li>
-    </ol>
-    <b>رعایت قوانین ippanel:</b> متن الگو را کوتاه و رسمی نگه دارید، تبلیغ و کلمات ممنوع ننویسید، <b>در متن پترن لینک نگذارید</b> (ippanel پترن دارای لینک را رد می‌کند؛ به همین خاطر متن‌های آماده بدون لینک‌اند و کاربر را به «پنل می‌جا» می‌فرستند). تا تأیید الگو منتظر بمانید. پیامک بدون کد پترن <b>ارسال نمی‌شود</b> و در «گزارش پیامک‌ها» با علت ثبت می‌شود.
+    <ul class="sp-steps">
+      <li><b>اگر برای یک پیامک «کد پترن» تأییدشده وارد کنید</b>، آن پیامک با پترن می‌رود (سریع‌تر و بدون محدودیت متن آزاد).</li>
+      <li><b>اگر کد پترن خالی باشد یا ippanel آن را نپذیرد</b>، همان متن به‌صورت عادی ارسال می‌شود؛ پس هیچ پیامکی گم نمی‌شود.</li>
+      <li>برای ساخت پترن: ippanel ← پیامک ← الگوها ← ایجاد الگو؛ «کپی متن» را بزنید و بچسبانید، متغیرها (مثل <code dir="ltr">%property%</code>) دقیقاً همین نام‌ها بمانند؛ بعد از تأیید «کد پترن» را همین‌جا بنویسید.</li>
+      <li>پترن‌ها <b>لینک ندارند</b> (ippanel رد می‌کند). فقط «کد ورود» اهمیت پترن دارد؛ بقیه اختیاری‌اند.</li>
+    </ul>
+    <b>رعایت قوانین ippanel:</b> پیامک‌های تبلیغاتی و همگانی در پایان «لغو۱۱» دارند؛ متن‌ها رسمی و کوتاه‌اند؛ پیامک‌های ناموفقِ موقت (قطعی اینترنت/خطای سرور) تا ۳ بار خودکار دوباره ارسال می‌شوند؛ خطای دائمی (توکن/اعتبار) در «گزارش پیامک‌ها» با علت فارسی ثبت می‌شود.
   </div>
   @error("test")<div class="alert bad">{{ $message }}</div>@enderror
   <div class="field"><label>شماره برای ارسال آزمایشی</label><input class="input" dir="ltr" name="test" value="{{ old('test', auth()->user()->phone) }}" inputmode="numeric" placeholder="09123456789"></div>
   @php
-    $chkLink = '<input type="hidden" name="keys[]" value="sms_use_link"><input type="hidden" name="sms_use_link" value="0"><label class="check"><input type="checkbox" name="sms_use_link" value="1" '.((int) setting('sms_use_link') ? 'checked' : '').'><div><b>لینک کوتاه در پیامک (متغیر %link%) بیاید</b><div class="xs muted" style="font-weight:500">فقط اگر پنل شما پترن دارای لینک را می‌پذیرد روشن کنید. با روشن‌کردن، متن‌ها عوض می‌شوند و باید پترن‌ها را دوباره بسازید.</div></div></label>';
-    $chkFb = '<input type="hidden" name="keys[]" value="sms_plain_fallback"><input type="hidden" name="sms_plain_fallback" value="0"><label class="check"><input type="checkbox" name="sms_plain_fallback" value="1" '.((int) setting('sms_plain_fallback') ? 'checked' : '').'><div><b>اگر کد پترن خالی بود، همان متن را عادی بفرست</b><div class="xs muted" style="font-weight:500">پیشنهاد نمی‌شود: ippanel ارسال عادی را روی بعضی خطوط نمی‌پذیرد و ممکن است رد شود. بهتر است برای همه‌ی پیامک‌ها پترن بسازید.</div></div></label>';
+    $chkLink = '<input type="hidden" name="keys[]" value="sms_use_link"><input type="hidden" name="sms_use_link" value="0"><label class="check"><input type="checkbox" name="sms_use_link" value="1" '.((int) setting('sms_use_link') ? 'checked' : '').'><div><b>لینک کوتاه‌شده در پایان پیامک‌های «عادی» بیاید</b><div class="xs muted" style="font-weight:500">لینک با کوتاه‌کننده‌ی خود می‌جا (mija.click/s/…) کوتاه می‌شود. پیش‌فرض خاموش است چون ippanel ممکن است پیامک دارای لینک را رد کند. در پترن‌ها هرگز لینک نمی‌آید.</div></div></label>';
+    $chkFb = '<input type="hidden" name="keys[]" value="sms_plain_fallback"><input type="hidden" name="sms_plain_fallback" value="0"><label class="check"><input type="checkbox" name="sms_plain_fallback" value="1" '.((int) setting('sms_plain_fallback') ? 'checked' : '').'><div><b>اگر کد پترن خالی بود یا پذیرفته نشد، همان متن را عادی بفرست</b><div class="xs muted" style="font-weight:500">پیشنهاد می‌شود روشن بماند. اگر خط شما ارسال عادی را نمی‌پذیرد، برای پیامک‌های مهم پترن بسازید.</div></div></label>';
   @endphp
   {!! $chkLink !!}
   {!! $chkFb !!}

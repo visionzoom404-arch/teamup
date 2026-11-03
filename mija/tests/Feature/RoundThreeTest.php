@@ -69,7 +69,7 @@ class RoundThreeTest extends TestCase
         BookingService::create($guest, $p, today()->addDays(5), today()->addDays(7), 2, 0, null, null);
         $this->assertTrue(Notice::where('user_id', $host->id)->exists());
         $this->assertSame('sent', SmsLog::where('phone', $host->phone)->first()->status);
-        Http::assertSent(fn ($r) => str_contains($r->url(), '/messages/patterns/send') && $r['pattern_code'] === 'patbooking_request_host' && $r['originator'] === '+983000505' && $r['recipient'] === '+989120005011' && str_contains(((array) $r['values'])['link'], '/s/') && ((array) $r['values'])['property'] !== '');
+        Http::assertSent(fn ($r) => str_contains($r->url(), '/messages/patterns/send') && $r['pattern_code'] === 'patbooking_request_host' && $r['originator'] === '+983000505' && $r['recipient'] === '+989120005011' && ((array) $r['values'])['property'] !== '' && ! isset(((array) $r['values'])['link']));
     }
 
     public function test_sms_errors_are_explained_in_persian(): void

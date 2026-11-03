@@ -53,6 +53,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/bookings/{booking}/message', [NoticeController::class, 'message'])->name('booking.message');
     Route::get('/bookings/{booking}/ics', [NoticeController::class, 'ics'])->name('booking.ics');
     Route::get('/bookings/{booking}/invoice', [NoticeController::class, 'invoice'])->name('booking.invoice');
+    Route::get('/bookings/{booking}/voucher', [NoticeController::class, 'voucher'])->name('booking.voucher');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile');
     Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::post('/profile/password', [ProfileController::class, 'password'])->name('profile.password');
@@ -211,6 +212,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::delete('/words/{word}', [Admin\ContentController::class, 'wordDestroy'])->name('words.destroy');
     Route::get('/sms', [Admin\ContentController::class, 'sms'])->name('sms');
     Route::get('/errors', [Admin\ErrorLogController::class, 'index'])->name('errors');
+    Route::post('/errors/fix', [Admin\ErrorLogController::class, 'fix'])->name('errors.fix');
+    Route::post('/errors/clear', [Admin\ErrorLogController::class, 'clear'])->name('errors.clear');
     Route::get('/activity', [Admin\ContentController::class, 'activity'])->name('activity');
     Route::get('/analytics', [Admin\AnalyticsController::class, 'index'])->name('analytics');
     Route::get('/broadcast', [Admin\ContentController::class, 'broadcast'])->name('broadcast');

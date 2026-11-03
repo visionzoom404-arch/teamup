@@ -43,6 +43,9 @@ class GatewayController extends Controller
     private static function back(Payment $pay, string $msg, bool $ok)
     {
         $to = $pay->booking_id ? route('guest.bookings.show', $pay->booking) : route('guest.wallet');
+        if ($ok && $pay->booking_id && $pay->booking->fresh()->isPaid() && $pay->purpose !== 'topup') {
+            $to = route('booking.voucher', $pay->booking);   // ووچر گرافیکی بعد از پرداخت موفق
+        }
 
         return $ok ? redirect($to)->with('ok', $msg)->with('celebrate', $pay->purpose !== 'topup' ? 1 : null) : redirect($to)->withErrors(['pay' => $msg]);
     }

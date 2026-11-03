@@ -238,15 +238,16 @@ class PanelController extends Controller
         if (! $u->sheba) {
             return back()->withErrors(['amount' => 'ابتدا شماره شبا را در پروفایل تکمیل کنید.']);
         }
-        DB::transaction(function () use ($u, $d) {
+        $po = DB::transaction(function () use ($u, $d) {
             $fresh = $u->fresh();
             abort_if($fresh->wallet < $d['amount'], 422, 'موجودی کافی نیست.');
             $fresh->walletChange(-$d['amount'], 'درخواست برداشت');
-            Payout::create(['host_id' => $u->id, 'amount' => $d['amount'], 'sheba' => $u->sheba, 'bank_owner' => $u->bank_owner]);
+
+            return Payout::create(['host_id' => $u->id, 'amount' => $d['amount'], 'sheba' => $u->sheba, 'bank_owner' => $u->bank_owner]);
         });
         \App\Models\User::notifyAdmins('درخواست برداشت جدید', $u->name.' — '.toman($d['amount']), route('admin.payouts'), true);
 
-        return back()->with('ok', 'درخواست برداشت ثبت شد؛ پس از بررسی به حساب شما واریز می‌شود.');
+        return redirect()->route('payout.receipt', $po)->with('ok', 'درخواست برداشت ثبت شد؛ پس از بررسی به حساب شما واریز می‌شود.');
     }
 
     /* ---------- کد تخفیف ---------- */

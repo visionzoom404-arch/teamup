@@ -105,7 +105,7 @@ class BookingController extends Controller
             $pay = Payment::create($base + ['gateway' => 'wallet']);
             Payments::complete($pay, 'W'.$pay->id);
 
-            return redirect()->route('guest.bookings.show', $b)->with('ok', 'پرداخت از کیف پول انجام شد.')->with('celebrate', 1);
+            return redirect()->route($b->fresh()->isPaid() ? 'booking.voucher' : 'guest.bookings.show', $b)->with('ok', 'پرداخت از کیف پول انجام شد.')->with('celebrate', 1);
         }
 
         if ($method === 'card') {

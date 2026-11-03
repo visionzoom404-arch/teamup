@@ -276,6 +276,11 @@ class BookingService
     /** انقضا، یادآوری، تسویه روز ورود، اتمام اقامت، نظرسنجی پیامکی، اعتبار هدیه و اقساط */
     public static function tick(): array
     {
+        try {
+            \App\Support\Sms::retryDue();   // پیامک‌های ناموفقِ موقت دوباره ارسال می‌شوند
+        } catch (\Throwable $e) {
+            report($e);
+        }
         $r = ['expired' => 0, 'settled' => 0, 'completed' => 0, 'reminded' => 0, 'cashback_expired' => 0, 'late' => 0, 'ads' => 0];
 
         Booking::where('status', 'pending_host')->where('respond_by', '<', now())->get()->each(function ($b) use (&$r) {

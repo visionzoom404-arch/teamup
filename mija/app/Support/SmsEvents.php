@@ -103,12 +103,12 @@ class SmsEvents
         'payout_paid' => "مبلغ %amount% به حساب شما واریز شد. رسید در پنل می‌جا است.",
         'payout_rejected' => "درخواست برداشت %amount% رد شد و مبلغ به کیف پول برگشت.",
         'ad_status_host' => "تبلیغ %type% شما %status%.",
-        'ad_promo' => "%text%",
+        'ad_promo' => "%text%\nلغو۱۱",
         'admin_alert' => "هشدار مدیریت می‌جا: %title% — %body%",
-        'general' => "%title% — %body%",
+        'general' => "%title% — %body%\nلغو۱۱",
     ];
 
-    /** آیا لینک در پیامک‌ها بیاید؟ (پیش‌فرض خیر) */
+    /** آیا در پیامک عادی (نه پترن) لینک کوتاه بیاید؟ (پیش‌فرض خیر) */
     public static function withLink(): bool
     {
         return (bool) (int) setting('sms_use_link');
@@ -127,29 +127,22 @@ class SmsEvents
     /** نام متغیرها (لاتین) برای ippanel */
     public static function vars(string $k): array
     {
-        $v = array_keys(self::E[$k][3] ?? []);
-
-        return self::withLink() ? $v : array_values(array_diff($v, ['link']));
+        // پترن هرگز لینک ندارد (ippanel رد می‌کند)
+        return array_values(array_diff(array_keys(self::E[$k][3] ?? []), ['link']));
     }
 
     /** توضیح متغیرها برای نمایش در پنل (بدون link در حالت بدون لینک) */
     public static function varDocs(string $k): array
     {
         $d = self::E[$k][3] ?? [];
-        if (! self::withLink()) {
-            unset($d['link']);
-        }
+        unset($d['link']);
 
         return $d;
     }
 
     public static function template(string $k): string
     {
-        if (! self::withLink()) {
-            return self::PLAIN[$k] ?? '%title% %body%';
-        }
-
-        return self::E[$k][4] ?? '%title% %body% %link%';
+        return self::PLAIN[$k] ?? '%title% %body%';
     }
 
     /** متن کامل پیامک با مقادیر (برای گزارش و ارسال عادی) */

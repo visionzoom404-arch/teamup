@@ -41,7 +41,7 @@ return [
     'ad_push_each' => 400,
     // پیامک (ippanel) و درگاه و کارت
     'sms_enabled' => 0,
-    'sms_plain_fallback' => 0,
+    'sms_plain_fallback' => 1,
     'sms_use_link' => 0,
     'admin_sms_alerts' => 0,
     'sms_provider' => 'ippanel',
@@ -109,7 +109,7 @@ return [
         'pending_host' => ['در انتظار تأیید میزبان', 'gold'],
         'awaiting_payment' => ['در انتظار پرداخت', 'orange'],
         'confirmed' => ['تأیید و پرداخت‌شده', 'green'],
-        'completed' => ['اقامت انجام شد', 'dark'],
+        'completed' => ['اقامت انجام شد', 'teal'],
         'offered' => ['پیشنهاد روز جایگزین', 'orange'],
         'payment_review' => ['در انتظار تأیید پرداخت', 'gold'],
         'rejected' => ['رد شده توسط میزبان', 'red'],

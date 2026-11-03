@@ -70,6 +70,16 @@ class NoticeController extends Controller
         return view('payout-receipt', ['po' => $payout->load('host')]);
     }
 
+    /** ووچر گرافیکی بعد از پرداخت (قابل دانلود به‌صورت تصویر) */
+    public function voucher(Booking $booking)
+    {
+        $b = $this->related($booking);
+        abort_unless($b->isPaid(), 404);
+        $pay = $b->payments->where('status', 'paid')->sortBy('id')->first();
+
+        return view('voucher', ['b' => $b, 'pay' => $pay, 'isGuest' => auth()->id() === $b->guest_id]);
+    }
+
     /** فاکتور قابل چاپ */
     public function invoice(Booking $booking)
     {

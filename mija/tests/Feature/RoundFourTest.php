@@ -103,63 +103,87 @@ class RoundFourTest extends TestCase
         $this->get('/s/zzzzzz')->assertNotFound();
     }
 
-    public function test_every_sms_event_vars_match_template_in_both_modes(): void
+    public function test_every_sms_event_vars_match_template_and_never_have_links(): void
     {
-        foreach ([0, 1] as $withLink) {
-            Setting::put('sms_use_link', $withLink);
-            foreach (SmsEvents::all() as $k => $e) {
-                $t = SmsEvents::template($k);
-                preg_match_all('/%(\w+)%/', $t, $m);
-                foreach ($m[1] as $v) {
-                    $this->assertContains($v, SmsEvents::vars($k), "$k: متغیر $v تعریف نشده");
-                }
-                foreach (SmsEvents::vars($k) as $v) {
-                    $this->assertStringContainsString('%'.$v.'%', $t, "$k: متغیر $v در متن نیامده");
-                }
-                $this->assertSame($withLink ? true : false, str_contains($t, '%link%'), "$k link mode $withLink");
-                $this->assertDoesNotMatchRegularExpression('~https?://|www\.|\.(com|ir|click)\b~i', $t);
+        foreach (SmsEvents::all() as $k => $e) {
+            $t = SmsEvents::template($k);
+            preg_match_all('/%(\w+)%/', $t, $m);
+            foreach ($m[1] as $v) {
+                $this->assertContains($v, SmsEvents::vars($k), "$k: متغیر $v تعریف نشده");
             }
+            foreach (SmsEvents::vars($k) as $v) {
+                $this->assertStringContainsString('%'.$v.'%', $t, "$k: متغیر $v در متن نیامده");
+            }
+            $this->assertStringNotContainsString('%link%', $t);
+            $this->assertDoesNotMatchRegularExpression('~https?://|www\.|\.(com|ir|click)\b~i', $t);
         }
-        Setting::put('sms_use_link', 0);
-        $this->assertCount(count(SmsEvents::all()), array_unique(array_column(SmsEvents::all(), 4)));
+        foreach (['ad_promo', 'general'] as $k) {
+            $this->assertStringContainsString('لغو۱۱', SmsEvents::template($k));
+        }
+        $this->assertCount(count(SmsEvents::all()), array_unique(array_map(fn ($k) => SmsEvents::template($k), array_keys(SmsEvents::all()))));
     }
 
-    public function test_sms_without_pattern_code_is_not_sent_and_reason_logged(): void
+    public function test_sms_without_pattern_code_goes_plain_and_fallback_off_is_logged(): void
     {
         $this->smsOn();
+        Setting::put('sms_plain_fallback', 1);
+        Http::fake(['*' => Http::response(['status' => 'OK', 'code' => 200], 200)]);
+        $this->assertTrue(Sms::event('booking_rejected_guest', '09120006011', ['property' => 'ویلا'], 'https://mija.click/search'));
+        Http::assertSent(fn ($r) => str_ends_with($r->url(), '/messages') && str_contains($r['message'], 'ویلا') && ! str_contains($r['message'], 'http') && $r['recipient'] === ['+989120006011']);
+        $this->assertSame('plain', SmsLog::latest('id')->first()->via);
+
+        Setting::put('sms_plain_fallback', 0);
+        Http::swap(new \Illuminate\Http\Client\Factory);
         Http::fake();
-        $ok = Sms::event('booking_rejected_guest', '09120006011', ['property' => 'ویلا'], 'https://mija.click/search');
-        $this->assertFalse($ok);
+        $this->assertFalse(Sms::event('booking_rejected_guest', '09120006011', ['property' => 'ویلا'], null));
         $this->assertStringContainsString('کد پترن', Sms::$lastError);
         $this->assertSame('failed', SmsLog::latest('id')->first()->status);
         Http::assertNothingSent();
     }
 
-    public function test_pattern_sms_payload_and_error_mapping(): void
+    public function test_pattern_used_when_set_falls_back_to_plain_when_rejected_and_retries_transients(): void
     {
         $this->smsOn();
         Setting::put('sms_pat_booking_rejected_guest', 'abc123');
         Http::fake(['*' => Http::response(['status' => 'OK', 'code' => 200, 'data' => ['message_id' => 9]], 200)]);
-        // پیش‌فرض: بدون لینک
         $this->assertTrue(Sms::event('booking_rejected_guest', '09120006011', ['property' => 'ویلای جنگلی'], 'https://mija.click/search'));
         Http::assertSent(function ($r) {
             $v = (array) $r['values'];
 
-            return str_ends_with($r->url(), '/messages/patterns/send') && $r['pattern_code'] === 'abc123' && $r['recipient'] === '+989120006011'
-                && $v === ['property' => 'ویلای جنگلی'];
+            return str_ends_with($r->url(), '/messages/patterns/send') && $r['pattern_code'] === 'abc123' && $r['recipient'] === '+989120006011' && $v === ['property' => 'ویلای جنگلی'];
         });
-        $this->assertStringNotContainsString('http', SmsLog::latest('id')->first()->message);
-        // با روشن‌کردن گزینه‌ی لینک، لینک کوتاه در متغیر link می‌رود
-        Setting::put('sms_use_link', 1);
+        $this->assertSame('pattern', SmsLog::latest('id')->first()->via);
+
+        // پترن تأیید‌نشده → همان پیام عادی می‌رود
+        Http::swap(new \Illuminate\Http\Client\Factory);
+        Http::fake(function ($r) {
+            return str_contains($r->url(), 'patterns') ? Http::response(['status' => 'ERROR', 'code' => 400, 'error_message' => 'pattern not approved'], 400) : Http::response(['status' => 'OK', 'code' => 200], 200);
+        });
+        $this->assertTrue(Sms::event('booking_rejected_guest', '09120006011', ['property' => 'x'], null));
+        $this->assertSame('plain', SmsLog::latest('id')->first()->via);
+
+        // خطای موقت (۵۰۰) → ثبت برای تلاش مجدد و ارسال موفق در تلاش بعدی
+        Http::swap(new \Illuminate\Http\Client\Factory);
+        Http::fake(['*' => Http::response('oops', 500)]);
+        $this->assertFalse(Sms::event('login_code', '09120006011', ['code' => '12345'], null));
+        $l = SmsLog::latest('id')->first();
+        $this->assertSame('failed', $l->status);
+        $this->assertNotNull($l->retry_at);
+        $this->travel(3)->minutes();
         Http::swap(new \Illuminate\Http\Client\Factory);
         Http::fake(['*' => Http::response(['status' => 'OK', 'code' => 200], 200)]);
-        $this->assertTrue(Sms::event('booking_rejected_guest', '09120006011', ['property' => 'ویلای جنگلی'], 'https://mija.click/search'));
-        Http::assertSent(fn ($r) => preg_match('~/s/\w+$~', ((array) $r['values'])['link'] ?? ''));
-        Setting::put('sms_use_link', 0);
-        Http::swap(new \Illuminate\Http\Client\Factory);
-        Http::fake(['*' => Http::response(['status' => 'ERROR', 'code' => 400, 'error_message' => 'pattern not found'], 400)]);
-        $this->assertFalse(Sms::event('booking_rejected_guest', '09120006011', ['property' => 'x'], null));
-        $this->assertStringContainsString('کد پترن', Sms::$lastError);
+        $this->assertSame(1, Sms::retryDue());
+        $this->assertSame('sent', SmsLog::latest('id')->first()->status);
+        $this->assertSame(1, (int) SmsLog::latest('id')->first()->attempts);
+    }
+
+    public function test_plain_sms_gets_short_link_only_when_enabled(): void
+    {
+        $this->smsOn();
+        Http::fake(['*' => Http::response(['status' => 'OK', 'code' => 200], 200)]);
+        Setting::put('sms_use_link', 1);
+        Sms::event('booking_rejected_guest', '09120006011', ['property' => 'ویلا'], 'https://mija.click/search');
+        Http::assertSent(fn ($r) => preg_match('~\n.*/s/\w+$~u', $r['message']) === 1);
     }
 
     public function test_admin_saves_pattern_codes_and_sees_credit_after_save(): void
@@ -170,7 +194,7 @@ class RoundFourTest extends TestCase
             'sms_token' => str_repeat('t', 30), 'sms_originator' => '3000505', 'sms_pat_login_code' => 'LOGIN01'])->assertSessionHasNoErrors();
         $this->assertSame('LOGIN01', SmsEvents::patternCode('login_code'));
         $page = $this->actingAs($a)->followingRedirects()->get('/admin/settings?tab=sms');
-        $page->assertOk()->assertSee('پترن‌های پیامک')->assertDontSee('<bdi dir="ltr">%link%</bdi>', false)->assertSee('LOGIN01', false);
+        $page->assertOk()->assertSee('پترن‌های پیامک')->assertSee('LOGIN01', false);
         $this->assertStringContainsString('۱,۲۳۴,۵۶۷', $page->getContent());
         $this->actingAs($a)->post('/admin/settings', ['group' => 'sms', 'keys' => ['sms_pat_login_code'], 'sms_pat_login_code' => 'bad code!'])->assertSessionHasErrors('sms_pat_login_code');
     }
@@ -220,5 +244,56 @@ class RoundFourTest extends TestCase
         $this->get('/google9999999999999999.html')->assertNotFound();
         $this->actingAs($a)->get('/admin/settings?tab=seo')->assertOk()->assertSee('آمادگی برای گوگل سرچ کنسول')->assertSee('sitemap.xml');
         $this->actingAs($a)->post('/admin/settings', ['group' => 'seo', 'keys' => ['google_verify_file'], 'google_verify_file' => 'evil.php'])->assertSessionHasErrors('google_verify_file');
+    }
+
+    public function test_error_report_explains_in_persian_with_fix_buttons(): void
+    {
+        $ex = \App\Support\ErrorExplainer::explain('SQLSTATE[HY000]: General error: 1 no such table: visits');
+        $this->assertSame('migrate', $ex['action']);
+        $this->assertStringContainsString('visits', $ex['title']);
+        $this->assertSame('sms', \App\Support\ErrorExplainer::explain('Http error to https://rest.ippanel.com/v1/messages')['route'][1]['tab']);
+        $this->assertSame('gateway', \App\Support\ErrorExplainer::explain('cURL error 28 gateway.zibal.ir')['route'][1]['tab']);
+        $this->assertNotEmpty(\App\Support\ErrorExplainer::explain('something weird')['fix']);
+
+        $f = storage_path('logs/laravel-test-errors.log');
+        file_put_contents($f, "[2026-11-03 10:00:00] production.ERROR: SQLSTATE[HY000]: General error: 1 no such table: visits (Connection: sqlite) at /app/x.php:10\n[2026-11-03 10:05:00] production.ERROR: SQLSTATE[HY000]: General error: 1 no such table: visits (Connection: sqlite)\n");
+        try {
+            $a = $this->admin();
+            $this->actingAs($a)->get('/admin/errors')->assertOk()->assertSee('جدول «visits» در دیتابیس ساخته نشده')->assertSee('رفع خودکار')->assertSee('۲ بار');
+            $this->actingAs($a)->post('/admin/errors/fix', ['action' => 'rm -rf'])->assertNotFound();
+            $this->actingAs($a)->post('/admin/errors/clear')->assertRedirect();
+            $this->assertSame('', (string) file_get_contents($f));
+        } finally {
+            @unlink($f);
+        }
+    }
+
+    public function test_voucher_after_wallet_payment_and_payout_receipt_pages(): void
+    {
+        $host = User::factory()->create(['role' => 'host', 'phone' => '09120006100', 'sheba' => 'IR062960000000100324200001', 'bank_owner' => 'علی', 'wallet' => 5000000]);
+        $p = \App\Models\Property::create([
+            'host_id' => $host->id, 'title' => 'ویلای ووچر', 'type' => 'villa', 'province' => 'مازندران', 'city' => 'نوشهر', 'description' => str_repeat('توضیحات ', 10),
+            'capacity_base' => 4, 'capacity_max' => 6, 'price_weekday' => 1000000, 'price_weekend' => 1000000, 'extra_guest_fee' => 0, 'cleaning_fee' => 0,
+            'instant_booking' => true, 'cancellation_policy' => 'moderate', 'status' => 'approved', 'address' => 'آدرس کامل تست',
+        ]);
+        $g = User::factory()->create(['role' => 'guest', 'phone' => '09120006101', 'wallet' => 9000000]);
+        $b = \App\Support\BookingService::create($g, $p, today()->addDays(6), today()->addDays(8), 2, 0, null, null);
+        Setting::put('pay_wallet_on', 1);
+        // پیش از پرداخت ووچری نیست
+        $this->actingAs($g)->get('/bookings/'.$b->code.'/voucher')->assertNotFound();
+        $this->actingAs($g)->post('/panel/bookings/'.$b->code.'/pay', ['method' => 'wallet'])->assertRedirect(route('booking.voucher', $b));
+        $res = $this->actingAs($g)->get('/bookings/'.$b->code.'/voucher')->assertOk();
+        $res->assertSee('رزرو شما قطعی شد')->assertSee($b->code)->assertSee('vc-bar', false)->assertSee('دانلود ووچر');
+        $this->actingAs(User::factory()->create(['role' => 'guest', 'phone' => '09120006102']))->get('/bookings/'.$b->code.'/voucher')->assertNotFound();
+        // بارکد Code 39: شروع و پایان با * (۹ المان در هر نویسه)
+        $w = \App\Support\Code39::widths('MJ-1');
+        $this->assertSame(6 * 9 + 5, count($w));
+
+        // برداشت میزبان: بعد از ثبت، فاکتور برداشت (در انتظار) نشان داده می‌شود
+        Setting::put('min_payout', 1000);
+        $r = $this->actingAs($host)->post('/host/wallet/payout', ['amount' => 2000000]);
+        $po = \App\Models\Payout::first();
+        $r->assertRedirect(route('payout.receipt', $po));
+        $this->actingAs($host)->get(route('payout.receipt', $po))->assertOk()->assertSee('فاکتور درخواست برداشت')->assertSee('در انتظار بررسی')->assertSee('rt-steps', false);
     }
 }

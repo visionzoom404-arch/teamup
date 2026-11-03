@@ -209,3 +209,16 @@
     (function f() { confetti({ particleCount: 5, angle: 60, spread: 70, origin: { x: 0, y: .7 }, colors }); confetti({ particleCount: 5, angle: 120, spread: 70, origin: { x: 1, y: .7 }, colors }); if (Date.now() < end) requestAnimationFrame(f); })();
   }
 })();
+
+/* ---------- شمارش متحرک مبلغ کل فاکتور ---------- */
+(function () {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches; if (reduce) return;
+  const fa = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '٬').replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+  document.querySelectorAll('.inv-t .tot td:last-child, [data-count]').forEach(el => {
+    const raw = el.textContent.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[^\d]/g, ''); const to = parseInt(raw, 10); if (!to || to < 1000) return;
+    const suffix = /تومان/.test(el.textContent) ? ' تومان' : ''; const t0 = performance.now() + 600, dur = 1100;
+    el.textContent = fa(0) + suffix;
+    const step = t => { const k = Math.min(1, Math.max(0, (t - t0) / dur)), e = 1 - Math.pow(1 - k, 3); el.textContent = fa(Math.round(to * e)) + suffix; if (k < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  });
+})();
