@@ -222,3 +222,10 @@
     requestAnimationFrame(step);
   });
 })();
+
+/* ---------- جدول‌ها در موبایل: برچسب ستون برای هر خانه (نمایش کارتی) ---------- */
+document.querySelectorAll('table.tbl').forEach(t => {
+  const heads = [...t.querySelectorAll('thead th')].map(h => h.textContent.trim());
+  if (!heads.length) return;
+  t.querySelectorAll('tbody tr').forEach(r => [...r.children].forEach((td, i) => { if (td.tagName === 'TD' && heads[i] !== undefined && !td.hasAttribute('data-label')) td.setAttribute('data-label', heads[i]); }));
+});

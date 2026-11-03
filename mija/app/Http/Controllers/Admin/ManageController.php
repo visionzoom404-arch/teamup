@@ -120,6 +120,39 @@ class ManageController extends Controller
         return view('admin.payments', ['items' => $q->paginate(25)->withQueryString(), 'tab' => $tab, 'reviewCount' => Payment::where('status', 'review')->count(), 'cards' => Payments::cards()]);
     }
 
+    public function paymentEdit(Payment $payment)
+    {
+        return view('admin.payment-edit', ['p' => $payment->load(['user', 'booking'])]);
+    }
+
+    /** ویرایش دستی پرداخت (مبلغ، وضعیت، درگاه، کد پیگیری، یادداشت) با ثبت در گزارش فعالیت */
+    public function paymentUpdate(Request $r, Payment $payment)
+    {
+        $d = $r->validate([
+            'amount' => 'required|integer|min:0|max:10000000000', 'status' => 'required|in:pending,review,paid,failed,refunded',
+            'gateway' => 'required|in:zibal,bitpay,sandbox,wallet,card', 'ref_id' => 'nullable|string|max:64', 'tracking_code' => 'nullable|string|max:40', 'note' => 'nullable|string|max:200',
+        ]);
+        $old = $payment->only(['amount', 'status', 'gateway', 'ref_id', 'tracking_code', 'note']);
+        $becomesPaid = $d['status'] === 'paid' && $payment->status !== 'paid';
+        $apply = $becomesPaid && $r->boolean('apply');
+        // اگر قرار است اثر اعمال شود، وضعیت را خودِ سرویس عوض می‌کند (قطعی‌کردن رزرو/شارژ کیف پول)
+        $payment->fill(collect($d)->except($apply ? ['status'] : [])->all())->save();
+        if ($apply) {
+            Payments::complete($payment, $d['ref_id'] ?: 'M'.$payment->id);
+        }
+        Audit::log('payment.update', "#{$payment->id}", ['old' => $old, 'new' => $payment->fresh()->only(array_keys($old)), 'applied' => $apply]);
+
+        return redirect()->route('admin.payments')->with('ok', 'پرداخت ویرایش شد'.($apply ? ' و اثر آن (رزرو/کیف پول) اعمال شد.' : '.'));
+    }
+
+    public function paymentDestroy(Payment $payment)
+    {
+        Audit::log('payment.delete', "#{$payment->id}", $payment->only(['amount', 'status', 'gateway', 'booking_id', 'user_id']));
+        $payment->delete();
+
+        return redirect()->route('admin.payments')->with('ok', 'پرداخت حذف شد.');
+    }
+
     public function cardApprove(Payment $payment)
     {
         Payments::approveCard($payment);
@@ -166,6 +199,22 @@ class ManageController extends Controller
     }
 
     /* ---------- نظرات ---------- */
+    /** پیش‌نمایش پیامک نظرسنجی و صفحه‌ای که مهمان بعد از اقامت می‌بیند */
+    public function reviewPreview()
+    {
+        $b = Booking::with('property')->where('status', 'completed')->latest('id')->first() ?? Booking::with('property')->latest('id')->first();
+        $title = $b?->property?->title ?: 'ویلای نمونه';
+        $code = $b?->code ?: 'MJ-ABC123';
+        $sample = \App\Support\SmsEvents::get('review_request_guest')[5] ?? [];
+        $vars = ['property' => $title] + $sample;
+        $link = $b ? route('guest.bookings.show', $b).'#review' : url('/panel/bookings/'.$code.'#review');
+
+        return view('admin.review-preview', [
+            'b' => $b, 'sms' => \App\Support\SmsEvents::render('review_request_guest', $vars), 'link' => $link, 'code' => $code,
+            'patternText' => \App\Support\SmsEvents::template('review_request_guest'), 'when' => 'همان روز تحویل ویلا (بعد از ساعت خروج)',
+        ]);
+    }
+
     public function reviews(Request $r)
     {
         $tab = $r->query('tab', 'flagged');

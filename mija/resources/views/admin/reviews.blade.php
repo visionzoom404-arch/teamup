@@ -1,7 +1,7 @@
 @extends('layouts.panel')
 @section('title', 'نظرات')
 @section('content')
-<div class="page-h"><h1>مدیریت نظرات</h1></div>
+<div class="page-h"><h1>مدیریت نظرات</h1><a class="btn btn-sm btn-gold" href="{{ route('admin.reviews.preview') }}"><x-icon name="phone" class="sm"/> پیامک و صفحه‌ی نظرسنجی مهمان</a></div>
 @include('partials.help', ['title' => 'چرخه‌ی نظرات', 'text' => 'مهمان نظر می‌نویسد ← میزبان می‌خواند. اگر تأیید کند منتشر می‌شود؛ اگر رد کند، نظر در تب «ارجاع‌شده» برای تصمیم نهایی شما می‌آید: <b>انتشار</b> یا <b>حذف</b>. نظر دارای کلمات ممنوع اصلاً ثبت نمی‌شود.'])
 <div class="tabs">@foreach(['flagged' => 'ارجاع‌شده از میزبان', 'pending' => 'منتظر میزبان', 'published' => 'منتشرشده', 'removed' => 'حذف‌شده', 'all' => 'همه'] as $k => $l)<a href="{{ route('admin.reviews', ['tab' => $k]) }}" class="{{ $tab === $k ? 'on' : '' }}">{{ $l }} @if($k === 'flagged' && ($counts['host_rejected'] ?? 0))<span class="badge red" style="padding:0 7px">{{ fa($counts['host_rejected']) }}</span>@endif</a>@endforeach</div>
 <div class="card mb rv-sample"><div class="row between wrap" style="gap:8px"><div class="row wrap" style="gap:8px"><span class="badge gold">نمونه‌ی پیش‌فرض — فقط مدیر می‌بیند</span></div><span class="xs muted">برای آشنایی با شکل نظرها</span></div>

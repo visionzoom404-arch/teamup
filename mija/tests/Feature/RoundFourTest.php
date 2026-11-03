@@ -256,10 +256,10 @@ class RoundFourTest extends TestCase
         $this->assertNotEmpty(\App\Support\ErrorExplainer::explain('something weird')['fix']);
 
         $f = storage_path('logs/laravel-test-errors.log');
-        file_put_contents($f, "[2026-11-03 10:00:00] production.ERROR: SQLSTATE[HY000]: General error: 1 no such table: visits (Connection: sqlite) at /app/x.php:10\n[2026-11-03 10:05:00] production.ERROR: SQLSTATE[HY000]: General error: 1 no such table: visits (Connection: sqlite)\n");
+        file_put_contents($f, "[2026-11-03 10:00:00] production.ERROR: SQLSTATE[HY000]: General error: 1 no such table: zztbl (Connection: sqlite)\n[2026-11-03 10:05:00] production.ERROR: SQLSTATE[HY000]: General error: 1 no such table: zztbl (Connection: sqlite)\n");
         try {
             $a = $this->admin();
-            $this->actingAs($a)->get('/admin/errors')->assertOk()->assertSee('جدول «visits» در دیتابیس ساخته نشده')->assertSee('رفع خودکار')->assertSee('۲ بار');
+            $this->actingAs($a)->get('/admin/errors')->assertOk()->assertSee('جدول «zztbl» در دیتابیس ساخته نشده')->assertSee('رفع خودکار')->assertSee('۲ بار');
             $this->actingAs($a)->post('/admin/errors/fix', ['action' => 'rm -rf'])->assertNotFound();
             $this->actingAs($a)->post('/admin/errors/clear')->assertRedirect();
             $this->assertSame('', (string) file_get_contents($f));
@@ -295,5 +295,61 @@ class RoundFourTest extends TestCase
         $po = \App\Models\Payout::first();
         $r->assertRedirect(route('payout.receipt', $po));
         $this->actingAs($host)->get(route('payout.receipt', $po))->assertOk()->assertSee('فاکتور درخواست برداشت')->assertSee('در انتظار بررسی')->assertSee('rt-steps', false);
+    }
+
+    public function test_admin_can_edit_and_delete_payments_and_see_review_sms_preview(): void
+    {
+        $a = $this->admin();
+        $u = $this->guest();
+        $pay = \App\Models\Payment::create(['user_id' => $u->id, 'purpose' => 'topup', 'amount' => 50000, 'gateway' => 'zibal', 'status' => 'failed', 'authority' => 'ed1']);
+        $this->actingAs($a)->get('/admin/payments')->assertOk()->assertSee('ویرایش');
+        $this->actingAs($a)->get(route('admin.payments.edit', $pay))->assertOk()->assertSee('ویرایش پرداخت');
+        $this->actingAs($a)->post(route('admin.payments.update', $pay), ['amount' => 70000, 'status' => 'paid', 'gateway' => 'card', 'ref_id' => 'R1', 'note' => 'دستی', 'apply' => 1])->assertRedirect(route('admin.payments'));
+        $this->assertSame(70000, (int) $pay->fresh()->amount);
+        $this->assertSame('paid', $pay->fresh()->status);
+        $this->assertSame(70000, (int) $u->fresh()->wallet);   // اثر شارژ کیف پول اعمال شد
+        $this->assertDatabaseHas('activity_logs', ['action' => 'payment.update']);
+        $this->actingAs($u)->get(route('admin.payments.edit', $pay))->assertStatus(403);
+        $this->actingAs($a)->delete(route('admin.payments.destroy', $pay))->assertRedirect();
+        $this->assertDatabaseMissing('payments', ['id' => $pay->id]);
+
+        $this->actingAs($a)->get('/admin/reviews')->assertOk()->assertSee('پیامک و صفحه‌ی نظرسنجی');
+        $this->actingAs($a)->get('/admin/reviews/preview')->assertOk()->assertSee('متن پیامک نظرسنجی')->assertSee('نظرتان را');
+    }
+
+    public function test_marketing_contacts_send_optout_cap_and_registration(): void
+    {
+        $this->smsOn();
+        Http::fake(['*' => Http::response(['status' => 'OK', 'code' => 200], 200)]);
+        $a = $this->admin();
+        $this->actingAs($a)->get('/admin/marketing')->assertOk()->assertSee('دعوت میزبانان');
+        $this->assertSame('09123456789', \App\Models\MarketingContact::normalize('+98 912 345 6789'));
+        $this->assertSame('09351234567', \App\Models\MarketingContact::normalize('۰۹۳۵۱۲۳۴۵۶۷'));
+        $this->assertNull(\App\Models\MarketingContact::normalize('12345'));
+
+        $this->actingAs($a)->post('/admin/marketing', ['numbers' => "09123456789 علی رضایی\n۰۹۳۵۱۲۳۴۵۶۷\nxx\n09123456789", 'send' => 1])->assertRedirect();
+        $this->assertSame(2, \App\Models\MarketingContact::count());
+        $c = \App\Models\MarketingContact::where('phone', '09123456789')->first();
+        $this->assertSame('علی رضایی', $c->name);
+        $this->assertSame('sent', $c->status);
+        Http::assertSent(fn ($r) => str_ends_with($r->url(), '/messages') && str_contains($r['message'], 'علی رضایی') && str_contains($r['message'], '/s/') && str_contains($r['message'], 'لغو۱۱'));
+        $this->assertDatabaseHas('short_links', ['url' => url('/register').'?as=host&utm_source=sms']);
+
+        // لغو: دیگر پیامی نمی‌رود
+        $this->actingAs($a)->post(route('admin.marketing.optout', $c))->assertRedirect();
+        Http::swap(new \Illuminate\Http\Client\Factory);
+        Http::fake();
+        $this->actingAs($a)->post(route('admin.marketing.send', $c))->assertSessionHasErrors('send');
+        Http::assertNothingSent();
+
+        // سقف روزانه
+        Setting::put('mk_daily_cap', 1);
+        $this->actingAs($a)->post('/admin/marketing', ['numbers' => '09111111111', 'send' => 1])->assertSessionHasErrors('send');
+        $this->assertSame('new', \App\Models\MarketingContact::where('phone', '09111111111')->value('status'));
+
+        // ثبت‌نام همان شماره به‌عنوان میزبان، وضعیت را «ثبت‌نام کرد» می‌کند
+        \Illuminate\Support\Facades\Auth::logout();
+        $this->post('/register', ['name' => 'علی', 'phone' => '09111111111', 'password' => 'secret123', 'password_confirmation' => 'secret123', 'role' => 'host']);
+        $this->assertSame('registered', \App\Models\MarketingContact::where('phone', '09111111111')->value('status'));
     }
 }

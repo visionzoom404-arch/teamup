@@ -175,6 +175,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/bookings/{booking}', [Admin\ManageController::class, 'bookingUpdate'])->name('bookings.update');
     Route::delete('/bookings/{booking}', [Admin\ManageController::class, 'bookingDestroy'])->name('bookings.destroy');
     Route::get('/payments', [Admin\ManageController::class, 'payments'])->name('payments');
+    Route::get('/reviews/preview', [Admin\ManageController::class, 'reviewPreview'])->name('reviews.preview');
+    Route::get('/payments/{payment}/edit', [Admin\ManageController::class, 'paymentEdit'])->name('payments.edit');
+    Route::post('/payments/{payment}/update', [Admin\ManageController::class, 'paymentUpdate'])->name('payments.update');
+    Route::delete('/payments/{payment}', [Admin\ManageController::class, 'paymentDestroy'])->name('payments.destroy');
     Route::post('/payments/{payment}/approve', [Admin\ManageController::class, 'cardApprove'])->name('payments.approve');
     Route::post('/payments/{payment}/reject', [Admin\ManageController::class, 'cardReject'])->name('payments.reject');
     Route::get('/payouts', [Admin\ManageController::class, 'payouts'])->name('payouts');
@@ -215,6 +219,13 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/errors/fix', [Admin\ErrorLogController::class, 'fix'])->name('errors.fix');
     Route::post('/errors/clear', [Admin\ErrorLogController::class, 'clear'])->name('errors.clear');
     Route::get('/activity', [Admin\ContentController::class, 'activity'])->name('activity');
+    Route::get('/marketing', [Admin\MarketingController::class, 'index'])->name('marketing');
+    Route::post('/marketing', [Admin\MarketingController::class, 'store'])->name('marketing.store');
+    Route::post('/marketing/template', [Admin\MarketingController::class, 'template_save'])->name('marketing.template');
+    Route::post('/marketing/bulk', [Admin\MarketingController::class, 'sendBulk'])->name('marketing.bulk');
+    Route::post('/marketing/{contact}/send', [Admin\MarketingController::class, 'send'])->name('marketing.send');
+    Route::post('/marketing/{contact}/optout', [Admin\MarketingController::class, 'optout'])->name('marketing.optout');
+    Route::delete('/marketing/{contact}', [Admin\MarketingController::class, 'destroy'])->name('marketing.destroy');
     Route::get('/analytics', [Admin\AnalyticsController::class, 'index'])->name('analytics');
     Route::get('/broadcast', [Admin\ContentController::class, 'broadcast'])->name('broadcast');
     Route::post('/broadcast', [Admin\ContentController::class, 'broadcastSend'])->name('broadcast.send');
