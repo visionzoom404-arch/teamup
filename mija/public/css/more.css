@@ -469,3 +469,5 @@ input[type=file]::file-selector-button{margin-inline-end:10px;border:0;border-ra
 .hx::after{background:linear-gradient(180deg,rgba(50,22,0,.55) 0%,rgba(50,22,0,.12) 50%,rgba(50,22,0,.42) 100%)}
 .hero-c .stage-search{margin:-74px 28px 0!important}
 @media(max-width:860px){.hx{min-height:410px}.hx-in{padding:34px 20px 120px}.hx h1{font-size:32px}.hx p{font-size:14px}.hero-c .stage-search{margin:-60px 10px 0!important}}
+.hx-img{object-position:center 55%}
+.hx h1,.hx p{text-shadow:0 3px 18px rgba(30,12,0,.75),0 1px 3px rgba(30,12,0,.6)}
