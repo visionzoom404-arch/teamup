@@ -10,7 +10,7 @@
   {{-- ===== بالای صفحه: عنوان فشرده + جستجو ===== --}}
   <section class="hero-c">
     <div class="hx">
-      <picture><source srcset="{{ asset('img/hero-home.webp') }}" type="image/webp"><img class="hx-img" src="{{ asset('img/hero-home.jpg') }}" alt="ویلا با استخر در غروب" width="1920" height="1080" fetchpriority="high"></picture>
+      @if(setting('home_hero'))<img class="hx-img" src="{{ asset('storage/'.setting('home_hero')) }}" alt="اجاره ویلا و کلبه در سراسر ایران" width="1920" height="1080" fetchpriority="high">@else<picture><source srcset="{{ asset('img/hero-home.webp') }}" type="image/webp"><img class="hx-img" src="{{ asset('img/hero-home.jpg') }}" alt="ویلا با استخر در غروب" width="1920" height="1080" fetchpriority="high"></picture>@endif
       <div class="hx-in">
         <span class="kicker"><x-icon name="sparkle" class="sm"/> رزرو مستقیم از میزبان، بدون واسطه‌ی پنهان</span>
         <h1>کجا می‌خوای بری؟</h1>

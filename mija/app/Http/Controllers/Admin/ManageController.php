@@ -395,6 +395,29 @@ class ManageController extends Controller
         return $back;
     }
 
+    /** عکس بنر صفحه‌ی اول (آپلود یا بازگشت به عکس پیش‌فرض) */
+    public function heroUpload(Request $r)
+    {
+        if ($r->boolean('reset')) {
+            if ($old = setting('home_hero')) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($old);
+            }
+            Setting::put('home_hero', '');
+            Audit::log('hero.reset');
+
+            return back()->with('ok', 'عکس بنر به حالت پیش‌فرض برگشت.');
+        }
+        $r->validate(['hero' => 'required|image|mimes:jpg,jpeg,png,webp|max:6144|dimensions:min_width=1000,min_height=450'], ['hero.dimensions' => 'عکس باید دست‌کم ۱۰۰۰×۴۵۰ پیکسل باشد (پیشنهاد: ۱۹۲۰×۱۰۸۰).', 'hero.max' => 'حجم عکس حداکثر ۶ مگابایت باشد.']);
+        $path = $r->file('hero')->storeAs('site', 'hero-'.time().'.'.$r->file('hero')->extension(), 'public');
+        if ($old = setting('home_hero')) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($old);
+        }
+        Setting::put('home_hero', $path);
+        Audit::log('hero.upload', $path);
+
+        return back()->with('ok', 'عکس بنر صفحه‌ی اول تغییر کرد.');
+    }
+
     public function peakStore(Request $r)
     {
         $d = $r->validate(['title' => 'required|string|max:60', 'from' => 'required|string', 'to' => 'required|string']);

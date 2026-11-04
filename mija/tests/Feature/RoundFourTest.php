@@ -382,4 +382,20 @@ class RoundFourTest extends TestCase
         $this->actingAs($a)->delete('/admin/articles/'.$art->slug)->assertRedirect();
         $this->assertDatabaseMissing('articles', ['slug' => 'test-article']);
     }
+
+    public function test_admin_can_upload_and_reset_home_hero_image(): void
+    {
+        \Illuminate\Support\Facades\Storage::fake('public');
+        $a = $this->admin();
+        $this->actingAs($a)->post(route('admin.settings.hero'), ['hero' => \Illuminate\Http\UploadedFile::fake()->image('h.jpg', 400, 200)])->assertSessionHasErrors('hero');
+        $this->actingAs($a)->post(route('admin.settings.hero'), ['hero' => \Illuminate\Http\UploadedFile::fake()->image('h.jpg', 1920, 1080)])->assertSessionHasNoErrors();
+        $p = setting('home_hero');
+        $this->assertStringStartsWith('site/hero-', $p);
+        \Illuminate\Support\Facades\Storage::disk('public')->assertExists($p);
+        auth()->logout();
+        $this->get('/')->assertOk()->assertSee('storage/'.$p, false);
+        $this->actingAs($a)->post(route('admin.settings.hero'), ['reset' => 1])->assertSessionHasNoErrors();
+        auth()->logout();
+        $this->get('/')->assertSee('img/hero-home.jpg', false);
+    }
 }

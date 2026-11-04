@@ -461,3 +461,11 @@ input[type=file]::file-selector-button{margin-inline-end:10px;border:0;border-ra
 }
 @media(prefers-reduced-motion:reduce){.app-bn-i i{animation:none}}
 .hero-c .stage-search{background:rgba(255,255,255,.97)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+
+/* بنر صفحه‌ی اول: کمی بلندتر (نزدیک به ۶۰٪ ارتفاع صفحه) */
+.hx{min-height:clamp(440px,62vh,620px)}
+.hx-in{padding:60px 46px 150px;max-width:860px}
+.hx h1{font-size:54px;margin-top:16px}.hx p{font-size:17px;max-width:620px}
+.hx::after{background:linear-gradient(180deg,rgba(50,22,0,.55) 0%,rgba(50,22,0,.12) 50%,rgba(50,22,0,.42) 100%)}
+.hero-c .stage-search{margin:-74px 28px 0!important}
+@media(max-width:860px){.hx{min-height:410px}.hx-in{padding:34px 20px 120px}.hx h1{font-size:32px}.hx p{font-size:14px}.hero-c .stage-search{margin:-60px 10px 0!important}}

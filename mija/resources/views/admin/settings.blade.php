@@ -46,6 +46,15 @@
 @elseif($tab === 'gateway')
 @include('admin.partials.gateways')
 @elseif($tab === 'texts')
+<div class="card mb"><h3>عکس بنر صفحه‌ی اول</h3>
+  <div class="row wrap" style="gap:14px;align-items:flex-start">
+    <img src="{{ setting('home_hero') ? asset('storage/'.setting('home_hero')) : asset('img/hero-home.jpg') }}" alt="" style="width:240px;max-width:100%;border-radius:14px;aspect-ratio:16/9;object-fit:cover">
+    <form class="grow" method="post" action="{{ route('admin.settings.hero') }}" enctype="multipart/form-data">@csrf
+      <div class="field"><label>عکس جدید (۱۶:۹، پیشنهاد ۱۹۲۰×۱۰۸۰، حداکثر ۶ مگابایت)</label><input class="input" type="file" name="hero" accept="image/*" required>@error('hero')<div class="msg-e">{{ $message }}</div>@enderror<div class="help">عکس واقعی و باکیفیت از یک ویلا یا کلبه بگذارید. متن روی عکس با سایه‌ی تیره خوانا می‌شود؛ عکس را بدون نوشته انتخاب کنید.</div></div>
+      <button class="btn btn-sm">تغییر عکس بنر</button> @if(setting('home_hero'))<button class="btn btn-sm btn-ghost" name="reset" value="1" formnovalidate>برگشت به عکس پیش‌فرض</button>@endif
+    </form>
+  </div>
+</div>
 <form class="card mb" method="post" action="{{ route('admin.settings.update') }}">@csrf<input type="hidden" name="group" value="texts"><h3>متن‌های سایت و تماس</h3>
   <div class="grid2">@php $txt('support_phone', 'تلفن اصلی پشتیبانی (برای پیامک‌ها و تماس سریع)') @endphp @php $txt('support_email', 'ایمیل پشتیبانی') @endphp</div>
   <input type="hidden" name="keys[]" value="contact_phones"><div class="field"><label>شماره‌های «تماس با ما» (هر خط یک شماره: عنوان | شماره)</label><textarea class="input" name="contact_phones" rows="4" dir="rtl" placeholder="پشتیبانی (موبایل) | 09123456789&#10;تلفن ثابت | 02634430536">{{ setting('contact_phones') }}</textarea><div class="help">هر تعداد شماره بنویسید؛ در صفحه‌ی «تماس با ما» و فوتر نمایش داده می‌شوند.</div></div>

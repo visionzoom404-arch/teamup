@@ -245,6 +245,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     Route::get('/settings', [Admin\ManageController::class, 'settings'])->name('settings');
     Route::post('/settings', [Admin\ManageController::class, 'settingsUpdate'])->name('settings.update');
+    Route::post('/settings/hero', [Admin\ManageController::class, 'heroUpload'])->name('settings.hero');
     Route::post('/peaks', [Admin\ManageController::class, 'peakStore'])->name('peaks.store');
     Route::delete('/peaks/{peak}', [Admin\ManageController::class, 'peakDestroy'])->name('peaks.destroy');
 });
