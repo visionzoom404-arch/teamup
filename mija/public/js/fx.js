@@ -229,3 +229,18 @@ document.querySelectorAll('table.tbl').forEach(t => {
   if (!heads.length) return;
   t.querySelectorAll('tbody tr').forEach(r => [...r.children].forEach((td, i) => { if (td.tagName === 'TD' && heads[i] !== undefined && !td.hasAttribute('data-label')) td.setAttribute('data-label', heads[i]); }));
 });
+
+/* ---------- ریل‌های افقی (کارت‌ها/مقصدها) با دکمه‌ی قبلی/بعدی ---------- */
+document.querySelectorAll('[data-rail]').forEach(r => {
+  const wrap = r.closest('.rail-wrap'); if (!wrap) return;
+  const prev = wrap.querySelector('[data-rail-prev]'), next = wrap.querySelector('[data-rail-next]');
+  const rtl = getComputedStyle(r).direction === 'rtl';
+  const step = () => Math.max(220, r.clientWidth * 0.8);
+  const upd = () => {
+    const max = r.scrollWidth - r.clientWidth - 2, x = Math.abs(r.scrollLeft);
+    if (prev) prev.disabled = x <= 2; if (next) next.disabled = x >= max;
+  };
+  if (prev) prev.addEventListener('click', () => r.scrollBy({ left: rtl ? step() : -step(), behavior: 'smooth' }));
+  if (next) next.addEventListener('click', () => r.scrollBy({ left: rtl ? -step() : step(), behavior: 'smooth' }));
+  r.addEventListener('scroll', upd, { passive: true }); addEventListener('resize', upd); upd();
+});

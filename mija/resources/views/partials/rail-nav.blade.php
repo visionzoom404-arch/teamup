@@ -1,0 +1,1 @@
+<button type="button" class="rail-btn prev" data-rail-prev aria-label="قبلی"><x-icon name="arrow-r" class="sm"/></button><button type="button" class="rail-btn next" data-rail-next aria-label="بعدی"><x-icon name="arrow-l" class="sm"/></button>

@@ -9,16 +9,17 @@
 <div class="container">
   {{-- ===== بالای صفحه: عنوان فشرده + جستجو ===== --}}
   <section class="hero-c">
-    <div class="hero-top">
-      <div>
-        <span class="kicker"><x-icon name="sparkle" class="sm"/> اقامتگاه‌های منتخب ایران</span>
-        <h1>جای خوب، سفر خوب.</h1>
-        <p>ویلا، کلبه و اقامتگاه‌های تأییدشده؛ مستقیم از میزبان، با قیمت شفاف و پرداخت امن.</p>
-      </div>
-      <div class="hero-stats">
-        <div><b data-count="{{ $stats['properties'] }}">{{ fa($stats['properties']) }}</b><small>اقامتگاه</small></div>
-        <div><b data-count="{{ $stats['cities'] }}">{{ fa($stats['cities']) }}</b><small>شهر و منطقه</small></div>
-        @if($stats['rating'])<div><b data-count="{{ $stats['rating'] }}" data-dec="1">{{ fa($stats['rating']) }}</b><small>امتیاز مهمانان</small></div>@endif
+    <div class="hx">
+      <picture><source srcset="{{ asset('img/hero-home.webp') }}" type="image/webp"><img class="hx-img" src="{{ asset('img/hero-home.jpg') }}" alt="ویلا با استخر در غروب" width="1920" height="1080" fetchpriority="high"></picture>
+      <div class="hx-in">
+        <span class="kicker"><x-icon name="sparkle" class="sm"/> رزرو مستقیم از میزبان، بدون واسطه‌ی پنهان</span>
+        <h1>کجا می‌خوای بری؟</h1>
+        <p>ویلا، کلبه و اقامتگاه‌های تأییدشده با قیمت شفاف و پرداخت امن؛ همه‌جا از شمال تا جنوب.</p>
+        <div class="hx-stats">
+          <span><b data-count="{{ $stats['properties'] }}">{{ fa($stats['properties']) }}</b> اقامتگاه</span>
+          <span><b data-count="{{ $stats['cities'] }}">{{ fa($stats['cities']) }}</b> شهر و منطقه</span>
+          @if($stats['rating'])<span><b data-count="{{ $stats['rating'] }}" data-dec="1">{{ fa($stats['rating']) }}</b> امتیاز مهمانان</span>@endif
+        </div>
       </div>
     </div>
 
@@ -37,34 +38,34 @@
       <div class="presets"><span class="muted">پیشنهاد سریع</span><button type="button" class="qchip" data-preset="weekend">این آخر هفته</button><button type="button" class="qchip" data-preset="weekend2">آخر هفته‌ی بعد</button><button type="button" class="qchip" data-preset="midweek">۳ شب میان‌هفته</button><button type="button" class="qchip" data-preset="soon">۳ شب از فردا</button></div>
     </form>
 
-    {{-- نوار نوع اقامتگاه --}}
-    <div class="tstrip">
+    {{-- دسته‌بندی دایره‌ای (نوع اقامتگاه) --}}
+    <div class="cat-rail" role="list">
       @foreach(config('mija.property_types') as $k => $n)
-        <a class="tcell" href="{{ route('search', ['type' => [$k]]) }}"><x-i3 :name="config('mija.type_icons.'.$k)"/>{{ $n }}<small>{{ fa($typeCounts[$k] ?? 0) }} مورد</small></a>
+        <a role="listitem" class="cat" href="{{ route('search', ['type' => [$k]]) }}"><span class="cat-ic"><x-i3 :name="config('mija.type_icons.'.$k)"/></span><b>{{ $n }}</b><small>{{ fa($typeCounts[$k] ?? 0) }} مورد</small></a>
       @endforeach
     </div>
+  </section>
 
-    {{-- مرکز دسته‌بندی: همه‌چیز ریز و مرتب --}}
-    <div class="hub">
-      <div class="hub-g"><b>بر اساس منطقه</b><div class="hub-chips">
-        @foreach(config('mija.regions') as $k => $rg)<a class="chip-s" href="{{ route('search', ['region' => $k]) }}"><x-icon name="pin"/>{{ $rg['name'] }}<i>{{ fa($regionCounts[$k] ?? 0) }}</i></a>@endforeach
-      </div></div>
-      <div class="hub-g"><b>بر اساس امکانات</b><div class="hub-chips">
-        @foreach([['pool','استخر'],['jacuzzi','جکوزی'],['sauna','سونا'],['fireplace','شومینه'],['bbq','باربیکیو'],['garden','باغ و حیاط'],['view','ویوی دریا/کوه'],['wifi','اینترنت'],['pet','حیوان خانگی'],['family','مناسب خانواده'],['ev','شارژر برقی']] as [$k,$n])<a class="chip-s" href="{{ route('search', ['amenity' => [$k]]) }}"><x-i3 :name="$k"/>{{ $n }}</a>@endforeach
-      </div></div>
-      <div class="hub-g"><b>بر اساس ظرفیت</b><div class="hub-chips">
-        <a class="chip-s" href="{{ route('search', ['guests' => 2]) }}"><x-icon name="users"/>دونفره</a>
-        <a class="chip-s" href="{{ route('search', ['guests' => 4]) }}"><x-icon name="users"/>تا ۴ نفر</a>
-        <a class="chip-s" href="{{ route('search', ['guests' => 8]) }}"><x-icon name="users"/>۸ نفر و بیشتر</a>
-        <a class="chip-s" href="{{ route('search', ['guests' => 15]) }}"><x-icon name="users"/>گروهی (۱۵+)</a>
-      </div></div>
-      <div class="hub-g"><b>بر اساس بودجه</b><div class="hub-chips">
-        <a class="chip-s" href="{{ route('search', ['max_price' => 2000000]) }}">زیر ۲ میلیون</a>
-        <a class="chip-s" href="{{ route('search', ['min_price' => 2000000, 'max_price' => 4000000]) }}">۲ تا ۴ میلیون</a>
-        <a class="chip-s" href="{{ route('search', ['min_price' => 4000000]) }}">بالای ۴ میلیون</a>
-        <a class="chip-s" href="{{ route('search', ['discount' => 1]) }}"><x-icon name="tag"/>تخفیف‌دار</a>
-        <a class="chip-s" href="{{ route('search', ['instant' => 1]) }}"><x-icon name="bolt"/>رزرو فوری</a>
-      </div></div>
+  @if($destinations->count())
+  <section class="sec" aria-labelledby="dest-h">
+    <div class="sec-h"><div><h2 id="dest-h">مقصدهای محبوب</h2><p>برای سفر بعدی‌تان از این شهرها شروع کنید</p></div><a class="more" href="{{ route('search') }}">همه‌ی مقصدها <x-icon name="arrow-l" class="sm"/></a></div>
+    <div class="rail-wrap"><div class="rail dest-rail" data-rail>
+      @foreach($destinations as $d)
+      <a class="dest" href="{{ route('search', ['city' => $d->city]) }}"><img src="{{ $destCovers[$d->city] ?? asset('img/og.png') }}" alt="اجاره ویلا در {{ $d->city }}" loading="lazy" width="320" height="400"><span class="dest-s"></span><div><b>{{ $d->city }}</b><small>{{ fa($d->c) }} اقامتگاه · از {{ toman($d->p, false) }} تومان</small></div></a>
+      @endforeach
+    </div>@include('partials.rail-nav')</div>
+  </section>
+  @endif
+
+  <section class="sec qf" aria-label="فیلتر سریع">
+    <div class="qf-rail">
+      @foreach(config('mija.regions') as $k => $rg)<a class="chip-s" href="{{ route('search', ['region' => $k]) }}"><x-icon name="pin"/>{{ $rg['name'] }}</a>@endforeach
+      <a class="chip-s" href="{{ route('search', ['amenity' => ['pool']]) }}"><x-icon name="pool"/> استخر</a>
+      <a class="chip-s" href="{{ route('search', ['instant' => 1]) }}"><x-icon name="bolt"/> رزرو فوری</a>
+      <a class="chip-s" href="{{ route('search', ['discount' => 1]) }}"><x-icon name="tag"/> تخفیف‌دار</a>
+      <a class="chip-s" href="{{ route('search', ['guests' => 8]) }}"><x-icon name="users"/> ۸ نفر و بیشتر</a>
+      <a class="chip-s" href="{{ route('search', ['max_price' => 2000000]) }}">زیر ۲ میلیون</a>
+      <a class="chip-s" href="{{ route('search', ['guests' => 2]) }}"><x-icon name="users"/> دونفره</a>
     </div>
   </section>
 
@@ -80,7 +81,7 @@
   </section>
   @endif
   @if($flash->count())
-  <section class="sec flash-sec"><div class="sec-h"><div><h2><x-i3 name="p_bolt" class="sm"/> تخفیف لحظه‌آخری</h2><p>فقط برای امروز و فردا؛ میزبان‌ها با تخفیف ویژه، سریع رزرو کنید.</p></div></div><div class="grid-cards">@foreach($flash as $p)@include('partials.pcard')@endforeach</div></section>
+  <section class="sec flash-sec"><div class="sec-h"><div><h2><x-i3 name="p_bolt" class="sm"/> تخفیف لحظه‌آخری</h2><p>فقط برای امروز و فردا؛ میزبان‌ها با تخفیف ویژه، سریع رزرو کنید.</p></div></div><div class="rail-wrap"><div class="rail" data-rail>@foreach($flash as $p)@include('partials.pcard')@endforeach</div>@include('partials.rail-nav')</div></section>
   @endif
 
   <section class="sec recent" id="recent-box" data-swiper="cards">
@@ -98,10 +99,17 @@
   @if($list->count())
   <section class="sec">
     <div class="sec-h"><div><h2>{{ $t }}</h2><p>{{ $sub }}</p></div><a class="more" href="{{ route('search', array_filter($q)) }}">مشاهده همه <x-icon name="arrow-l" class="sm"/></a></div>
-    <div class="grid-cards">@foreach($list->take(4) as $p)@include('partials.pcard')@endforeach</div>
+    <div class="rail-wrap"><div class="rail" data-rail>@foreach($list->take(10) as $p)@include('partials.pcard')@endforeach</div>@include('partials.rail-nav')</div>
   </section>
   @endif
   @endforeach
+
+  <section class="sec">
+    <a class="app-bn" href="{{ route('app') }}">
+      <div class="app-bn-t"><span class="kicker"><x-i3 name="p_phone" class="sm"/> اپلیکیشن اندروید</span><h2>می‌جا را در گوشی داشته باشید</h2><p>رزرو سریع‌تر، اعلان لحظه‌ای وضعیت رزرو و پرداخت، و دسترسی آسان به ووچر سفر.</p><span class="btn btn-gold">دریافت اپلیکیشن <x-icon name="arrow-l" class="sm"/></span></div>
+      <div class="app-bn-i" aria-hidden="true"><i></i><i></i><i></i></div>
+    </a>
+  </section>
 
   <section class="sec">
     <div class="sec-h"><div><h2>رزرو در سه قدم</h2></div></div>

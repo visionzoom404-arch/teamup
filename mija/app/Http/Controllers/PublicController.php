@@ -29,6 +29,7 @@ class PublicController extends Controller
             'regionCounts' => collect(config('mija.regions'))->map(fn ($rg) => Property::approved()->whereIn('province', $rg['provinces'])->count()),
             'cities' => Property::approved()->select('city')->distinct()->pluck('city'),
             'destinations' => Property::approved()->selectRaw('city, province, count(*) as c, min(price_weekday) as p')->groupBy('city', 'province')->orderByDesc('c')->take(8)->get(),
+            'destCovers' => Property::approved()->with('images')->get()->groupBy('city')->map(fn ($g) => $g->first()->cover())->all(),
             'stats' => [
                 'properties' => Property::approved()->count(),
                 'cities' => Property::approved()->distinct('city')->count('city'),
