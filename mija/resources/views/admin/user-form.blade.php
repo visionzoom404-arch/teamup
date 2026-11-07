@@ -32,8 +32,18 @@
     </div>
     @if($u->exists && $u->id_photo)<a class="btn btn-sm btn-light" target="_blank" href="{{ route('admin.users.idphoto', $u) }}"><x-icon name="eye" class="sm"/> مشاهده‌ی تصویر کارت ملی</a>@endif
   </div>
-  <div class="row pf-nav glass"><button class="btn btn-lg">ذخیره</button></div>
+  @unless($u->exists)
+  <div class="card"><label class="check"><input type="checkbox" name="send_invite" value="1" checked><div><b>بعد از ساخت، پیامک «لینک ورود شخصی» برای کاربر ارسال شود</b><div class="xs muted" style="font-weight:500">متن پیام: «سلام جناب/آقای (نام) … از پشتیبانی (میزبانان/مهمانان طبق نقش) پلتفرم می‌جا … وارد لینک زیر شوید؛ شماره موبایل شما (شماره‌ی ثبت‌شده) به‌عنوان نام کاربری و گذرواژه‌ی شما ثبت گردید … لینک ورود: mija.click/j/…». کاربر با زدن لینک بدون رمز وارد پنل می‌شود و ثبت‌نام (برای میزبان: هویت و ثبت اقامتگاه) را ادامه می‌دهد. برای نقش «مدیر سایت» لینک ساخته نمی‌شود.</div></div></label></div>
+  @endunless
+  <div class="row pf-nav glass"><button class="btn btn-lg">{{ $u->exists ? 'ذخیره' : 'ساخت کاربر' }}</button></div>
 </form>
+@if($u->exists && ! $u->isAdmin())
+<div class="card mt"><h3><x-i3 name="p_phone" class="sm"/> لینک ورود شخصی (پیامکی)</h3>
+  @if(session('invite_link'))<div class="copybox mb"><span class="ltr small" id="invl" style="overflow-wrap:anywhere">{{ session('invite_link') }}</span><button type="button" class="btn btn-sm" data-copy="#invl"><x-icon name="share" class="sm"/> کپی لینک</button></div>@endif
+  <p class="small muted" style="line-height:2">وضعیت: @if($u->invite_used_at)<b>کاربر با لینک وارد شده است ({{ jdate($u->invite_used_at, 'j F H:i') }})</b>@elseif($u->invite_sent_at)لینک پیامک شده ({{ jdate($u->invite_sent_at, 'j F H:i') }})؛ هنوز استفاده نشده@else لینکی ارسال نشده@endif @if($u->invite_expires_at) · اعتبار تا {{ jdate($u->invite_expires_at, 'j F') }}@endif</p>
+  <form method="post" action="{{ route('admin.users.invite', $u) }}" onsubmit="return confirm('لینک جدید ساخته و پیامک می‌شود؛ لینک قبلی باطل می‌شود. ادامه؟')">@csrf<button class="btn btn-sm btn-light"><x-icon name="send" class="sm"/> ارسال لینک جدید به {{ fa($u->phone) }}</button></form>
+</div>
+@endif
 @if($u->exists)
 <div class="grid2 mt" style="gap:18px;align-items:start">
   <form class="card" method="post" action="{{ route('admin.users.wallet', $u) }}">@csrf<h3>کیف پول — موجودی {{ toman($u->wallet) }}</h3>

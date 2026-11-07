@@ -105,4 +105,21 @@ class AuthController extends Controller
 
         return redirect('/');
     }
+
+    /** ورود با لینک شخصی پیامکی (کاربری که مدیر برایش حساب ساخته) و ادامه‌ی ثبت‌نام */
+    public function inviteLogin(string $token)
+    {
+        $u = \App\Support\UserInvite::find($token);
+        if (! $u) {
+            return redirect()->route('login')->withErrors(['phone' => 'این لینک نامعتبر یا منقضی شده است. با شماره‌ی موبایل و رمز عبور وارد شوید یا از پشتیبانی لینک تازه بگیرید.']);
+        }
+        if (Auth::check() && Auth::id() !== $u->id) {
+            return redirect('/')->with('warn', 'ابتدا از حساب فعلی خارج شوید و دوباره لینک را باز کنید.');
+        }
+        Auth::login($u, true);
+        request()->session()->regenerate();
+        $u->forceFill(['invite_used_at' => now()])->save();
+
+        return redirect($u->isHost() ? route('host.onboard') : $u->homeRoute())->with('ok', 'خوش آمدید '.$u->name.'؛ ادامه‌ی ثبت‌نام را در همین پنل انجام دهید.');
+    }
 }

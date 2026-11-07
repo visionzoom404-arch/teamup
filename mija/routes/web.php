@@ -34,6 +34,7 @@ Route::get('/s/{code}', function (string $code) {
 
     return redirect()->away($l->url);
 })->where('code', '[a-z0-9]{4,12}')->name('short');
+Route::get('/j/{token}', [AuthController::class, 'inviteLogin'])->middleware('throttle:30,1')->name('invite');
 Route::get('/pay/callback', [GatewayController::class, 'callback'])->name('gateway.callback');
 Route::match(['get', 'post'], '/pay/bitpay', [GatewayController::class, 'bitpay'])->name('gateway.bitpay');
 
@@ -161,6 +162,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/users/{user}', [Admin\UserController::class, 'edit'])->name('users.edit');
     Route::post('/users/{user}', [Admin\UserController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [Admin\UserController::class, 'destroy'])->name('users.destroy');
+    Route::post('/users/{user}/invite', [Admin\UserController::class, 'invite'])->name('users.invite');
     Route::post('/users/{user}/toggle', [Admin\ManageController::class, 'userToggle'])->name('users.toggle');
     Route::post('/users/{user}/verify', [Admin\ManageController::class, 'userVerify'])->name('users.verify');
     Route::post('/users/{user}/wallet', [Admin\UserController::class, 'wallet'])->name('users.wallet');

@@ -74,8 +74,27 @@ class UserController extends Controller
     {
         $u = User::create($this->payload($r));
         Audit::log('user.create', "#{$u->id} {$u->phone}");
+        $back = redirect()->route('admin.users.edit', $u);
+        if ($r->boolean('send_invite', true) && \App\Support\UserInvite::allowed($u)) {
+            [$ok, $link, $err] = \App\Support\UserInvite::send($u);
+            $back->with('invite_link', $link);
 
-        return redirect()->route('admin.users.edit', $u)->with('ok', 'کاربر ساخته شد.');
+            return $ok ? $back->with('ok', 'کاربر ساخته شد و پیامک لینک ورود برای '.$u->phone.' ارسال شد.')
+                : $back->with('ok', 'کاربر ساخته شد.')->with('warn', 'پیامک ارسال نشد: '.$err.' — لینک را از پایین کپی کنید و دستی بفرستید.');
+        }
+
+        return $back->with('ok', 'کاربر ساخته شد.');
+    }
+
+    /** ارسال دوباره‌ی لینک ورود شخصی (لینک قبلی باطل می‌شود) */
+    public function invite(User $user)
+    {
+        abort_unless(\App\Support\UserInvite::allowed($user), 403);
+        [$ok, $link, $err] = \App\Support\UserInvite::send($user);
+        Audit::log('user.invite', "#{$user->id}");
+        $back = back()->with('invite_link', $link);
+
+        return $ok ? $back->with('ok', 'لینک ورود جدید برای '.$user->phone.' پیامک شد.') : $back->with('warn', 'پیامک ارسال نشد: '.$err.' — لینک را از پایین کپی کنید و دستی بفرستید.');
     }
 
     public function edit(User $user)

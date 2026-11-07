@@ -398,4 +398,68 @@ class RoundFourTest extends TestCase
         auth()->logout();
         $this->get('/')->assertSee('img/hero-home.jpg', false);
     }
+
+    public function test_admin_creates_user_and_personal_login_link_sms_is_sent(): void
+    {
+        $this->smsOn();
+        Http::fake(['*' => Http::response(['status' => 'OK', 'code' => 200], 200)]);
+        $a = $this->admin();
+        $this->actingAs($a)->post('/admin/users', ['name' => 'علی رضایی', 'phone' => '09351112233', 'role' => 'host', 'password' => 'secret123', 'send_invite' => 1])->assertRedirect();
+        $u = User::where('phone', '09351112233')->first();
+        $this->assertNotNull($u);
+        $this->assertSame('host', $u->role);
+        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('secret123', $u->password));
+        $this->assertNotNull($u->invite_sent_at);
+
+        $msg = '';
+        Http::assertSent(function ($r) use (&$msg) {
+            $msg = (string) ($r['message'] ?? '');
+
+            return str_ends_with($r->url(), '/messages') && $r['recipient'] === ['+989351112233'];
+        });
+        $this->assertStringContainsString('سلام جناب/آقای علی رضایی', $msg);
+        $this->assertStringContainsString('از پشتیبانی میزبانان پلتفرم می‌جا', $msg);
+        $this->assertStringContainsString('(09351112233)', $msg);
+        $this->assertStringContainsString('لطفا مراحل ثبت اقامتگاهتان را در پنل جلو ببرید.', $msg);
+        $this->assertStringNotContainsString('secret123', $msg);
+        preg_match('~(https?://\S+/j/([a-z0-9]{14}))~', $msg, $m);
+        $this->assertNotEmpty($m, 'لینک شخصی در پیام نیست');
+
+        // لینک: ورود بدون رمز و ادامه‌ی ثبت‌نام میزبان
+        auth()->logout();
+        $this->get('/j/'.$m[2])->assertRedirect(route('host.onboard'));
+        $this->assertAuthenticatedAs($u);
+        $this->assertNotNull($u->fresh()->invite_used_at);
+
+        // لینک نامعتبر / منقضی
+        auth()->logout();
+        $this->get('/j/aaaaaaaaaaaaaa')->assertRedirect(route('login'));
+        $this->assertGuest();
+        $u->forceFill(['invite_expires_at' => now()->subMinute()])->save();
+        $this->get('/j/'.$m[2])->assertRedirect(route('login'));
+        $this->assertGuest();
+
+        // ارسال دوباره: لینک قبلی باطل و لینک جدید معتبر
+        $this->actingAs($a)->post(route('admin.users.invite', $u))->assertRedirect();
+        $u = $u->fresh();
+        $this->assertTrue($u->invite_expires_at->isFuture());
+        auth()->logout();
+        $this->get('/j/'.$m[2])->assertRedirect(route('login'));
+    }
+
+    public function test_invite_for_guest_role_text_and_no_link_for_admin_role_and_sms_off_shows_link(): void
+    {
+        $a = $this->admin();
+        // پیامک خاموش: کاربر ساخته می‌شود و لینک برای ارسال دستی نشان داده می‌شود
+        $res = $this->actingAs($a)->post('/admin/users', ['name' => 'سارا محمدی', 'phone' => '09361112233', 'role' => 'guest', 'password' => 'secret123']);
+        $res->assertRedirect()->assertSessionHas('invite_link')->assertSessionHas('warn');
+        $g = User::where('phone', '09361112233')->first();
+        $this->assertStringContainsString('از پشتیبانی مهمانان', \App\Support\UserInvite::message($g, 'https://mija.click/j/x'));
+        $this->assertStringContainsString('تکمیل حساب', \App\Support\UserInvite::message($g, 'https://mija.click/j/x'));
+        // مدیر سایت: بدون لینک ورود
+        $this->actingAs($a)->post('/admin/users', ['name' => 'مدیر دوم', 'phone' => '09371112233', 'role' => 'admin', 'password' => 'secret123'])->assertRedirect();
+        $ad = User::where('phone', '09371112233')->first();
+        $this->assertNull($ad->invite_hash);
+        $this->actingAs($a)->post(route('admin.users.invite', $ad))->assertStatus(403);
+    }
 }

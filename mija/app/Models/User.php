@@ -22,7 +22,7 @@ class User extends Authenticatable
 
     protected function casts(): array
     {
-        return ['password' => 'hashed', 'is_active' => 'boolean', 'host_verified' => 'boolean', 'phone_verified_at' => 'datetime'];
+        return ['password' => 'hashed', 'is_active' => 'boolean', 'host_verified' => 'boolean', 'phone_verified_at' => 'datetime', 'invite_expires_at' => 'datetime', 'invite_sent_at' => 'datetime', 'invite_used_at' => 'datetime'];
     }
 
     protected static function booted(): void
