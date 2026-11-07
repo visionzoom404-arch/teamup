@@ -471,3 +471,16 @@ input[type=file]::file-selector-button{margin-inline-end:10px;border:0;border-ra
 @media(max-width:860px){.hx{min-height:410px}.hx-in{padding:34px 20px 120px}.hx h1{font-size:32px}.hx p{font-size:14px}.hero-c .stage-search{margin:-60px 10px 0!important}}
 .hx-img{object-position:center 55%}
 .hx h1,.hx p{text-shadow:0 3px 18px rgba(30,12,0,.75),0 1px 3px rgba(30,12,0,.6)}
+
+/* بنر صفحه‌ی اول در موبایل/تبلت: عکس کامل و بدون زوم؛ متن زیر عکس */
+@media(max-width:860px){
+  .hx{display:block;min-height:0;background:linear-gradient(165deg,#8A4410 0%,#4A2306 100%);border-radius:22px}
+  .hx::after{display:none}
+  .hx picture{display:block;line-height:0}
+  .hx-img{position:static;display:block;width:100%;height:auto;aspect-ratio:2/1;object-fit:cover;object-position:center}
+  .hx-in{padding:18px 18px 78px;max-width:none}
+  .hx .kicker{margin-bottom:0}
+  .hx h1{font-size:28px;margin:10px 0 6px}
+  .hx p{font-size:13.5px;line-height:1.9}
+}
+@media(max-width:420px){.hx{border-radius:18px}.hx-in{padding:16px 14px 74px}.hx h1{font-size:25px}}
