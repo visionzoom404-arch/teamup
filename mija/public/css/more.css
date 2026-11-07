@@ -484,3 +484,9 @@ input[type=file]::file-selector-button{margin-inline-end:10px;border:0;border-ra
   .hx p{font-size:13.5px;line-height:1.9}
 }
 @media(max-width:420px){.hx{border-radius:18px}.hx-in{padding:16px 14px 74px}.hx h1{font-size:25px}}
+
+/* رفع بریدگی دکمه/آدرس‌های بلند در ستون‌های باریک */
+td .btn-sm,.table-cards .btn-sm{max-width:100%;white-space:normal;text-align:center;line-height:1.5}
+.xs.muted.ltr{overflow-wrap:anywhere;word-break:break-all}
+a.btn,.btn-light{max-width:100%}
+.au-form a.btn,.auth a.btn{white-space:normal;text-align:center}

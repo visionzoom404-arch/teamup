@@ -342,3 +342,25 @@ document.addEventListener('click', async e => {
   var f = document.querySelector('form.atm-form');
   if (f) f.addEventListener('submit', function () { var g = f.querySelector('.atm-go'); if (g) g.classList.add('busy'); });
 })();
+
+/* ---------- حالت روشن / تیره ---------- */
+(function () {
+  const root = document.documentElement;
+  const apply = t => {
+    root.setAttribute('data-theme', t);
+    const m = document.querySelector('meta[name=theme-color]'); if (m) m.setAttribute('content', t === 'dark' ? '#17120D' : '#E8860C');
+    try { localStorage.setItem('mija-theme', t); } catch (e) { }
+    document.dispatchEvent(new CustomEvent('mija:theme', { detail: t }));
+  };
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-theme-toggle]'); if (!b) return;
+    apply(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  });
+  // اگر کاربر دستی انتخاب نکرده، با تغییر حالت سیستم هماهنگ شود
+  try {
+    matchMedia('(prefers-color-scheme: dark)').addEventListener('change', ev => {
+      let saved = null; try { saved = localStorage.getItem('mija-theme'); } catch (e) { }
+      if (!saved) { root.setAttribute('data-theme', ev.matches ? 'dark' : 'light'); const m = document.querySelector('meta[name=theme-color]'); if (m) m.setAttribute('content', ev.matches ? '#17120D' : '#E8860C'); }
+    });
+  } catch (e) { }
+})();

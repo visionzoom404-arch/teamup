@@ -7,7 +7,7 @@
 <div class="au">
   <div class="au-top">
     <a href="{{ route('home') }}" class="au-back"><x-icon name="arrow-r" class="sm"/> بازگشت به سایت</a>
-    <span class="au-sec"><x-icon name="lock" class="sm"/> اتصال امن</span>
+    <span class="au-sec"><button type="button" class="top-btn theme-btn" data-theme-toggle aria-label="تغییر حالت روشن/تیره"><x-icon name="moon" class="t-moon"/><x-icon name="sun" class="t-sun"/></button> <x-icon name="lock" class="sm"/> اتصال امن</span>
   </div>
   <div class="au-shell" id="auth-card">
     <section class="au-form">

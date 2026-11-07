@@ -37,6 +37,7 @@ $p = [
  'share' => '<circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.2 11l7.6-4M8.2 13l7.6 4"/>',
  'phone' => '<rect x="7" y="2" width="10" height="20" rx="3"/><path d="M11 18h2"/>',
  'bolt' => '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
+ 'moon' => '<path d="M20 14.5A8.5 8.5 0 019.5 4a8.5 8.5 0 1010.5 10.5z"/>',
  'sun' => '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
  'download' => '<path d="M12 3v12M7 10l5 5 5-5M4 20h16"/>',
  'lock' => '<rect x="5" y="11" width="14" height="10" rx="3"/><path d="M8 11V8a4 4 0 018 0v3"/>',

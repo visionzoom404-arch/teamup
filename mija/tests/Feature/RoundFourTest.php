@@ -462,4 +462,19 @@ class RoundFourTest extends TestCase
         $this->assertNull($ad->invite_hash);
         $this->actingAs($a)->post(route('admin.users.invite', $ad))->assertStatus(403);
     }
+
+    public function test_dark_mode_markup_present(): void
+    {
+        foreach (['/', '/login', '/blog', '/app'] as $u) {
+            $html = $this->get($u)->assertOk()->getContent();
+            $this->assertStringContainsString('mija-theme', $html, $u);
+            $this->assertStringContainsString('css/dark.auto.css', $html, $u);
+            $this->assertStringContainsString('css/dark.css', $html, $u);
+            $this->assertStringContainsString('data-theme-toggle', $html, $u);
+        }
+        $this->get('/no-such-page-xyz')->assertNotFound()->assertSee('css/dark.css', false);
+        foreach (['dark.css', 'dark.auto.css'] as $f) {
+            $this->assertFileExists(public_path('css/'.$f));
+        }
+    }
 }

@@ -11,6 +11,7 @@
     </nav>
     <div class="spacer"></div>
     <div class="top-actions">
+      <button type="button" class="top-btn theme-btn" data-theme-toggle aria-label="تغییر حالت روشن/تیره" title="حالت روشن / تیره"><x-icon name="moon" class="t-moon"/><x-icon name="sun" class="t-sun"/></button>
       @auth
         <a href="{{ route('notices') }}" class="top-btn" aria-label="اعلان‌ها"><x-icon name="bell"/>@if($unread)<span class="dot">{{ fa($unread) }}</span>@endif</a>
         <a href="{{ $u->homeRoute() }}" class="top-btn solid"><img class="tb-av" src="{{ $u->avatarUrl() }}" alt=""><span class="top-hide-m">{{ \Illuminate\Support\Str::limit($u->name, 14) }}</span><small class="top-hide-m role-mini {{ $u->role }}">{{ $u->roleLabel() }}</small></a>
