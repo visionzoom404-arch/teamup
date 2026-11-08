@@ -35,7 +35,7 @@
         <div class="rp-field"><div><small>ورود</small><b data-label-in>انتخاب تاریخ</b></div><div><small>خروج</small><b data-label-out>انتخاب تاریخ</b></div></div>
         <div class="rp-pop"></div>
       </div>
-      <div><label>مسافران</label><select name="guests"><option value="">هر تعداد</option>@foreach([2,4,6,8,10,15] as $n)<option value="{{ $n }}">{{ fa($n) }} نفر و بیشتر</option>@endforeach</select></div>
+      <div><label>مسافران</label><div class="counter gcount" data-any data-min="0" data-max="30"><button type="button" data-dec aria-label="کمتر">−</button><b>هر تعداد</b><button type="button" data-inc aria-label="بیشتر">+</button><input type="hidden" name="guests" value=""></div></div>
       <button class="btn"><x-icon name="search"/> جستجو</button>
       <div class="presets"><span class="muted">پیشنهاد سریع</span><button type="button" class="qchip" data-preset="weekend">این آخر هفته</button><button type="button" class="qchip" data-preset="weekend2">آخر هفته‌ی بعد</button><button type="button" class="qchip" data-preset="midweek">۳ شب میان‌هفته</button><button type="button" class="qchip" data-preset="soon">۳ شب از فردا</button></div>
     </form>

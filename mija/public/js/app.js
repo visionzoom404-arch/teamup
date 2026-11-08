@@ -73,7 +73,8 @@
   $$('.counter').forEach(c => {
     const inp = $('input', c), out = $('b', c);
     const min = +c.dataset.min || 0, max = +c.dataset.max || 99;
-    const set = v => { v = Math.max(min, Math.min(max, v)); inp.value = v; out.textContent = Jalali.fa(v); inp.dispatchEvent(new Event('change', { bubbles: true })); };
+    const any = c.hasAttribute('data-any'); // مقدار صفر یعنی «هر تعداد»
+    const set = v => { v = Math.max(min, Math.min(max, v || 0)); inp.value = any && v === 0 ? '' : v; out.textContent = any && v === 0 ? 'هر تعداد' : Jalali.fa(v); inp.dispatchEvent(new Event('change', { bubbles: true })); };
     $('[data-dec]', c).addEventListener('click', () => set(+inp.value - 1));
     $('[data-inc]', c).addEventListener('click', () => set(+inp.value + 1));
   });

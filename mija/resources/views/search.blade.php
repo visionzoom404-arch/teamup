@@ -25,7 +25,7 @@
       <h4>نوع اقامتگاه</h4>
       <div class="chips">@foreach(config('mija.property_types') as $k => $n)<label class="check" style="padding:6px 12px"><input type="checkbox" name="type[]" value="{{ $k }}" @checked(in_array($k, (array) request('type')))>{{ $n }}</label>@endforeach</div>
       <h4>تعداد نفرات</h4>
-      <select name="guests"><option value="">هر تعداد</option>@foreach([2,4,6,8,10,15,20] as $n)<option value="{{ $n }}" @selected(request('guests')==$n)>{{ fa($n) }} نفر و بیشتر</option>@endforeach</select>
+      <div class="guest-pick"><div><b>مهمان</b><div class="xs muted">حداقل ظرفیت</div></div><div class="counter gcount" data-any data-min="0" data-max="30"><button type="button" data-dec aria-label="کمتر">−</button><b>{{ request('guests') ? fa((int) request('guests')) : 'هر تعداد' }}</b><button type="button" data-inc aria-label="بیشتر">+</button><input type="hidden" name="guests" value="{{ request('guests') }}"></div></div>
       <h4>محدوده قیمت (هر شب، تومان)</h4>
       <div class="grid2"><input class="input" type="number" name="min_price" placeholder="از" value="{{ request('min_price') }}" dir="ltr"><input class="input" type="number" name="max_price" placeholder="تا" value="{{ request('max_price') }}" dir="ltr"></div>
       <h4>خواب</h4>

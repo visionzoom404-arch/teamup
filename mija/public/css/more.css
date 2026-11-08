@@ -624,3 +624,18 @@ html[data-theme="dark"] .gs-opt:not(.on):hover,html[data-theme="dark"] .gs-opt:n
 html[data-theme="dark"] .gs-opt.on{color:#2a1a02}
 @keyframes gsIn{from{opacity:0;transform:translateY(-6px) scale(.98)}}
 @media(prefers-reduced-motion:reduce){.gs-pop{animation:none}}
+
+/* ===== شمارنده‌ی تعداد نفرات (− ۱۲ +) در نوار جستجو و فیلترها ===== */
+.gcount{gap:10px}
+.gcount b{min-width:62px;white-space:nowrap}
+.searchbar .gcount{justify-content:flex-start;padding-top:2px}
+.searchbar .gcount b{font-size:14.5px;font-weight:700}
+.searchbar .gcount button{width:30px;height:30px;font-size:16px;flex:none}
+@media(min-width:861px){
+  .hero-c.hero-c.hero-c .searchbar .gcount b{color:#fff}
+  html:not([data-theme="dark"]) .hero-c.hero-c.hero-c .searchbar .gcount b{color:#2a1a02}
+  html:not([data-theme="dark"]) .hero-c.hero-c.hero-c .searchbar .gcount button{color:#2a1a02!important}
+}
+.filters .guest-pick .gcount b{min-width:58px}
+html[data-theme="dark"] .gcount button{color:#F4EDE3!important;background:rgba(255,255,255,.1)!important;border:1px solid rgba(255,255,255,.3)!important;box-shadow:none!important}
+html[data-theme="dark"] .gcount button:hover{background:rgba(240,162,72,.25)!important;border-color:rgba(240,162,72,.7)!important}
