@@ -93,3 +93,12 @@ html.theme-vt::view-transition-old(theme-orb),html.theme-vt::view-transition-new
 .theme-veil.to-dark{background:radial-gradient(circle at 82% 40%,#2a1608,#0d0a14 70%)}
 .theme-veil.to-light{background:radial-gradient(circle at 82% 40%,#fff8ea,#ffe9c4 70%)}
 @media(prefers-reduced-motion:reduce){#theme-orb,.theme-veil{display:none}}
+
+/* ===== تقویم رزرو در حالت تیره: روزهای انتخاب‌شده طلایی هم‌رنگ تم ===== */
+html[data-theme="dark"] .rp-day.start,html[data-theme="dark"] .rp-day.end,
+html[data-theme="dark"] .rp-day.start:not(.booked):not(.past):not(:disabled),
+html[data-theme="dark"] .rp-day.end:not(.booked):not(.past):not(:disabled){background:linear-gradient(135deg,#F7C26A,#E58F1B)!important;color:#2a1a02!important;font-weight:800;box-shadow:0 6px 14px -6px rgba(232,134,12,.75)!important}
+html[data-theme="dark"] .rp-day.start small,html[data-theme="dark"] .rp-day.end small{color:rgba(42,26,2,.75)!important}
+html[data-theme="dark"] .rp-day.range:not(.start):not(.end):not(.booked):not(.past):not(:disabled){background:linear-gradient(135deg,rgba(247,194,106,.5),rgba(229,143,27,.42))!important;color:#fff!important;font-weight:700}
+html[data-theme="dark"] .rp-day.range small{color:#F8C98A!important}
+html[data-theme="dark"] .rp-day:hover:not(:disabled):not(.start):not(.end){background:rgba(240,162,72,.22)!important}

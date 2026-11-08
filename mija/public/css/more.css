@@ -604,3 +604,6 @@ html:not([data-theme="dark"]) .hero-c.hero-c.hero-c .sp-pill .icon{color:#C4650C
 }
 @media(max-width:860px){.hero-c.hero-c.hero-c .stage-search.sheet-open select{-webkit-appearance:none;appearance:none;padding:4px 0 4px 22px!important;
   background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23998a77' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat left 2px center!important}}
+
+/* بازه‌ی انتخاب‌شده‌ی تقویم در حالت روشن هم طلایی دیده شود */
+.rp-day.range:not(.start):not(.end):not(.booked):not(.past):not(:disabled){background:rgba(249,192,90,.38)}
