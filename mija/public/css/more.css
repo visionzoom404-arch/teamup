@@ -540,3 +540,11 @@ a.btn,.btn-light{max-width:100%}
 @media(max-width:860px){.hero-c.hero-c.hero-c .stage-search.sheet-open{z-index:95!important;margin:0!important}body.search-open .bottomnav{display:none!important}}
 @media(max-width:860px){.hero-c.hero-c.hero-c .stage-search:not(.sheet-open){background:linear-gradient(135deg,rgba(70,32,4,.82),rgba(50,22,2,.74))!important}}
 @media(max-width:380px){.hero-c.hero-c.hero-c .sp-pill{gap:8px}.hero-c.hero-c.hero-c .sp-pill b{font-size:13px;white-space:nowrap}.hero-c.hero-c.hero-c .sp-pill small{display:none}.hero-c.hero-c.hero-c .sp-pill i{padding:10px 16px}.hero-c.hero-c.hero-c .sp-pill .icon{margin-inline-start:4px}}
+
+/* نوار جستجو: حدود ۴۰٪ از آن بیرون از عکس و روی صفحه می‌نشیند */
+@media(min-width:861px){
+  .hx-wrap{margin-bottom:64px}
+  .hx-in{padding-bottom:132px!important}
+  .hero-c.hero-c.hero-c .stage-search:not(.sheet-open){bottom:-62px!important;
+    background:linear-gradient(135deg,rgba(38,17,2,.7),rgba(38,17,2,.56))!important}
+}
