@@ -1,4 +1,5 @@
 /* ==========================================================================
+   فقط در اپلیکیشن (اندروید/PWA نصب‌شده) فعال است؛ وب مرورگر همان ظاهر قبلی را دارد.
    می‌جا — منوی چسبان «شیشه‌ی مایع» (الهام از Liquid Glass در iOS 26/27)
    • هدر شناور بالا (دسکتاپ/موبایل/تبلت)
    • نوار تب پایین (موبایل و تبلت): کپسول شیشه‌ای، عدسیِ انتخاب که می‌لغزد و کش می‌آید،
@@ -8,24 +9,24 @@
 :root{--lg-spring:cubic-bezier(.32,1.22,.5,1);--lg-ease:cubic-bezier(.3,.9,.3,1)}
 
 /* ---------- هدر چسبان (شیشه‌ی مایع) ---------- */
-html header.topbar{
+html.is-app header.topbar{
   background:linear-gradient(180deg,rgba(255,255,255,.7),rgba(255,248,236,.5))!important;
   -webkit-backdrop-filter:blur(26px) saturate(190%);backdrop-filter:blur(26px) saturate(190%);
   border:0!important;
   box-shadow:inset 0 1px 1px rgba(255,255,255,.95),inset 0 -1px 1px rgba(255,255,255,.3),inset 0 0 0 1px rgba(255,255,255,.55),
     0 14px 34px -16px rgba(120,60,0,.34),0 2px 8px rgba(0,0,0,.05)!important;
   transition:box-shadow .35s,background .35s}
-html header.topbar.scrolled{box-shadow:inset 0 1px 1px rgba(255,255,255,.95),inset 0 -1px 1px rgba(255,255,255,.3),inset 0 0 0 1px rgba(255,255,255,.6),
+html.is-app header.topbar.scrolled{box-shadow:inset 0 1px 1px rgba(255,255,255,.95),inset 0 -1px 1px rgba(255,255,255,.3),inset 0 0 0 1px rgba(255,255,255,.6),
     0 18px 40px -14px rgba(120,60,0,.46),0 3px 10px rgba(0,0,0,.08)!important}
-html[data-theme="dark"] header.topbar{
+html.is-app[data-theme="dark"] header.topbar{
   background:linear-gradient(180deg,rgba(46,36,27,.62),rgba(28,21,15,.5))!important;
   box-shadow:inset 0 1px 1px rgba(255,255,255,.16),inset 0 0 0 1px rgba(255,255,255,.1),0 16px 36px -16px rgba(0,0,0,.8),0 2px 8px rgba(0,0,0,.3)!important}
-html[data-theme="dark"] header.topbar.scrolled{box-shadow:inset 0 1px 1px rgba(255,255,255,.18),inset 0 0 0 1px rgba(255,255,255,.12),0 20px 44px -14px rgba(0,0,0,.9),0 3px 10px rgba(0,0,0,.35)!important}
+html.is-app[data-theme="dark"] header.topbar.scrolled{box-shadow:inset 0 1px 1px rgba(255,255,255,.18),inset 0 0 0 1px rgba(255,255,255,.12),0 20px 44px -14px rgba(0,0,0,.9),0 3px 10px rgba(0,0,0,.35)!important}
 
 /* ---------- نوار تب پایین ---------- */
 .lg-edge{display:none}
 @media(max-width:860px){
-  :root{--lg-h:64px;--lg-w:min(calc(100vw - 28px),520px);--lg-start:max(14px,calc((100vw - 520px)/2));--lg-min-w:68px;--nav-h:86px}
+  html.is-app{--lg-h:64px;--lg-w:min(calc(100vw - 28px),520px);--lg-start:max(14px,calc((100vw - 520px)/2));--lg-min-w:68px;--nav-h:86px}
 
   html nav.bottomnav.lg-nav{
     display:block;position:fixed;z-index:60;

@@ -1,6 +1,8 @@
 /* منوی چسبان پایین «شیشه‌ی مایع» — عدسی انتخاب، کشیدن انگشت، جمع‌شدن هنگام اسکرول */
 (function () {
   'use strict';
+  // فقط در اپلیکیشن (WebView اندروید «MijaApp» یا برنامه‌ی نصب‌شده)؛ در مرورگر معمولی همان نوار قبلی می‌ماند
+  if (!document.documentElement.classList.contains('is-app')) return;
   const nav = document.querySelector('nav.bottomnav');
   const ul = nav && nav.querySelector('ul');
   if (!nav || !ul) return;

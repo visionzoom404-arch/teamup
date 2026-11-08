@@ -2,7 +2,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#E8860C">
 <meta name="color-scheme" content="light dark">
-<script>(function(){try{var t=localStorage.getItem('mija-theme');if(t!=='dark'&&t!=='light')t=(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';document.documentElement.setAttribute('data-theme',t);if(t==='dark'){var m=document.querySelector('meta[name=theme-color]');if(m)m.setAttribute('content','#17120D')}}catch(e){document.documentElement.setAttribute('data-theme','light')}})()</script>
+<script>(function(){try{if(/MijaApp\//.test(navigator.userAgent)||navigator.standalone||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches))document.documentElement.classList.add('is-app')}catch(e){}try{var t=localStorage.getItem('mija-theme');if(t!=='dark'&&t!=='light')t=(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';document.documentElement.setAttribute('data-theme',t);if(t==='dark'){var m=document.querySelector('meta[name=theme-color]');if(m)m.setAttribute('content','#17120D')}}catch(e){document.documentElement.setAttribute('data-theme','light')}})()</script>
 @include('partials.seo')
 <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
 <link rel="icon" href="{{ asset('favicon.png') }}" type="image/png">
