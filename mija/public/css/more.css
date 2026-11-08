@@ -607,3 +607,20 @@ html:not([data-theme="dark"]) .hero-c.hero-c.hero-c .sp-pill .icon{color:#C4650C
 
 /* بازه‌ی انتخاب‌شده‌ی تقویم در حالت روشن هم طلایی دیده شود */
 .rp-day.range:not(.start):not(.end):not(.booked):not(.past):not(:disabled){background:rgba(249,192,90,.38)}
+
+/* ===== لیست کشویی شیشه‌ای (جایگزین منوی پیش‌فرض مرورگر) ===== */
+.gs-native{pointer-events:none}.gs-cell{cursor:pointer}
+.gs-pop{position:fixed;z-index:99990;min-width:190px;overflow:auto;padding:6px;border-radius:18px;scrollbar-width:thin;animation:gsIn .18s ease-out;
+  background:linear-gradient(180deg,rgba(255,255,255,.8),rgba(255,248,236,.66));
+  -webkit-backdrop-filter:blur(22px) saturate(1.7);backdrop-filter:blur(22px) saturate(1.7);
+  border:1px solid rgba(255,255,255,.9);box-shadow:0 30px 60px -22px rgba(80,35,0,.55),inset 0 1px 0 #fff}
+html[data-theme="dark"] .gs-pop{background:linear-gradient(180deg,rgba(44,34,25,.8),rgba(26,20,14,.7));border-color:rgba(255,255,255,.14);box-shadow:0 30px 60px -22px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.08)}
+.gs-opt{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:9px 14px;border:0;border-radius:12px;background:none;font:inherit;font-size:14px;font-weight:600;color:#2a1a02;text-align:start;cursor:pointer;transition:background .15s}
+.gs-opt:not(.on):hover,.gs-opt:not(.on):focus-visible{background:rgba(249,192,90,.3);outline:0}
+.gs-opt.on{background:linear-gradient(135deg,#F7C26A,#E58F1B);color:#2a1a02;font-weight:800;box-shadow:0 8px 16px -10px rgba(232,134,12,.8)}
+.gs-opt.on::after{content:"✓";font-size:13px}
+html[data-theme="dark"] .gs-opt{color:#F4EDE3}
+html[data-theme="dark"] .gs-opt:not(.on):hover,html[data-theme="dark"] .gs-opt:not(.on):focus-visible{background:rgba(240,162,72,.22)}
+html[data-theme="dark"] .gs-opt.on{color:#2a1a02}
+@keyframes gsIn{from{opacity:0;transform:translateY(-6px) scale(.98)}}
+@media(prefers-reduced-motion:reduce){.gs-pop{animation:none}}

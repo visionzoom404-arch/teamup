@@ -432,3 +432,67 @@ document.addEventListener('click', async e => {
     });
   } catch (e) { }
 })();
+
+/* ---------- لیست‌های کشویی شیشه‌ای (به‌جای منوی پیش‌فرض مرورگر) ---------- */
+(function () {
+  const SEL = '.searchbar select,.filters select,select[data-glass]';
+  let pop = null, curSel = null;
+  const off = () => { document.removeEventListener('keydown', onKey, true); document.removeEventListener('mousedown', onOut, true); document.removeEventListener('touchstart', onOut, true); window.removeEventListener('resize', close); window.removeEventListener('scroll', onScroll, true); };
+  const close = (refocus) => { if (!pop) return; pop.remove(); pop = null; if (curSel) { curSel.parentElement.classList.remove('gs-open'); if (refocus) curSel.focus({ preventScroll: true }); curSel = null; } off(); };
+  const onOut = e => { if (pop && !pop.contains(e.target) && !(curSel && curSel.parentElement.contains(e.target))) close(); };
+  const onScroll = e => { if (pop && !pop.contains(e.target)) close(); };
+  const onKey = e => {
+    if (!pop) return;
+    const items = [...pop.querySelectorAll('.gs-opt')], i = items.indexOf(document.activeElement);
+    if (e.key === 'Escape') { e.preventDefault(); close(true); }
+    else if (e.key === 'ArrowDown') { e.preventDefault(); (items[i + 1] || items[0]).focus(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); (items[i - 1] || items[items.length - 1]).focus(); }
+    else if (e.key === 'Tab') { close(); }
+  };
+  const open = sel => {
+    const same = curSel === sel; close(); if (same) return;
+    curSel = sel;
+    const cell = sel.parentElement; cell.classList.add('gs-open');
+    pop = document.createElement('div'); pop.className = 'gs-pop'; pop.setAttribute('role', 'listbox'); pop.setAttribute('dir', 'rtl');
+    [...sel.options].forEach((o, i) => {
+      if (o.hidden) return;
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'gs-opt' + (o.selected ? ' on' : ''); b.setAttribute('role', 'option'); b.setAttribute('aria-selected', o.selected ? 'true' : 'false');
+      b.textContent = o.textContent.trim();
+      b.addEventListener('click', () => {
+        sel.selectedIndex = i;
+        sel.dispatchEvent(new Event('input', { bubbles: true })); sel.dispatchEvent(new Event('change', { bubbles: true }));
+        close(true);
+      });
+      pop.appendChild(b);
+    });
+    document.body.appendChild(pop);
+    const multi = cell.querySelectorAll('select').length > 1, r = (multi ? sel : cell).getBoundingClientRect(), w = Math.max(r.width, 210), vh = innerHeight, vw = innerWidth;
+    pop.style.width = w + 'px';
+    const h = Math.min(pop.scrollHeight, 300), below = vh - r.bottom - 14, above = r.top - 14;
+    const up = below < Math.min(h, 220) && above > below;
+    pop.style.maxHeight = Math.max(140, Math.min(300, up ? above : below)) + 'px';
+    const ph = Math.min(pop.scrollHeight, parseFloat(pop.style.maxHeight));
+    pop.style.top = (up ? r.top - ph - 8 : r.bottom + 8) + 'px';
+    pop.style.left = Math.min(Math.max(8, r.right - w), vw - w - 8) + 'px'; // هم‌تراز با لبه‌ی راست (راست‌به‌چپ)
+    const on = pop.querySelector('.gs-opt.on') || pop.querySelector('.gs-opt'); if (on) { on.focus({ preventScroll: true }); pop.scrollTop = Math.max(0, on.offsetTop - pop.clientHeight / 2 + on.offsetHeight / 2); }
+    document.addEventListener('keydown', onKey, true); document.addEventListener('mousedown', onOut, true); document.addEventListener('touchstart', onOut, true);
+    window.addEventListener('resize', close); window.addEventListener('scroll', onScroll, true);
+  };
+  const init = () => document.querySelectorAll(SEL).forEach(sel => {
+    if (sel.multiple || sel.size > 1 || sel.dataset.gsInit) return;
+    sel.dataset.gsInit = '1'; sel.classList.add('gs-native'); sel.parentElement.classList.add('gs-cell');
+    const par = sel.parentElement;
+    if (!par.dataset.gsBound) {
+      par.dataset.gsBound = '1';
+      par.addEventListener('click', e => {
+        if (e.target.closest('a,button,input:not([type=hidden]),textarea')) return;
+        const list = [...par.querySelectorAll('select.gs-native')]; if (!list.length) return;
+        const hit = list.find(s => { const r = s.getBoundingClientRect(); return e.clientY >= r.top - 6 && e.clientY <= r.bottom + 6; });
+        if (!hit && list.length > 1) return;
+        e.preventDefault(); open(hit || list[0]);
+      });
+    }
+    sel.addEventListener('keydown', e => { if (['Enter', ' ', 'ArrowDown', 'ArrowUp'].includes(e.key)) { e.preventDefault(); open(sel); } });
+  });
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
