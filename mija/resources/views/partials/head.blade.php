@@ -19,5 +19,6 @@
 <link rel="stylesheet" href="{{ asset('vendor/swiper-bundle.min.css') }}">
 <link rel="stylesheet" href="{{ asset('css/dark.auto.css') }}?v={{ filemtime(public_path('css/dark.auto.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/dark.css') }}?v={{ filemtime(public_path('css/dark.css')) }}">
+<link rel="stylesheet" href="{{ asset('css/liquid.css') }}?v={{ filemtime(public_path('css/liquid.css')) }}">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 @auth<meta name="notice-last" content="{{ (int) auth()->user()->notices()->max('id') }}">@endauth

@@ -490,4 +490,13 @@ class RoundFourTest extends TestCase
         $this->actingAs($a)->post(route('admin.settings.hero'), ['kind' => 'night', 'reset' => 1])->assertRedirect();
         $this->assertEmpty(setting('home_hero_night'));
     }
+
+    public function test_liquid_glass_nav_assets_are_loaded(): void
+    {
+        $html = $this->get('/')->assertOk()->getContent();
+        $this->assertStringContainsString('css/liquid.css', $html);
+        $this->assertStringContainsString('js/liquid-nav.js', $html);
+        $this->assertStringContainsString('class="bottomnav tabbar"', $html);
+        $this->assertFileExists(public_path('js/liquid-nav.js'));
+    }
 }

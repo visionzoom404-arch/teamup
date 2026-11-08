@@ -6,4 +6,5 @@
 <script src="{{ asset('js/app.js') }}?v={{ filemtime(public_path('js/app.js')) }}"></script>
 @stack('vendor')
 <script src="{{ asset('js/fx.js') }}?v={{ filemtime(public_path('js/fx.js')) }}"></script>
+<script src="{{ asset('js/liquid-nav.js') }}?v={{ filemtime(public_path('js/liquid-nav.js')) }}"></script>
 @stack('scripts')
