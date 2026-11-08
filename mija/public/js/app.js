@@ -358,32 +358,35 @@ document.addEventListener('click', async e => {
   const preloadHero = () => document.querySelectorAll('.hx-night img, img.hx-night, .hx-day img, img.hx-day').forEach(i => { if (i.loading === 'lazy') i.loading = 'eager'; });
   if (document.querySelector('.hx-night')) (window.requestIdleCallback || (f => setTimeout(f, 1500)))(preloadHero);
 
-  // نقطه‌ی هدف: خورشید (رفتن به تیره) یا ماه (رفتن به روشن) در مختصات صفحه
-  const target = toDark => {
+  // نقطه‌ی هدف: اگر عکس اصلیِ صفحه‌ی اول روی صفحه دیده می‌شود و خورشید/ماه در کادر است، همان؛
+  // در غیر این صورت (صفحه‌های دیگر یا وقتی بنر اسکرول شده و رفته) خودِ دکمه‌ی تغییر حالت
+  const target = (toDark, btn) => {
     const vw = innerWidth, vh = innerHeight;
     const img = [...document.querySelectorAll('.hx-img')].find(i => i.offsetParent !== null);
     if (img) {
       const fx = (img.getAttribute('data-fx') || (toDark ? SUN : MOON).join(',')).split(',').map(Number);
       const r = img.getBoundingClientRect(), iw = img.naturalWidth || r.width, ih = img.naturalHeight || r.height;
       if (r.width > 0 && r.bottom > 0 && r.top < vh) {
-        const k = Math.max(r.width / iw, r.height / ih), py = parseFloat(getComputedStyle(img).objectPositionY) / 100;
+        const k = Math.max(r.width / iw, r.height / ih), py = parseFloat((getComputedStyle(img).objectPosition.split(' ')[1]) || '50') / 100;
         const ox = (r.width - iw * k) / 2, oy = (r.height - ih * k) * (isNaN(py) ? 0.5 : py);
         const x = r.left + ox + fx[0] * iw * k, y = r.top + oy + fx[1] * ih * k;
-        if (x > 0 && x < vw && y > 0 && y < vh) return [x, y];
+        const hdr = document.querySelector('.topbar'), top = hdr ? hdr.getBoundingClientRect().bottom + 8 : 70;
+        // خورشید/ماه باید کاملاً دیده شود (نه زیر هدر، نه خارج از صفحه، نه زیر نوار پایین)
+        if (x > 24 && x < vw - 24 && y > top + 16 && y < vh - 90) return [x, y];
       }
     }
-    const p = toDark ? SUN : MOON; // صفحه‌های بدون عکس: انگار عکس کل صفحه را پوشانده
-    return [p[0] * vw, p[1] * vh * 0.9 + 20];
+    if (btn) { const b = btn.getBoundingClientRect(); return [b.left + b.width / 2, b.top + b.height / 2]; }
+    return [vw - 60, 40];
   };
 
   let busy = false;
-  const toggle = async () => {
+  const toggle = async btn => {
     if (busy) return; busy = true;
     const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark', toDark = next === 'dark';
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduce || !document.body) { apply(next); busy = false; return; }
     preloadHero();
-    const [sx, sy] = target(toDark), vw = innerWidth, vh = innerHeight;
+    const [sx, sy] = target(toDark, btn), vw = innerWidth, vh = innerHeight;
     const R = Math.hypot(Math.max(sx, vw - sx), Math.max(sy, vh - sy)) + 40;
     const D = window.__themeDur || 1100, EASE = 'cubic-bezier(.65,0,.3,1)';
     // کره‌ی خورشید/ماه (خودش یک لایه‌ی جدا در انیمیشن است)
@@ -424,7 +427,7 @@ document.addEventListener('click', async e => {
       }).then(() => { veil.remove(); done(); }, () => { veil.remove(); done(); });
     }
   };
-  document.addEventListener('click', e => { if (e.target.closest('[data-theme-toggle]')) toggle(); });
+  document.addEventListener('click', e => { const b = e.target.closest('[data-theme-toggle]'); if (b) toggle(b); });
   // اگر کاربر دستی انتخاب نکرده، با تغییر حالت سیستم هماهنگ شود
   try {
     matchMedia('(prefers-color-scheme: dark)').addEventListener('change', ev => {
