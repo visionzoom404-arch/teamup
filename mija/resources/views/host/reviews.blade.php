@@ -15,7 +15,7 @@
     <form method="post" action="{{ route('host.reviews.approve', $r) }}" class="row grow wrap" style="gap:6px">@csrf<input class="input" name="host_reply" placeholder="پاسخ شما (اختیاری)" style="flex:1;min-width:180px"><button class="btn btn-green btn-sm"><x-icon name="check" class="sm"/> تأیید و انتشار</button></form>
     <form method="post" action="{{ route('host.reviews.reject', $r) }}" class="row wrap" style="gap:6px">@csrf<input class="input" name="reason" placeholder="دلیل رد (برای مدیر)" required style="min-width:160px"><button class="btn btn-sm btn-ghost">رد و ارجاع به مدیر</button></form>
   </div>
-  @error('reason')<div class="msg-e">{{ $message }}</div>@enderror
+  @error('reason')<div class="msg-e">{{ fa($message) }}</div>@enderror
 </div>
 @endforeach
 @endif

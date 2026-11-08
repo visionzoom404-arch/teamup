@@ -20,7 +20,7 @@
     <div class="atm-display"><small>مبلغ برداشت</small><div class="ad-line"><div class="ad-in"><input id="po-amt" name="amount" dir="ltr" inputmode="numeric" placeholder="0" max="{{ $u->wallet }}" autocomplete="off" required data-money></div><em>تومان</em></div></div>
     <div class="atm-chips" data-max="{{ $u->wallet }}">@foreach([25, 50, 75, 100] as $pc)<button type="button" data-pc="{{ $pc }}">{{ $pc === 100 ? 'همه‌ی موجودی' : fa($pc).'٪' }}</button>@endforeach</div>
     <div class="atm-to"><x-icon name="shield" class="sm"/> واریز به شبا: <b class="ltr">{{ $u->sheba ?: '—' }}</b> @if($u->bank_name)<span class="muted">({{ $u->bank_name }})</span>@endif</div>
-    @error('amount')<div class="msg-e">{{ $message }}</div>@enderror
+    @error('amount')<div class="msg-e">{{ fa($message) }}</div>@enderror
     <button class="btn btn-lg btn-block atm-go" @disabled(! $u->sheba || $u->wallet < (int) setting('min_payout'))><span class="spin"></span><span class="lbl">ثبت درخواست برداشت</span></button>
   </form>
 </div>

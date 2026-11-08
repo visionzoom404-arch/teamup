@@ -20,11 +20,11 @@
 
 <form method="post" action="{{ route('host.bookings.reject', $b) }}" class="card" id="reject-box" hidden>@csrf
   <h3>رد درخواست</h3>
-  <div class="field"><label>دلیل (اختیاری)</label><input class="input" name="reason" placeholder="مثلاً: این تاریخ را برای خانواده‌ی خودم نگه داشته‌ام" value="{{ old('reason') }}">@error('reason')<div class="msg-e">{{ $message }}</div>@enderror</div>
+  <div class="field"><label>دلیل (اختیاری)</label><input class="input" name="reason" placeholder="مثلاً: این تاریخ را برای خانواده‌ی خودم نگه داشته‌ام" value="{{ old('reason') }}">@error('reason')<div class="msg-e">{{ fa($message) }}</div>@enderror</div>
   <label class="check"><input type="checkbox" name="offer" value="1" id="offer-chk" @checked(old('offer'))><div><b><x-i3 name="p_gift" class="sm"/> می‌خواهم روز دیگری با تخفیف به مهمان پیشنهاد دهم</b><div class="xs muted" style="font-weight:500">اگر مهمان بپذیرد، رزرو با همان روز جدید و قیمت تخفیف‌دار ادامه پیدا می‌کند؛ اگر نپذیرد، رزرو بسته می‌شود.</div></div></label>
   <div id="offer-fields" class="grid2 mt" hidden>
     <div class="field"><label>روز جایگزین (هم‌طول رزرو، فقط روزهای خالی شما)</label>
-      <select name="offer_window">@forelse($offerOptions as $o)<option value="{{ $o['value'] }}">{{ $o['label'] }}</option>@empty<option value="">روز خالی مناسبی در ۷۵ روز آینده پیدا نشد</option>@endforelse</select>@error('offer_window')<div class="msg-e">{{ $message }}</div>@enderror @error('offer_check_in')<div class="msg-e">{{ $message }}</div>@enderror</div>
+      <select name="offer_window">@forelse($offerOptions as $o)<option value="{{ $o['value'] }}">{{ $o['label'] }}</option>@empty<option value="">روز خالی مناسبی در ۷۵ روز آینده پیدا نشد</option>@endforelse</select>@error('offer_window')<div class="msg-e">{{ fa($message) }}</div>@enderror @error('offer_check_in')<div class="msg-e">{{ fa($message) }}</div>@enderror</div>
     <div class="field"><label>درصد تخفیف برای مهمان</label><select name="offer_discount">@foreach([5,10,15,20,25,30,40] as $d)<option value="{{ $d }}" @selected($d === 15)>{{ fa($d) }}٪</option>@endforeach</select><div class="help">این تخفیف از دریافتی شما کم می‌شود.</div></div>
   </div>
   <button class="btn btn-danger mt">ثبت پاسخ</button>
@@ -81,7 +81,7 @@
       @include('partials.help', ['title' => 'این امتیاز چه کاربردی دارد؟', 'text' => 'امتیاز و نظر شما فقط برای میزبان‌های دیگر نمایش داده می‌شود تا هنگام دریافت درخواست رزرو این مهمان، راحت‌تر تصمیم بگیرند. مهمان آن را نمی‌بیند.'])
       <div class="field"><label>امتیاز</label><select name="rating">@foreach([5,4,3,2,1] as $n)<option value="{{ $n }}">{{ fa($n) }} از ۵</option>@endforeach</select></div>
       <div class="chips" style="margin-bottom:10px">@foreach(config('mija.guest_tags') as $t)<label class="qchip"><input type="checkbox" name="tags[]" value="{{ $t }}"><span>{{ $t }}</span></label>@endforeach</div>
-      <div class="field"><textarea class="input" name="comment" maxlength="400" placeholder="توضیح کوتاه (اختیاری)"></textarea>@error('comment')<div class="msg-e">{{ $message }}</div>@enderror</div>
+      <div class="field"><textarea class="input" name="comment" maxlength="400" placeholder="توضیح کوتاه (اختیاری)"></textarea>@error('comment')<div class="msg-e">{{ fa($message) }}</div>@enderror</div>
       <button class="btn">ثبت امتیاز</button>
     </form>
     @elseif($b->guestReview)<div class="card"><h3>امتیاز شما به مهمان</h3><span class="stars"><x-icon name="star"/>{{ fa($b->guestReview->rating) }}</span> @foreach($b->guestReview->tags ?? [] as $t)<span class="badge">{{ $t }}</span>@endforeach</div>@endif

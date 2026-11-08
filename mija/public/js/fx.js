@@ -164,6 +164,7 @@
     $('#pf-prev').addEventListener('click', () => show(i - 1));
     const apply = () => { if (mq.matches) show(i); else { steps.forEach(s => s.classList.add('on')); $('#pf-save').hidden = false; $('#pf-next').hidden = true; } };
     mq.addEventListener('change', apply); apply();
+    window.pfGoto = el => { const k = steps.findIndex(s => s.contains(el)); if (k >= 0 && mq.matches) show(k); };
   }
 
   /* ---------- منوی اشتراک ---------- */

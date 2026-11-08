@@ -16,10 +16,10 @@
 <div class="grid2 mb" style="gap:18px;align-items:start">
   <form class="card" method="post" action="{{ route('admin.marketing.store') }}">@csrf
     <h3><x-i3 name="p_phone" class="sm"/> افزودن شماره و ارسال پیامک (دستی)</h3>
-    <div class="field"><label>شماره‌ها — هر خط یک شماره (اختیاری: بعدش نام)</label><textarea class="input" name="numbers" rows="5" dir="ltr" placeholder="09123456789 علی رضایی&#10;09351234567" required>{{ old('numbers') }}</textarea>@error('numbers')<div class="msg-e">{{ $message }}</div>@enderror</div>
+    <div class="field"><label>شماره‌ها — هر خط یک شماره (اختیاری: بعدش نام)</label><textarea class="input" name="numbers" rows="5" dir="ltr" placeholder="09123456789 علی رضایی&#10;09351234567" required>{{ old('numbers') }}</textarea>@error('numbers')<div class="msg-e">{{ fa($message) }}</div>@enderror</div>
     <div class="field"><label>متن پیام (اختیاری — اگر خالی بماند «متن پیش‌فرض» پایین استفاده می‌شود)</label><textarea class="input" name="text" rows="4" maxlength="400" placeholder="{{ $tpl }}">{{ old('text') }}</textarea><div class="help">می‌توانید از <b dir="ltr">{name}</b> و <b dir="ltr">{link}</b> (لینک کوتاهِ ثبت‌نام میزبان) استفاده کنید. «لغو۱۱» اگر ننویسید خودکار اضافه می‌شود.</div></div>
     <label class="check"><input type="checkbox" name="send" value="1" checked><div><b>همین حالا پیامک ارسال شود</b><div class="xs muted" style="font-weight:500">اگر تیک را بردارید فقط در لیست ذخیره می‌شوند.</div></div></label>
-    @error('send')<div class="msg-e">{{ $message }}</div>@enderror
+    @error('send')<div class="msg-e">{{ fa($message) }}</div>@enderror
     <button class="btn mt"><x-icon name="send" class="sm"/> ذخیره و ارسال</button>
   </form>
 

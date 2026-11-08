@@ -24,12 +24,12 @@
   <input type="hidden" name="type" id="ad-type" value="{{ $oldType }}">
   <h3>ثبت تبلیغ <span id="ad-title-t" class="badge orange">{{ $types[$oldType][0] }}</span></h3>
   <div class="grid2">
-    <div class="field"><label>اقامتگاه</label><select name="property_id" id="ad-prop">@foreach($props as $pr)<option value="{{ $pr->id }}" data-t="{{ $pr->title }}" data-c="{{ $pr->province }}، {{ $pr->city }}" data-p="{{ toman($pr->startingPrice(), false) }}" data-i="{{ $pr->cover() }}" @selected((string) old('property_id') === (string) $pr->id)>{{ $pr->title }}</option>@endforeach</select>@error('property_id')<div class="msg-e">{{ $message }}</div>@enderror</div>
-    <div class="field" id="f-units"><label id="units-l">تعداد روز</label><input class="input" dir="ltr" type="number" name="units" id="units" min="1" value="{{ old('units', 200000) }}">@error('units')<div class="msg-e">{{ $message }}</div>@enderror</div>
+    <div class="field"><label>اقامتگاه</label><select name="property_id" id="ad-prop">@foreach($props as $pr)<option value="{{ $pr->id }}" data-t="{{ $pr->title }}" data-c="{{ $pr->province }}، {{ $pr->city }}" data-p="{{ toman($pr->startingPrice(), false) }}" data-i="{{ $pr->cover() }}" @selected((string) old('property_id') === (string) $pr->id)>{{ $pr->title }}</option>@endforeach</select>@error('property_id')<div class="msg-e">{{ fa($message) }}</div>@enderror</div>
+    <div class="field" id="f-units"><label id="units-l">تعداد روز</label><input class="input" dir="ltr" type="number" name="units" id="units" min="1" value="{{ old('units', 200000) }}">@error('units')<div class="msg-e">{{ fa($message) }}</div>@enderror</div>
     <div class="field" data-for="banner"><label>شروع بنر</label><select name="starts_on"><option value="{{ today()->toDateString() }}">از امروز</option><option value="{{ today()->addDay()->toDateString() }}">از فردا</option></select></div>
     <div class="field" data-for="sms push"><label>مخاطبان</label><select name="audience"><option value="all">همه‌ی مهمانان</option>@foreach(config('mija.regions') as $rk => $rg)<option value="{{ $rk }}">علاقه‌مند به {{ $rg['name'] }}</option>@endforeach</select></div>
-    <div class="field" data-for="banner click sms push"><label>عنوان کوتاه</label><input class="input" name="title" id="ad-t" maxlength="80" value="{{ old('title') }}" placeholder="مثلاً: ویلای استخردار با ۲۰٪ تخفیف">@error('title')<div class="msg-e">{{ $message }}</div>@enderror</div>
-    <div class="field" data-for="banner click sms push"><label>متن تبلیغ</label><input class="input" name="text" id="ad-x" maxlength="200" value="{{ old('text') }}" placeholder="متن کوتاه تبلیغ">@error('text')<div class="msg-e">{{ $message }}</div>@enderror</div>
+    <div class="field" data-for="banner click sms push"><label>عنوان کوتاه</label><input class="input" name="title" id="ad-t" maxlength="80" value="{{ old('title') }}" placeholder="مثلاً: ویلای استخردار با ۲۰٪ تخفیف">@error('title')<div class="msg-e">{{ fa($message) }}</div>@enderror</div>
+    <div class="field" data-for="banner click sms push"><label>متن تبلیغ</label><input class="input" name="text" id="ad-x" maxlength="200" value="{{ old('text') }}" placeholder="متن کوتاه تبلیغ">@error('text')<div class="msg-e">{{ fa($message) }}</div>@enderror</div>
   </div>
 
   <div class="bn-box" data-for="banner">
@@ -37,13 +37,13 @@
     <div id="bn-upload">
       <div class="bn-size"><div class="bn-frame"><i>۱۲۰۰ × ۴۲۰</i><span class="safe">محدوده‌ی امن متن</span></div>
         <ul><li><b>اندازه‌ی پیشنهادی:</b> ۱۲۰۰ × ۴۲۰ پیکسل (نسبت ≈ ۲٫۹ به ۱)</li><li><b>حداقل:</b> ۹۰۰ × ۲۸۰ پیکسل — فرمت JPG، PNG یا WebP — حداکثر ۳ مگابایت</li><li>متن و لوگو را در <b>وسط ۶۰٪</b> تصویر بگذارید؛ در گوشی لبه‌ها کمی بریده می‌شود.</li></ul></div>
-      <div class="field"><label>فایل بنر</label><input class="input" type="file" name="image" id="bn-file" accept="image/png,image/jpeg,image/webp">@error('image')<div class="msg-e">{{ $message }}</div>@enderror</div>
+      <div class="field"><label>فایل بنر</label><input class="input" type="file" name="image" id="bn-file" accept="image/png,image/jpeg,image/webp">@error('image')<div class="msg-e">{{ fa($message) }}</div>@enderror</div>
     </div>
-    <div id="bn-support" hidden><div class="field"><label>چه نوشته‌ای و با چه حال‌وهوایی روی بنر باشد؟</label><textarea class="input" name="support_text" rows="3" maxlength="500" placeholder="مثلاً: ویلای استخردار با ویوی جنگل، ۲۰٪ تخفیف تا آخر هفته؛ رنگ‌ها گرم و نارنجی">{{ old('support_text') }}</textarea>@error('support_text')<div class="msg-e">{{ $message }}</div>@enderror<div class="help">پشتیبانی بنر را از روی عکس‌های اقامتگاه‌تان می‌سازد و به شما اطلاع می‌دهد؛ هزینه همان هزینه‌ی بنر است.</div></div></div>
+    <div id="bn-support" hidden><div class="field"><label>چه نوشته‌ای و با چه حال‌وهوایی روی بنر باشد؟</label><textarea class="input" name="support_text" rows="3" maxlength="500" placeholder="مثلاً: ویلای استخردار با ویوی جنگل، ۲۰٪ تخفیف تا آخر هفته؛ رنگ‌ها گرم و نارنجی">{{ old('support_text') }}</textarea>@error('support_text')<div class="msg-e">{{ fa($message) }}</div>@enderror<div class="help">پشتیبانی بنر را از روی عکس‌های اقامتگاه‌تان می‌سازد و به شما اطلاع می‌دهد؛ هزینه همان هزینه‌ی بنر است.</div></div></div>
   </div>
 
   <div class="ad-cost"><span>هزینه‌ی کل:</span><b id="ad-cost">—</b><small id="ad-note" class="muted"></small></div>
-  @error('type')<div class="msg-e">{{ $message }}</div>@enderror
+  @error('type')<div class="msg-e">{{ fa($message) }}</div>@enderror
   <button class="btn btn-lg">پرداخت از کیف پول و ثبت تبلیغ</button>
 </form>
 

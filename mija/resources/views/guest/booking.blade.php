@@ -77,7 +77,7 @@
       <form method="post" action="{{ route('guest.bookings.request', $b) }}" class="sr-form">@csrf
         <div class="chips">@foreach(config('mija.service_categories') as $k => $l)<label class="qchip"><input type="radio" name="category" value="{{ $k }}" class="sr" @checked($loop->first)><span>{{ $l }}</span></label>@endforeach</div>
         <textarea class="input" name="text" required minlength="3" maxlength="400" placeholder="مثلاً: شب اول شام کباب برای ۶ نفر، ۲ بسته نوشابه…">{{ old('text') }}</textarea>
-        @error('text')<div class="msg-e">{{ $message }}</div>@enderror
+        @error('text')<div class="msg-e">{{ fa($message) }}</div>@enderror
         <button class="btn btn-sm">ارسال درخواست به میزبان</button>
       </form>
       @endif

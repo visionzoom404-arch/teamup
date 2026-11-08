@@ -7,7 +7,7 @@
   <div class="qrow"><span>کاربر</span><b>{{ $p->user->name }}</b></div>
   <div class="qrow"><span>بابت</span><b>{{ $p->purpose === 'topup' ? 'شارژ کیف پول' : ($p->booking?->code ?: '—') }}</b></div>
   <div class="grid2 mt">
-    <div class="field"><label>مبلغ (تومان)</label><input class="input" dir="ltr" type="number" name="amount" value="{{ old('amount', $p->amount) }}" required>@error('amount')<div class="msg-e">{{ $message }}</div>@enderror</div>
+    <div class="field"><label>مبلغ (تومان)</label><input class="input" dir="ltr" type="number" name="amount" value="{{ old('amount', $p->amount) }}" required>@error('amount')<div class="msg-e">{{ fa($message) }}</div>@enderror</div>
     <div class="field"><label>وضعیت</label><select class="input" name="status">@foreach(['pending' => 'در انتظار', 'review' => 'در انتظار تأیید', 'paid' => 'موفق', 'failed' => 'ناموفق', 'refunded' => 'بازگشتی'] as $k => $l)<option value="{{ $k }}" @selected(old('status', $p->status) === $k)>{{ $l }}</option>@endforeach</select></div>
     <div class="field"><label>درگاه / روش</label><select class="input" name="gateway">@foreach(['zibal' => 'زیبال', 'bitpay' => 'بیت‌پی', 'card' => 'کارت‌به‌کارت', 'wallet' => 'کیف پول', 'sandbox' => 'آزمایشی'] as $k => $l)<option value="{{ $k }}" @selected(old('gateway', $p->gateway) === $k)>{{ $l }}</option>@endforeach</select></div>
     <div class="field"><label>کد رهگیری (ref)</label><input class="input" dir="ltr" name="ref_id" value="{{ old('ref_id', $p->ref_id) }}"></div>

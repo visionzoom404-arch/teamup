@@ -7,12 +7,12 @@
 <form method="post" enctype="multipart/form-data" action="{{ $u->exists ? route('admin.users.update', $u) : route('admin.users.store') }}" class="stack">@csrf
   <div class="card"><h3>اطلاعات اصلی</h3>
     <div class="grid3">
-      <div class="field"><label>نام و نام خانوادگی</label><input class="input" name="name" value="{{ $v('name') }}" required>@error('name')<div class="msg-e">{{ $message }}</div>@enderror</div>
-      <div class="field"><label>موبایل</label><input class="input" dir="ltr" name="phone" value="{{ $v('phone') }}" required>@error('phone')<div class="msg-e">{{ $message }}</div>@enderror</div>
-      <div class="field"><label>نقش</label><select name="role">@foreach(['guest' => 'مهمان', 'host' => 'میزبان', 'admin' => 'مدیر سایت'] as $k => $l)<option value="{{ $k }}" @selected($v('role') === $k)>{{ $l }}</option>@endforeach</select>@error('role')<div class="msg-e">{{ $message }}</div>@enderror</div>
-      <div class="field"><label>ایمیل</label><input class="input" dir="ltr" name="email" value="{{ $v('email') }}">@error('email')<div class="msg-e">{{ $message }}</div>@enderror</div>
+      <div class="field"><label>نام و نام خانوادگی</label><input class="input" name="name" value="{{ $v('name') }}" required>@error('name')<div class="msg-e">{{ fa($message) }}</div>@enderror</div>
+      <div class="field"><label>موبایل</label><input class="input" dir="ltr" name="phone" value="{{ $v('phone') }}" required>@error('phone')<div class="msg-e">{{ fa($message) }}</div>@enderror</div>
+      <div class="field"><label>نقش</label><select name="role">@foreach(['guest' => 'مهمان', 'host' => 'میزبان', 'admin' => 'مدیر سایت'] as $k => $l)<option value="{{ $k }}" @selected($v('role') === $k)>{{ $l }}</option>@endforeach</select>@error('role')<div class="msg-e">{{ fa($message) }}</div>@enderror</div>
+      <div class="field"><label>ایمیل</label><input class="input" dir="ltr" name="email" value="{{ $v('email') }}">@error('email')<div class="msg-e">{{ fa($message) }}</div>@enderror</div>
       <div class="field"><label>شهر</label><input class="input" name="city" value="{{ $v('city') }}"></div>
-      <div class="field"><label>{{ $u->exists ? 'رمز جدید (خالی = بدون تغییر)' : 'رمز عبور' }}</label><input class="input" dir="ltr" name="password" type="text" autocomplete="off" @required(! $u->exists)>@error('password')<div class="msg-e">{{ $message }}</div>@enderror</div>
+      <div class="field"><label>{{ $u->exists ? 'رمز جدید (خالی = بدون تغییر)' : 'رمز عبور' }}</label><input class="input" dir="ltr" name="password" type="text" autocomplete="off" @required(! $u->exists)>@error('password')<div class="msg-e">{{ fa($message) }}</div>@enderror</div>
     </div>
     <div class="field"><label>معرفی</label><textarea class="input" name="bio">{{ $v('bio') }}</textarea></div>
     <div class="field"><label>عکس پروفایل</label><input class="input" type="file" name="avatar" accept="image/*"></div>
@@ -20,11 +20,11 @@
   </div>
   <div class="card"><h3>هویت و حساب بانکی</h3>
     <div class="grid3">
-      <div class="field"><label>کد ملی</label><input class="input" dir="ltr" name="national_code" value="{{ $v('national_code') }}">@error('national_code')<div class="msg-e">{{ $message }}</div>@enderror</div>
+      <div class="field"><label>کد ملی</label><input class="input" dir="ltr" name="national_code" value="{{ $v('national_code') }}">@error('national_code')<div class="msg-e">{{ fa($message) }}</div>@enderror</div>
       <div class="field"><label>تاریخ تولد</label><input class="input" dir="ltr" name="birth_date" value="{{ $v('birth_date') }}" placeholder="1365/04/21"></div>
       <div class="field"><label>وضعیت هویت</label><select name="id_status">@foreach(['none' => '—', 'pending' => 'در انتظار بررسی', 'verified' => 'تأییدشده', 'rejected' => 'ردشده'] as $k => $l)<option value="{{ $k }}" @selected($v('id_status', 'none') === $k)>{{ $l }}</option>@endforeach</select></div>
-      <div class="field"><label>شماره کارت</label><input class="input" dir="ltr" name="card_number" value="{{ $v('card_number') }}">@error('card_number')<div class="msg-e">{{ $message }}</div>@enderror</div>
-      <div class="field"><label>شبا</label><input class="input" dir="ltr" name="sheba" value="{{ $v('sheba') }}">@error('sheba')<div class="msg-e">{{ $message }}</div>@enderror</div>
+      <div class="field"><label>شماره کارت</label><input class="input" dir="ltr" name="card_number" value="{{ $v('card_number') }}">@error('card_number')<div class="msg-e">{{ fa($message) }}</div>@enderror</div>
+      <div class="field"><label>شبا</label><input class="input" dir="ltr" name="sheba" value="{{ $v('sheba') }}">@error('sheba')<div class="msg-e">{{ fa($message) }}</div>@enderror</div>
       <div class="field"><label>نام صاحب حساب</label><input class="input" name="bank_owner" value="{{ $v('bank_owner') }}"></div>
       <div class="field"><label>بانک</label><input class="input" name="bank_name" value="{{ $v('bank_name') }}"></div>
       <div class="field"><label>کمیسیون اختصاصی (٪)</label><input class="input" dir="ltr" type="number" name="commission_override" value="{{ $v('commission_override') }}" placeholder="پیش‌فرض سایت: {{ fa(setting('commission_percent')) }}"><div class="help">فقط برای این میزبان؛ خالی = کمیسیون عمومی.</div></div>
@@ -55,7 +55,7 @@
     <div class="grid2"><div class="field"><label>مبلغ (خالی = همه‌ی موجودی)</label><input class="input" dir="ltr" type="number" name="amount" max="{{ $u->wallet }}" placeholder="{{ $u->wallet }}"></div><div class="field"><label>کد پیگیری بانکی</label><input class="input" dir="ltr" name="tracking_code"></div></div>
     <div class="field"><label>تصویر رسید بانکی</label><input class="input" type="file" name="receipt" accept="image/*"></div>
     <div class="field"><label>توضیح (اختیاری)</label><input class="input" name="note" maxlength="200"></div>
-    @error('receipt')<div class="msg-e">{{ $message }}</div>@enderror
+    @error('receipt')<div class="msg-e">{{ fa($message) }}</div>@enderror
     <button class="btn btn-sm btn-gold" @disabled($u->wallet < 1) onclick="return confirm('تسویه ثبت و رسید ارسال شود؟')">ثبت واریز و ارسال رسید</button></form>
   @endif
   <div class="card"><h3>اقدامات</h3><div class="stack">

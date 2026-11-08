@@ -12,6 +12,7 @@
   <div class="au-shell" id="auth-card">
     <section class="au-form">
       <div class="auth-logo"><img src="{{ asset('img/mija-logo-h.png') }}" alt="می‌جا" width="103" height="42"></div>
+      @include('partials.flash')
       @yield('card')
     </section>
     <aside class="au-show" aria-hidden="true">

@@ -14,7 +14,7 @@
     </ul>
     <b>رعایت قوانین ippanel:</b> پیامک‌های تبلیغاتی و همگانی در پایان «لغو۱۱» دارند؛ متن‌ها رسمی و کوتاه‌اند؛ پیامک‌های ناموفقِ موقت (قطعی اینترنت/خطای سرور) تا ۳ بار خودکار دوباره ارسال می‌شوند؛ خطای دائمی (توکن/اعتبار) در «گزارش پیامک‌ها» با علت فارسی ثبت می‌شود.
   </div>
-  @error("test")<div class="alert bad">{{ $message }}</div>@enderror
+  @error("test")<div class="alert bad">{{ fa($message) }}</div>@enderror
   <div class="field"><label>شماره برای ارسال آزمایشی</label><input class="input" dir="ltr" name="test" value="{{ old('test', auth()->user()->phone) }}" inputmode="numeric" placeholder="09123456789"></div>
   @php
     $chkLink = '<input type="hidden" name="keys[]" value="sms_use_link"><input type="hidden" name="sms_use_link" value="0"><label class="check"><input type="checkbox" name="sms_use_link" value="1" '.((int) setting('sms_use_link') ? 'checked' : '').'><div><b>لینک کوتاه‌شده در پایان پیامک‌های «عادی» بیاید</b><div class="xs muted" style="font-weight:500">لینک با کوتاه‌کننده‌ی خود می‌جا (mija.click/s/…) کوتاه می‌شود. پیش‌فرض خاموش است چون ippanel ممکن است پیامک دارای لینک را رد کند. در پترن‌ها هرگز لینک نمی‌آید.</div></div></label>';

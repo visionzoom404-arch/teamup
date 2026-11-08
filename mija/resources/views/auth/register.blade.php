@@ -23,13 +23,13 @@
     <span class="ico"><x-icon name="user"/></span>
     <input id="name" name="name" autocomplete="name" placeholder=" " value="{{ old('name') }}" required>
     <label for="name">نام و نام خانوادگی</label>
-    @error('name')<div class="msg-e">{{ $message }}</div>@enderror
+    @error('name')<div class="msg-e">{{ fa($message) }}</div>@enderror
   </div>
   <div class="fl {{ $errors->has('phone') ? 'has-err' : '' }}" data-a>
     <span class="ico"><x-icon name="phone"/></span>
     <input id="phone" name="phone" dir="ltr" inputmode="numeric" autocomplete="username" placeholder=" " value="{{ old('phone') }}" data-phone required>
     <label for="phone">شماره موبایل</label>
-    @error('phone')<div class="msg-e">{{ $message }}</div>@enderror
+    @error('phone')<div class="msg-e">{{ fa($message) }}</div>@enderror
   </div>
   <div class="fl-2">
     <div class="fl {{ $errors->has('password') ? 'has-err' : '' }}" data-a>
@@ -37,7 +37,7 @@
       <input id="password" name="password" type="password" dir="ltr" autocomplete="new-password" placeholder=" " minlength="6" required data-strength>
       <label for="password">رمز عبور</label>
       <button type="button" class="eye" data-eye aria-label="نمایش رمز"><x-icon name="eye"/></button>
-      @error('password')<div class="msg-e">{{ $message }}</div>@enderror
+      @error('password')<div class="msg-e">{{ fa($message) }}</div>@enderror
     </div>
     <div class="fl" data-a>
       <span class="ico"><x-icon name="lock"/></span>

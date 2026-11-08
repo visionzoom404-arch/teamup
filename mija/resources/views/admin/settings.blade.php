@@ -50,7 +50,7 @@
   <div class="row wrap" style="gap:14px;align-items:flex-start">
     <img src="{{ setting('home_hero') ? asset('storage/'.setting('home_hero')) : asset('img/hero-home.jpg') }}" alt="" style="width:240px;max-width:100%;border-radius:14px;aspect-ratio:16/9;object-fit:cover">
     <form class="grow" method="post" action="{{ route('admin.settings.hero') }}" enctype="multipart/form-data">@csrf
-      <div class="field"><label>عکس جدید (۱۶:۹، پیشنهاد ۱۹۲۰×۱۰۸۰، حداکثر ۶ مگابایت)</label><input class="input" type="file" name="hero" accept="image/*" required>@error('hero')<div class="msg-e">{{ $message }}</div>@enderror<div class="help">عکس واقعی و باکیفیت از یک ویلا یا کلبه بگذارید. متن روی عکس با سایه‌ی تیره خوانا می‌شود؛ عکس را بدون نوشته انتخاب کنید.</div></div>
+      <div class="field"><label>عکس جدید (۱۶:۹، پیشنهاد ۱۹۲۰×۱۰۸۰، حداکثر ۶ مگابایت)</label><input class="input" type="file" name="hero" accept="image/*" required>@error('hero')<div class="msg-e">{{ fa($message) }}</div>@enderror<div class="help">عکس واقعی و باکیفیت از یک ویلا یا کلبه بگذارید. متن روی عکس با سایه‌ی تیره خوانا می‌شود؛ عکس را بدون نوشته انتخاب کنید.</div></div>
       <button class="btn btn-sm">تغییر عکس بنر</button> @if(setting('home_hero'))<button class="btn btn-sm btn-ghost" name="reset" value="1" formnovalidate>برگشت به عکس پیش‌فرض</button>@endif
     </form>
   </div>

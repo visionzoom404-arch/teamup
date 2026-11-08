@@ -497,3 +497,90 @@ document.addEventListener('click', async e => {
   });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
+
+/* ---------- خطاهای فرم: فارسی، قابل کلیک، با علامت‌گذاری خودکار فیلتر ---------- */
+(function () {
+  const faN = v => (window.Jalali && Jalali.fa) ? Jalali.fa(v) : String(v);
+  const labelOf = el => {
+    let t = '';
+    const byFor = el.id && document.querySelector('label[for="' + el.id + '"]');
+    if (byFor) t = byFor.textContent;
+    else { const f = el.closest('.field,.fl'); const l = f && f.querySelector('label'); if (l) t = l.textContent; }
+    if (!t) t = el.getAttribute('aria-label') || el.getAttribute('placeholder') || el.title || '';
+    return t.replace(/\(.*?\)/g, '').replace(/[—–-].*$/, '').replace(/[:*٪]/g, '').replace(/\s+/g, ' ').trim();
+  };
+  // پیام‌های فارسی به‌جای حباب انگلیسی/ناخوانای مرورگر
+  const msgFor = el => {
+    const v = el.validity, L = labelOf(el), q = L ? '«' + L + '»' : 'این فیلد';
+    if (v.valueMissing) return el.type === 'checkbox' || el.type === 'radio' ? 'برای ادامه، ' + q + ' را تأیید یا انتخاب کنید.' : (el.tagName === 'SELECT' || el.type === 'file' ? q + ' را انتخاب کنید.' : q + ' را وارد کنید.');
+    if (v.typeMismatch) return el.type === 'email' ? 'نشانی ایمیل معتبر نیست؛ مثل name@example.com' : (el.type === 'url' ? 'آدرس وب معتبر نیست (با https:// شروع شود).' : q + ' معتبر نیست.');
+    if (v.tooShort) return q + ' باید حداقل ' + faN(el.minLength) + ' کاراکتر باشد (الان ' + faN(el.value.length) + ' کاراکتر نوشته‌اید).';
+    if (v.tooLong) return q + ' نباید بیشتر از ' + faN(el.maxLength) + ' کاراکتر باشد.';
+    if (v.rangeUnderflow) return q + ' نباید کمتر از ' + faN(el.min) + ' باشد.';
+    if (v.rangeOverflow) return q + ' نباید بیشتر از ' + faN(el.max) + ' باشد.';
+    if (v.stepMismatch) return q + ' باید عدد صحیح (بدون اعشار) باشد.';
+    if (v.badInput) return q + ' را فقط با عدد وارد کنید.';
+    if (v.patternMismatch) return el.title || ('قالب ' + q + ' درست نیست.');
+    return '';
+  };
+  document.addEventListener('invalid', e => {
+    const el = e.target; if (!el.setCustomValidity || el.closest('[data-native-validation]')) return;
+    el.setCustomValidity(''); const m = msgFor(el); if (m) el.setCustomValidity(m);
+    if (window.pfGoto) window.pfGoto(el); // اگر فیلد در مرحله‌ی دیگرِ فرم است، همان مرحله را باز کن
+    markField(el, m || el.validationMessage);
+  }, true);
+  document.addEventListener('input', e => { const el = e.target; if (el.setCustomValidity) el.setCustomValidity(''); unmark(el); }, true);
+  document.addEventListener('change', e => { const el = e.target; if (el.setCustomValidity) el.setCustomValidity(''); unmark(el); }, true);
+
+  const wrapOf = el => el.closest('.field,.fl') || el.parentElement;
+  const markField = (el, msg) => {
+    const w = wrapOf(el); if (!w) return;
+    w.classList.add('has-err'); el.setAttribute('aria-invalid', 'true');
+    let m = w.querySelector('.msg-e');
+    if (!m) { m = document.createElement('div'); m.className = 'msg-e'; m.setAttribute('data-auto', '1'); w.appendChild(m); }
+    if (m.getAttribute('data-auto') || !m.textContent.trim()) m.textContent = msg;
+  };
+  const unmark = el => {
+    const w = wrapOf(el); if (!w || !w.classList.contains('has-err')) return;
+    w.classList.remove('has-err'); el.removeAttribute('aria-invalid');
+    const m = w.querySelector('.msg-e'); if (m) m.remove();
+  };
+
+  // پیدا کردن فیلتر مربوط به کلید خطای سرور (مثل images.2 یا price_dow.3)
+  const find = key => {
+    const parts = key.split('.'), base = parts[0], br = base + parts.slice(1).map(p => '[' + p + ']').join('');
+    const q = s => { try { return document.querySelector(s); } catch (e) { return null; } };
+    let el = q('[name="' + key + '"]') || q('[name="' + br + '"]') || q('[name="' + base + '[]"]') || q('[name^="' + base + '["]') || q('#' + CSS.escape(key));
+    if (!el && (key === 'lat' || key === 'lng')) el = q('[data-map-pick]');
+    return el;
+  };
+  const visible = el => {
+    if (el.type === 'hidden' || el.offsetParent === null) { const w = wrapOf(el); return (w && w.offsetParent !== null) ? w : (el.closest('.card,.pf-step') || el.parentElement); }
+    return el;
+  };
+  const pulse = t => { t.classList.remove('err-pulse'); void t.offsetWidth; t.classList.add('err-pulse'); setTimeout(() => t.classList.remove('err-pulse'), 1600); };
+  const go = key => {
+    const el = find(key); const box = document.getElementById('errbox');
+    if (!el) { box && box.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
+    if (window.pfGoto) window.pfGoto(el);
+    requestAnimationFrame(() => {
+      const t = visible(el);
+      t.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => { if (el.focus && el.type !== 'hidden' && el.offsetParent !== null) { try { el.focus({ preventScroll: true }); } catch (e) { } } pulse(t); }, 380);
+    });
+  };
+  document.addEventListener('click', e => {
+    const a = e.target.closest('#errbox [data-err-key]'); if (!a) return;
+    e.preventDefault(); go(a.getAttribute('data-err-key'));
+  });
+  // با باز شدن صفحه، فیلدهای دارای خطا علامت بخورند (و در موبایل مرحله‌ی اولین خطا باز شود)
+  const boot = () => {
+    const box = document.getElementById('errbox'); if (!box) return;
+    let keys = []; try { keys = JSON.parse(box.getAttribute('data-keys') || '[]'); } catch (e) { }
+    const msgs = {}; box.querySelectorAll('[data-err-key]').forEach(a => { const k = a.getAttribute('data-err-key'); (msgs[k] = msgs[k] || []).push(a.textContent.trim()); });
+    let first = null;
+    keys.forEach(k => { const el = find(k); if (!el) return; first = first || el; const w = wrapOf(visible(el)) || visible(el); if (!w) return; w.classList.add('has-err'); if (el.setAttribute) el.setAttribute('aria-invalid', 'true'); if (!w.querySelector('.msg-e')) { const m = document.createElement('div'); m.className = 'msg-e'; m.setAttribute('data-auto', '1'); m.textContent = msgs[k][0]; w.appendChild(m); } });
+    if (first && window.pfGoto) window.pfGoto(first);
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => setTimeout(boot, 0)); else setTimeout(boot, 0);
+})();

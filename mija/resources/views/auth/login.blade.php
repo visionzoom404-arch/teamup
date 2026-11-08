@@ -17,14 +17,14 @@
     <span class="ico"><x-icon name="phone"/></span>
     <input id="phone" name="phone" dir="ltr" inputmode="numeric" autocomplete="username" placeholder=" " value="{{ old('phone') }}" data-phone required>
     <label for="phone">شماره موبایل</label>
-    @error('phone')<div class="msg-e">{{ $message }}</div>@enderror
+    @error('phone')<div class="msg-e">{{ fa($message) }}</div>@enderror
   </div>
   <div class="fl {{ $errors->has('password') ? 'has-err' : '' }}" data-a>
     <span class="ico"><x-icon name="lock"/></span>
     <input id="password" name="password" type="password" dir="ltr" autocomplete="current-password" placeholder=" " required>
     <label for="password">رمز عبور</label>
     <button type="button" class="eye" data-eye aria-label="نمایش رمز"><x-icon name="eye"/></button>
-    @error('password')<div class="msg-e">{{ $message }}</div>@enderror
+    @error('password')<div class="msg-e">{{ fa($message) }}</div>@enderror
   </div>
   <label class="switch" data-a><input type="checkbox" name="remember" value="1"><span class="tr"></span>مرا به خاطر بسپار</label>
   <button class="btn btn-auth btn-lg" data-a><span class="spin"></span><span class="lbl">ورود به حساب</span><x-icon name="chev-l"/></button>
@@ -39,7 +39,7 @@
       <span class="ico"><x-icon name="shield"/></span>
       <input id="code" name="code" dir="ltr" inputmode="numeric" autocomplete="one-time-code" maxlength="5" placeholder=" " required autofocus style="letter-spacing:.5em;font-size:20px;text-align:center">
       <label for="code">کد تأیید</label>
-      @error('code')<div class="msg-e">{{ $message }}</div>@enderror
+      @error('code')<div class="msg-e">{{ fa($message) }}</div>@enderror
     </div>
     <button class="btn btn-auth btn-lg" data-a><span class="spin"></span><span class="lbl">تأیید و ورود</span><x-icon name="chev-l"/></button>
   </form>
@@ -52,7 +52,7 @@
       <span class="ico"><x-icon name="phone"/></span>
       <input id="phone2" name="phone" dir="ltr" inputmode="numeric" autocomplete="tel" placeholder=" " value="{{ old('phone') }}" data-phone required>
       <label for="phone2">شماره موبایل</label>
-      @error('phone')<div class="msg-e">{{ $message }}</div>@enderror
+      @error('phone')<div class="msg-e">{{ fa($message) }}</div>@enderror
     </div>
     <button class="btn btn-auth btn-lg" data-a><span class="spin"></span><span class="lbl">دریافت کد ورود</span><x-icon name="chev-l"/></button>
     <p class="xs muted" style="margin:10px 0 0">بدون نیاز به رمز عبور؛ کد ۵ رقمی برایتان پیامک می‌شود.</p>

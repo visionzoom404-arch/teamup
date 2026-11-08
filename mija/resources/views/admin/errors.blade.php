@@ -3,7 +3,7 @@
 @section('content')
 <div class="page-h"><div><h1>گزارش خطاها</h1><div class="muted">خطاهای سرور به زبان ساده: چه شده، چرا شده و چطور رفع کنیم</div></div>
   @if(count($groups))<form method="post" action="{{ route('admin.errors.clear') }}" onsubmit="return confirm('همه‌ی گزارش‌ها پاک شود؟ (بعد از رفع مشکل برای شروع تازه)')">@csrf<button class="btn btn-sm btn-light"><x-icon name="trash" class="sm"/> پاک‌کردن گزارش‌ها</button></form>@endif</div>
-@error('fix')<div class="alert bad">{{ $message }}</div>@enderror
+@error('fix')<div class="alert bad">{{ fa($message) }}</div>@enderror
 @forelse($groups as $g)
 @php $e = $g['ex']; [$lv, $lc] = $levels[$e['level']]; @endphp
 <div class="card mb er-card {{ $e['level'] }}">

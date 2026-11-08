@@ -88,7 +88,7 @@
             <label class="xs muted">تصویر رسید (اختیاری)</label><input class="input" type="file" name="receipt" accept="image/*">
           </div>
           @endif
-          @error('method')<div class="msg-e">{{ $message }}</div>@enderror @error('pay')<div class="msg-e">{{ $message }}</div>@enderror @error('tracking_code')<div class="msg-e">{{ $message }}</div>@enderror
+          @error('method')<div class="msg-e">{{ fa($message) }}</div>@enderror @error('pay')<div class="msg-e">{{ fa($message) }}</div>@enderror @error('tracking_code')<div class="msg-e">{{ fa($message) }}</div>@enderror
           <button class="btn btn-lg btn-block" id="pay-btn"><x-icon name="lock"/> <span id="pay-lbl">پرداخت {{ toman($b->total) }}</span></button>
         </form>
         <ul class="vp-trust"><li><x-i3 name="p_shield" class="sm"/>پرداخت امن</li><li><x-i3 name="p_lock" class="sm"/>اطلاعات محفوظ</li><li><x-i3 name="p_phone" class="sm"/>پشتیبانی</li></ul>
