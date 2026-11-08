@@ -490,3 +490,53 @@ td .btn-sm,.table-cards .btn-sm{max-width:100%;white-space:normal;text-align:cen
 .xs.muted.ltr{overflow-wrap:anywhere;word-break:break-all}
 a.btn,.btn-light{max-width:100%}
 .au-form a.btn,.auth a.btn{white-space:normal;text-align:center}
+
+/* ===== نوار جستجوی صفحه‌ی اول: شیشه‌ی دودی مات روی عکس، فشرده و مرتب ===== */
+.hx-wrap{position:relative}
+.hero-c.hero-c.hero-c .stage-search:not(.sheet-open){
+  background:linear-gradient(135deg,rgba(38,17,2,.46),rgba(38,17,2,.26))!important;
+  -webkit-backdrop-filter:blur(18px) saturate(1.45)!important;backdrop-filter:blur(18px) saturate(1.45)!important;
+  border:1px solid rgba(255,255,255,.38)!important;color:#fff!important;
+  box-shadow:0 26px 50px -26px rgba(30,12,0,.8),inset 0 1px 0 rgba(255,255,255,.4)!important}
+.hero-c.hero-c.hero-c .sp-pill{color:#fff}
+.hero-c.hero-c.hero-c .sp-pill b{color:#fff}.hero-c.hero-c.hero-c .sp-pill small{color:rgba(255,255,255,.8)}
+.hero-c.hero-c.hero-c .sp-pill .icon{color:#FFD28A}
+.hero-c.hero-c.hero-c .sp-pill i{background:linear-gradient(135deg,#F9C468,#E8860C)!important;color:#2a1a02!important;font-weight:800}
+@media(min-width:861px){
+  .hx-in{padding-bottom:196px!important}
+  .hero-c.hero-c.hero-c .stage-search{position:absolute!important;inset-inline:28px!important;bottom:24px!important;margin:0!important;max-width:none;
+    padding:8px 10px 10px!important;border-radius:24px!important;
+    grid-template-columns:minmax(0,1.05fr) minmax(0,1.5fr) minmax(0,.95fr) auto!important;gap:2px!important;align-items:stretch!important}
+  .hero-c.hero-c.hero-c .searchbar>div:not(.presets):not(.sp-head){padding:8px 18px!important;border:0!important;border-radius:0!important;border-inline-end:1px solid rgba(255,255,255,.26)!important;display:flex;flex-direction:column;justify-content:center}
+  .hero-c.hero-c.hero-c .searchbar>div:nth-last-of-type(2){border-inline-end:0!important}
+  .hero-c.hero-c.hero-c .searchbar label{color:rgba(255,255,255,.78)!important;font-size:11px;margin:0 0 1px}
+  .hero-c.hero-c.hero-c .searchbar select{color:#fff!important;font-size:14.5px;font-weight:700;padding:3px 22px 3px 0;
+    -webkit-appearance:none;appearance:none;background-color:transparent!important;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")!important;
+    background-repeat:no-repeat!important;background-position:left 2px center!important}
+  .hero-c.hero-c.hero-c .searchbar select option{color:#1B1B1F;background:#fff}
+  .hero-c.hero-c.hero-c .rp-field small{color:rgba(255,255,255,.72)!important;font-size:10.5px}
+  .hero-c.hero-c.hero-c .rp-field b{color:#fff!important;font-size:14px}
+  .hero-c.hero-c.hero-c .rp-field>div+div{border-inline-start:1px solid rgba(255,255,255,.22)!important}
+  .hero-c.hero-c.hero-c .rp>label{display:none}
+  .hero-c.hero-c.hero-c .stage-search>.btn{align-self:stretch;margin:2px 4px 2px 2px;padding:0 30px;border-radius:18px;font-size:15px;font-weight:800;
+    background:linear-gradient(135deg,#FACB78,#E8860C)!important;color:#2a1a02!important;text-shadow:none!important;box-shadow:0 12px 22px -12px rgba(232,134,12,.9),inset 0 1px 0 rgba(255,255,255,.6)!important}
+  .hero-c.hero-c.hero-c .presets{border-top:1px solid rgba(255,255,255,.22);margin-top:6px;padding:9px 10px 0!important;gap:6px}
+  .hero-c.hero-c.hero-c .presets .muted{color:rgba(255,255,255,.78)!important;font-size:11.5px}
+  .hero-c.hero-c.hero-c .presets .qchip{background:rgba(255,255,255,.16)!important;border:1px solid rgba(255,255,255,.34)!important;color:#fff!important;padding:3px 13px;font-size:12px;box-shadow:none!important}
+  .hero-c.hero-c.hero-c .presets .qchip:hover{background:rgba(255,255,255,.3)!important}
+  .hero-c.hero-c.hero-c .presets .qchip.on{background:linear-gradient(135deg,#FACB78,#E8860C)!important;color:#2a1a02!important;border-color:transparent!important}
+}
+@media(min-width:861px) and (max-width:1020px){
+  .hero-c.hero-c.hero-c .searchbar>div:not(.presets):not(.sp-head){padding:8px 12px!important}
+  .hero-c.hero-c.hero-c .stage-search>.btn{padding:0 18px}
+}
+@media(min-width:861px){.hero-c.hero-c.hero-c .searchbar select{border:0!important;outline:0;box-shadow:none!important;border-radius:0!important;height:auto!important;min-height:0!important}
+.hero-c.hero-c.hero-c .searchbar select:focus-visible{outline:2px solid rgba(255,210,138,.8);outline-offset:3px;border-radius:6px!important}}
+/* پنجره‌ی تقویم داخل نوار شیشه‌ای: کاملاً مات و خوانا */
+.hero-c.hero-c.hero-c .rp-pop{background:var(--surface,#fff)!important;color:var(--ink)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:0 30px 70px -20px rgba(20,10,0,.55)!important;border:1px solid var(--line-2)!important}
+.hero-c.hero-c.hero-c .rp-pop *{text-shadow:none}
+/* برگه‌ی جستجوی موبایل باید بالاتر از منوی پایین باشد */
+@media(max-width:860px){.hero-c.hero-c.hero-c .stage-search.sheet-open{z-index:95!important;margin:0!important}body.search-open .bottomnav{display:none!important}}
+@media(max-width:860px){.hero-c.hero-c.hero-c .stage-search:not(.sheet-open){background:linear-gradient(135deg,rgba(70,32,4,.82),rgba(50,22,2,.74))!important}}
+@media(max-width:380px){.hero-c.hero-c.hero-c .sp-pill{gap:8px}.hero-c.hero-c.hero-c .sp-pill b{font-size:13px;white-space:nowrap}.hero-c.hero-c.hero-c .sp-pill small{display:none}.hero-c.hero-c.hero-c .sp-pill i{padding:10px 16px}.hero-c.hero-c.hero-c .sp-pill .icon{margin-inline-start:4px}}

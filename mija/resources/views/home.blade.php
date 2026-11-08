@@ -9,6 +9,7 @@
 <div class="container">
   {{-- ===== بالای صفحه: عنوان فشرده + جستجو ===== --}}
   <section class="hero-c">
+    <div class="hx-wrap">
     <div class="hx">
       @if(setting('home_hero'))<img class="hx-img" src="{{ asset('storage/'.setting('home_hero')) }}" alt="اجاره ویلا و کلبه در سراسر ایران" width="1920" height="1080" fetchpriority="high">@else<picture><source srcset="{{ asset('img/hero-home.webp') }}" type="image/webp"><img class="hx-img" src="{{ asset('img/hero-home.jpg') }}" alt="ویلای ساحلی و کوهستانی هنگام غروب" width="1916" height="821" fetchpriority="high"></picture>@endif
       <div class="hx-in">
@@ -37,6 +38,7 @@
       <button class="btn"><x-icon name="search"/> جستجو</button>
       <div class="presets"><span class="muted">پیشنهاد سریع</span><button type="button" class="qchip" data-preset="weekend">این آخر هفته</button><button type="button" class="qchip" data-preset="weekend2">آخر هفته‌ی بعد</button><button type="button" class="qchip" data-preset="midweek">۳ شب میان‌هفته</button><button type="button" class="qchip" data-preset="soon">۳ شب از فردا</button></div>
     </form>
+    </div>
 
     {{-- دسته‌بندی دایره‌ای (نوع اقامتگاه) --}}
     <div class="cat-rail" role="list">
