@@ -26,7 +26,7 @@
     </div>
 
     <form class="searchbar stage-search" action="{{ route('search') }}" method="get" id="home-search">
-      <button type="button" class="sp-pill" data-open-search><x-icon name="search"/><span><b>کجا می‌خوای بری؟</b><small>مقصد · تاریخ · تعداد نفرات</small></span><i>جستجو</i></button>
+      <button type="button" class="sp-pill" data-open-search><x-icon name="search"/><span><b>جستجوی اقامتگاه</b><small>مقصد · تاریخ · تعداد نفرات</small></span><i>جستجو</i></button>
       <div class="sp-head"><b>جستجوی اقامتگاه</b><button type="button" class="btn btn-sm btn-icon btn-light" data-close-search aria-label="بستن"><x-icon name="x" class="sm"/></button></div>
       <div><label>مقصد</label><select name="province"><option value="">همه‌ی استان‌ها</option>@foreach(config('mija.provinces') as $pv => $cs)<option>{{ $pv }}</option>@endforeach</select></div>
       <div class="rp" data-rangepicker data-unavailable="[]">
