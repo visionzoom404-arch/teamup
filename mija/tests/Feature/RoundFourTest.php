@@ -477,4 +477,17 @@ class RoundFourTest extends TestCase
             $this->assertFileExists(public_path('css/'.$f));
         }
     }
+
+    public function test_night_hero_markup_and_admin_upload(): void
+    {
+        $this->get('/')->assertOk()->assertSee('hx-night', false)->assertSee('hero-night.webp', false)->assertSee('data-fx', false);
+        $a = $this->admin();
+        \Illuminate\Support\Facades\Storage::fake('public');
+        $this->actingAs($a)->post(route('admin.settings.hero'), ['kind' => 'night', 'hero' => \Illuminate\Http\UploadedFile::fake()->image('n.jpg', 1400, 700)])->assertRedirect();
+        $this->assertNotEmpty(setting('home_hero_night'));
+        $this->assertEmpty(setting('home_hero'));
+        $this->get('/')->assertOk()->assertSee(setting('home_hero_night'), false);
+        $this->actingAs($a)->post(route('admin.settings.hero'), ['kind' => 'night', 'reset' => 1])->assertRedirect();
+        $this->assertEmpty(setting('home_hero_night'));
+    }
 }

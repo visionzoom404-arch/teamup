@@ -74,3 +74,22 @@ html[data-theme="dark"] .switch input:checked+.tr{background:linear-gradient(135
 html[data-theme="dark"] .qchip:has(input:checked),html[data-theme="dark"] .qchip:has(input:checked) span{background:linear-gradient(135deg,#F7C26A,#E58F1B)!important;color:#2a1a02!important}
 html[data-theme="dark"] .sp-pill i{background:linear-gradient(135deg,#F7C26A,#E58F1B)!important;color:#2a1a02!important}
 html[data-theme="dark"] .cx-bar span b{color:#2a1a02!important}
+
+/* ===== عکس بنر: روز / شب ===== */
+.hx-night{display:none!important}
+html[data-theme="dark"] .hx-night{display:block!important}
+html[data-theme="dark"] .hx-day{display:none!important}
+html[data-theme="dark"] .hx::after{background:linear-gradient(180deg,rgba(8,10,28,.55) 0%,rgba(8,10,28,.08) 50%,rgba(8,10,28,.5) 100%)!important}
+html[data-theme="dark"] .hx{box-shadow:0 30px 60px -34px rgba(0,0,0,.9)}
+
+/* ===== انیمیشن تغییر حالت: حرکت به سمت خورشید / ماه ===== */
+#theme-orb{position:fixed;z-index:2147483000;border-radius:50%;pointer-events:none;view-transition-name:theme-orb;will-change:transform}
+#theme-orb.sun{background:radial-gradient(circle,#fffbe3 0 16%,#ffd76e 30%,rgba(255,160,40,.6) 50%,rgba(255,120,20,0) 70%);box-shadow:0 0 60px 20px rgba(255,170,50,.55)}
+#theme-orb.moon{background:radial-gradient(circle,#fff 0 16%,#e4ebff 30%,rgba(150,175,255,.5) 50%,rgba(120,150,255,0) 70%);box-shadow:0 0 60px 20px rgba(150,175,255,.5)}
+html.theme-vt::view-transition-old(root),html.theme-vt::view-transition-new(root){animation:none;mix-blend-mode:normal}
+html.theme-vt::view-transition-group(theme-orb){animation-duration:1100ms;animation-timing-function:cubic-bezier(.65,0,.3,1)}
+html.theme-vt::view-transition-old(theme-orb),html.theme-vt::view-transition-new(theme-orb){animation:none;mix-blend-mode:normal}
+.theme-veil{position:fixed;inset:0;z-index:2147482000;pointer-events:none}
+.theme-veil.to-dark{background:radial-gradient(circle at 82% 40%,#2a1608,#0d0a14 70%)}
+.theme-veil.to-light{background:radial-gradient(circle at 82% 40%,#fff8ea,#ffe9c4 70%)}
+@media(prefers-reduced-motion:reduce){#theme-orb,.theme-veil{display:none}}

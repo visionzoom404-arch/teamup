@@ -343,19 +343,87 @@ document.addEventListener('click', async e => {
   if (f) f.addEventListener('submit', function () { var g = f.querySelector('.atm-go'); if (g) g.classList.add('busy'); });
 })();
 
-/* ---------- حالت روشن / تیره ---------- */
+/* ---------- حالت روشن / تیره (با انیمیشن حرکت به سمت خورشید / ماه) ---------- */
 (function () {
   const root = document.documentElement;
+  const SUN = [0.8217, 0.435], MOON = [0.8247, 0.3686]; // مختصات خورشید/ماه در عکس‌های پیش‌فرض (نسبت به عکس)
   const apply = t => {
     root.setAttribute('data-theme', t);
     const m = document.querySelector('meta[name=theme-color]'); if (m) m.setAttribute('content', t === 'dark' ? '#17120D' : '#E8860C');
     try { localStorage.setItem('mija-theme', t); } catch (e) { }
     document.dispatchEvent(new CustomEvent('mija:theme', { detail: t }));
   };
-  document.addEventListener('click', e => {
-    const b = e.target.closest('[data-theme-toggle]'); if (!b) return;
-    apply(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
-  });
+  // عکس هرویِ حالت مقابل را زودتر بارگیری کن تا هنگام انیمیشن آماده باشد
+  const preloadHero = () => document.querySelectorAll('.hx-night img, img.hx-night, .hx-day img, img.hx-day').forEach(i => { if (i.loading === 'lazy') i.loading = 'eager'; });
+  if (document.querySelector('.hx-night')) (window.requestIdleCallback || (f => setTimeout(f, 1500)))(preloadHero);
+
+  // نقطه‌ی هدف: خورشید (رفتن به تیره) یا ماه (رفتن به روشن) در مختصات صفحه
+  const target = toDark => {
+    const vw = innerWidth, vh = innerHeight;
+    const img = [...document.querySelectorAll('.hx-img')].find(i => i.offsetParent !== null);
+    if (img) {
+      const fx = (img.getAttribute('data-fx') || (toDark ? SUN : MOON).join(',')).split(',').map(Number);
+      const r = img.getBoundingClientRect(), iw = img.naturalWidth || r.width, ih = img.naturalHeight || r.height;
+      if (r.width > 0 && r.bottom > 0 && r.top < vh) {
+        const k = Math.max(r.width / iw, r.height / ih), py = parseFloat(getComputedStyle(img).objectPositionY) / 100;
+        const ox = (r.width - iw * k) / 2, oy = (r.height - ih * k) * (isNaN(py) ? 0.5 : py);
+        const x = r.left + ox + fx[0] * iw * k, y = r.top + oy + fx[1] * ih * k;
+        if (x > 0 && x < vw && y > 0 && y < vh) return [x, y];
+      }
+    }
+    const p = toDark ? SUN : MOON; // صفحه‌های بدون عکس: انگار عکس کل صفحه را پوشانده
+    return [p[0] * vw, p[1] * vh * 0.9 + 20];
+  };
+
+  let busy = false;
+  const toggle = async () => {
+    if (busy) return; busy = true;
+    const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark', toDark = next === 'dark';
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce || !document.body) { apply(next); busy = false; return; }
+    preloadHero();
+    const [sx, sy] = target(toDark), vw = innerWidth, vh = innerHeight;
+    const R = Math.hypot(Math.max(sx, vw - sx), Math.max(sy, vh - sy)) + 40;
+    const D = window.__themeDur || 1100, EASE = 'cubic-bezier(.65,0,.3,1)';
+    // کره‌ی خورشید/ماه (خودش یک لایه‌ی جدا در انیمیشن است)
+    const orb = document.createElement('div'); orb.id = 'theme-orb'; orb.className = toDark ? 'sun' : 'moon'; orb.setAttribute('aria-hidden', 'true');
+    orb.style.cssText = `left:${sx - 36}px;top:${sy - 36}px;width:72px;height:72px`;
+    document.body.appendChild(orb);
+    // اگر عکس مقصد هنوز نیامده، کوتاه صبر کن
+    const want = document.querySelector(toDark ? '.hx-night img, img.hx-night' : '.hx-day img, img.hx-day');
+    if (want && !want.complete) { try { await Promise.race([want.decode(), new Promise(r => setTimeout(r, 700))]); } catch (e) { } }
+    const done = () => { orb.remove(); root.classList.remove('theme-vt'); busy = false; };
+    if (typeof document.startViewTransition === 'function') {
+      root.classList.add('theme-vt');
+      const vt = document.startViewTransition(() => {
+        apply(next);
+        orb.style.cssText = `left:${sx - R}px;top:${sy - R}px;width:${2 * R}px;height:${2 * R}px;opacity:0`;
+      });
+      vt.ready.then(() => {
+        const o = `${sx}px ${sy}px`;
+        root.animate({ clipPath: [`circle(0px at ${o})`, `circle(${R}px at ${o})`] }, { duration: D, easing: EASE, fill: 'both', pseudoElement: '::view-transition-new(root)' });
+        root.animate([
+          { transform: 'scale(1)', transformOrigin: o, filter: 'brightness(1) saturate(1)', opacity: 1 },
+          { transform: 'scale(1.5)', transformOrigin: o, filter: toDark ? 'brightness(1.25) saturate(1.3)' : 'brightness(.85)', opacity: 1, offset: .7 },
+          { transform: 'scale(2.4)', transformOrigin: o, filter: toDark ? 'brightness(1.6) blur(8px)' : 'brightness(.6) blur(8px)', opacity: 0 }
+        ], { duration: D, easing: EASE, fill: 'both', pseudoElement: '::view-transition-old(root)' });
+        const g = { duration: D, easing: EASE, fill: 'both' };
+        root.animate({ opacity: [1, 1, 0], offset: [0, .55, 1] }, { ...g, pseudoElement: '::view-transition-new(theme-orb)' });
+        root.animate({ opacity: [1, 1, 0], offset: [0, .55, 1] }, { ...g, pseudoElement: '::view-transition-old(theme-orb)' });
+      }).catch(() => { });
+      vt.finished.then(done, done);
+    } else {
+      // پشتیبان: دایره‌ی رنگی از محل خورشید/ماه باز می‌شود، حالت عوض می‌شود، سپس محو می‌شود
+      const veil = document.createElement('div'); veil.className = 'theme-veil ' + (toDark ? 'to-dark' : 'to-light'); veil.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(veil);
+      const a = veil.animate({ clipPath: [`circle(0px at ${sx}px ${sy}px)`, `circle(${R}px at ${sx}px ${sy}px)`] }, { duration: D * .55, easing: EASE, fill: 'forwards' });
+      a.finished.then(() => {
+        apply(next); orb.remove();
+        return veil.animate({ opacity: [1, 0] }, { duration: D * .45, easing: 'ease-out', fill: 'forwards' }).finished;
+      }).then(() => { veil.remove(); done(); }, () => { veil.remove(); done(); });
+    }
+  };
+  document.addEventListener('click', e => { if (e.target.closest('[data-theme-toggle]')) toggle(); });
   // اگر کاربر دستی انتخاب نکرده، با تغییر حالت سیستم هماهنگ شود
   try {
     matchMedia('(prefers-color-scheme: dark)').addEventListener('change', ev => {

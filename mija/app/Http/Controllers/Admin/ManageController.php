@@ -395,27 +395,29 @@ class ManageController extends Controller
         return $back;
     }
 
-    /** عکس بنر صفحه‌ی اول (آپلود یا بازگشت به عکس پیش‌فرض) */
+    /** عکس بنر صفحه‌ی اول — روز (home_hero) یا شب برای حالت تیره (home_hero_night) */
     public function heroUpload(Request $r)
     {
+        $night = $r->input('kind') === 'night';
+        $key = $night ? 'home_hero_night' : 'home_hero';
         if ($r->boolean('reset')) {
-            if ($old = setting('home_hero')) {
+            if ($old = setting($key)) {
                 \Illuminate\Support\Facades\Storage::disk('public')->delete($old);
             }
-            Setting::put('home_hero', '');
-            Audit::log('hero.reset');
+            Setting::put($key, '');
+            Audit::log('hero.reset', $key);
 
             return back()->with('ok', 'عکس بنر به حالت پیش‌فرض برگشت.');
         }
         $r->validate(['hero' => 'required|image|mimes:jpg,jpeg,png,webp|max:6144|dimensions:min_width=1000,min_height=450'], ['hero.dimensions' => 'عکس باید دست‌کم ۱۰۰۰×۴۵۰ پیکسل باشد (پیشنهاد: ۱۹۲۰×۱۰۸۰).', 'hero.max' => 'حجم عکس حداکثر ۶ مگابایت باشد.']);
-        $path = $r->file('hero')->storeAs('site', 'hero-'.time().'.'.$r->file('hero')->extension(), 'public');
-        if ($old = setting('home_hero')) {
+        $path = $r->file('hero')->storeAs('site', ($night ? 'hero-night-' : 'hero-').time().'.'.$r->file('hero')->extension(), 'public');
+        if ($old = setting($key)) {
             \Illuminate\Support\Facades\Storage::disk('public')->delete($old);
         }
-        Setting::put('home_hero', $path);
+        Setting::put($key, $path);
         Audit::log('hero.upload', $path);
 
-        return back()->with('ok', 'عکس بنر صفحه‌ی اول تغییر کرد.');
+        return back()->with('ok', $night ? 'عکس شب بنر (حالت تیره) تغییر کرد.' : 'عکس بنر صفحه‌ی اول تغییر کرد.');
     }
 
     public function peakStore(Request $r)

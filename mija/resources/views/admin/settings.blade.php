@@ -55,6 +55,15 @@
     </form>
   </div>
 </div>
+<div class="card mb"><h3>عکس بنر شب (حالت تیره)</h3>
+  <div class="row wrap" style="gap:14px;align-items:flex-start">
+    <img src="{{ setting('home_hero_night') ? asset('storage/'.setting('home_hero_night')) : asset('img/hero-night.jpg') }}" alt="" style="width:240px;max-width:100%;border-radius:14px;aspect-ratio:16/9;object-fit:cover">
+    <form class="grow" method="post" action="{{ route('admin.settings.hero') }}" enctype="multipart/form-data">@csrf<input type="hidden" name="kind" value="night">
+      <div class="field"><label>عکس شب (حداکثر ۶ مگابایت)</label><input class="input" type="file" name="hero" accept="image/*" required><div class="help">وقتی کاربر حالت تیره را روشن کند، این عکس در بالای صفحه‌ی اول نشان داده می‌شود. انیمیشن تغییر حالت (روشن ← تیره) به سمت خورشید و برعکس به سمت ماهِ عکس‌های پیش‌فرض می‌رود؛ با عکس دلخواه، به‌جای آن‌ها گوشه‌ی بالا-راست صفحه هدف است.</div></div>
+      <button class="btn btn-sm">تغییر عکس شب</button> @if(setting('home_hero_night'))<button class="btn btn-sm btn-ghost" name="reset" value="1" formnovalidate>برگشت به عکس پیش‌فرض</button>@endif
+    </form>
+  </div>
+</div>
 <form class="card mb" method="post" action="{{ route('admin.settings.update') }}">@csrf<input type="hidden" name="group" value="texts"><h3>متن‌های سایت و تماس</h3>
   <div class="grid2">@php $txt('support_phone', 'تلفن اصلی پشتیبانی (برای پیامک‌ها و تماس سریع)') @endphp @php $txt('support_email', 'ایمیل پشتیبانی') @endphp</div>
   <input type="hidden" name="keys[]" value="contact_phones"><div class="field"><label>شماره‌های «تماس با ما» (هر خط یک شماره: عنوان | شماره)</label><textarea class="input" name="contact_phones" rows="4" dir="rtl" placeholder="پشتیبانی (موبایل) | 09123456789&#10;تلفن ثابت | 02634430536">{{ setting('contact_phones') }}</textarea><div class="help">هر تعداد شماره بنویسید؛ در صفحه‌ی «تماس با ما» و فوتر نمایش داده می‌شوند.</div></div>

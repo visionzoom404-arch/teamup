@@ -11,7 +11,8 @@
   <section class="hero-c">
     <div class="hx-wrap">
     <div class="hx">
-      @if(setting('home_hero'))<img class="hx-img" src="{{ asset('storage/'.setting('home_hero')) }}" alt="اجاره ویلا و کلبه در سراسر ایران" width="1920" height="1080" fetchpriority="high">@else<picture><source srcset="{{ asset('img/hero-home.webp') }}" type="image/webp"><img class="hx-img" src="{{ asset('img/hero-home.jpg') }}" alt="ویلای ساحلی و کوهستانی هنگام غروب" width="1916" height="821" fetchpriority="high"></picture>@endif
+      @if(setting('home_hero'))<img class="hx-img hx-day" src="{{ asset('storage/'.setting('home_hero')) }}" alt="اجاره ویلا و کلبه در سراسر ایران" width="1920" height="1080" fetchpriority="high">@else<picture class="hx-day"><source srcset="{{ asset('img/hero-home.webp') }}" type="image/webp"><img class="hx-img" data-fx="0.8217,0.435" src="{{ asset('img/hero-home.jpg') }}" alt="ویلای ساحلی و کوهستانی هنگام غروب" width="1916" height="821" fetchpriority="high"></picture>@endif
+      @if(setting('home_hero_night'))<img class="hx-img hx-night" src="{{ asset('storage/'.setting('home_hero_night')) }}" alt="" width="1920" height="1080" loading="lazy" aria-hidden="true">@else<picture class="hx-night" aria-hidden="true"><source srcset="{{ asset('img/hero-night.webp') }}" type="image/webp"><img class="hx-img" data-fx="0.8247,0.3686" src="{{ asset('img/hero-night.jpg') }}" alt="" width="1774" height="887" loading="lazy"></picture>@endif
       <div class="hx-in">
         <span class="kicker"><x-icon name="sparkle" class="sm"/> رزرو مستقیم از میزبان، بدون واسطه‌ی پنهان</span>
         <h1>کجا می‌خوای بری؟</h1>
