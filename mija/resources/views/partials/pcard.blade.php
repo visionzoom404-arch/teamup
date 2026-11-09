@@ -3,12 +3,15 @@
   <div class="ph">
     <img src="{{ $p->cover() }}" alt="{{ $p->title }}" loading="lazy">
     <span class="pp">@if(isset($p->quote_total)){{ toman($p->quote_total, false) }}@else{{ toman($p->startingPrice(), false) }}@endif <small>تومان</small></span>
-    <div class="tags">
-      @if(max($p->weekly_discount, $p->monthly_discount) > 0)<span class="tag-sale">تا {{ fa(max($p->weekly_discount, $p->monthly_discount)) }}٪ تخفیف</span>@endif
-      @if($p->featured)<span class="tag-glass gold"><x-icon name="star" class="sm"/> ویژه</span>@endif
-      @if($p->instant_booking)<span class="tag-glass"><x-icon name="bolt" class="sm"/> رزرو فوری</span>@endif
-      @if($p->host && $p->host->isSuperhost())<span class="tag-glass gold"><x-i3 name="p_crown" class="sm"/> میزبان برتر</span>@endif
+    @php $disc = max($p->weekly_discount, $p->monthly_discount); $sh = $p->host && $p->host->isSuperhost(); @endphp
+    <div class="tags">@if($disc > 0)<span class="tag-sale">تا {{ fa($disc) }}٪ تخفیف</span>@endif</div>
+    @if($p->featured || $p->instant_booking || $sh)
+    <div class="pc-marks">
+      @if($p->featured)<span class="pc-mk gold" title="ویژه" aria-label="ویژه"><x-icon name="star"/></span>@endif
+      @if($p->instant_booking)<span class="pc-mk" title="رزرو فوری" aria-label="رزرو فوری"><x-icon name="bolt"/></span>@endif
+      @if($sh)<span class="pc-mk gold" title="میزبان برتر" aria-label="میزبان برتر"><x-i3 name="p_crown"/></span>@endif
     </div>
+    @endif
     @auth @if(auth()->user()->isGuest())
     <button type="button" class="fav {{ $fav ? 'on' : '' }}" data-fav="{{ route('favorite', $p) }}" aria-label="علاقه‌مندی"><x-icon name="heart"/></button>
     @endif @endauth
