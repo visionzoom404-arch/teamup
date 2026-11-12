@@ -96,6 +96,11 @@ echo "==> TLS (خودامضا برای حالت Full در Cloudflare) و nginx"
 mkdir -p /etc/ssl/mija
 [ -f /etc/ssl/mija/origin.crt ] || openssl req -x509 -nodes -newkey rsa:2048 -days 3650 \
   -subj "/CN=${DOMAIN}" -keyout /etc/ssl/mija/origin.key -out /etc/ssl/mija/origin.crt 2>/dev/null
+# اگر گواهی معتبر Let's Encrypt از قبل هست، از همان شروع استفاده شود (بدون دوره‌ی گواهی خودامضا)
+SSL_CRT=/etc/ssl/mija/origin.crt; SSL_KEY=/etc/ssl/mija/origin.key
+if [ -s "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem" ] && openssl x509 -checkend 86400 -noout -in "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem" >/dev/null 2>&1; then
+  SSL_CRT="/etc/letsencrypt/live/${DOMAIN}/fullchain.pem"; SSL_KEY="/etc/letsencrypt/live/${DOMAIN}/privkey.pem"
+fi
 cat > /etc/nginx/sites-available/mija <<NGINX
 # پورت ۸۰: فقط تأیید دامنه‌ی Let's Encrypt و ریدایرکت به https
 server {
@@ -108,8 +113,8 @@ server {
 server {
     listen 443 ssl default_server;
     server_name ${DOMAIN} www.${DOMAIN} _;
-    ssl_certificate     /etc/ssl/mija/origin.crt;
-    ssl_certificate_key /etc/ssl/mija/origin.key;
+    ssl_certificate     ${SSL_CRT};
+    ssl_certificate_key ${SSL_KEY};
     ssl_protocols TLSv1.2 TLSv1.3;
     add_header Strict-Transport-Security "max-age=31536000" always;
     root ${APP}/public;
