@@ -184,13 +184,49 @@ class User extends Authenticatable
         }
     }
 
-    /** اعلان برای همه‌ی مدیران سایت (در بخش «اعلان‌ها»ی پنل مدیر) */
+    /**
+     * اعلان برای همه‌ی مدیران سایت (بخش «اعلان‌ها»ی پنل مدیر) و در صورت $sms پیامک هم می‌رود:
+     * به مدیرانِ فعال + شماره‌های اضافه‌ی ثبت‌شده در تنظیمات پیامک (admin_sms_phones).
+     */
     public static function notifyAdmins(string $title, ?string $body = null, ?string $url = null, bool $sms = false): void
     {
-        static::where('role', 'admin')->where('is_active', true)->get()->each(function ($a) use ($title, $body, $url, $sms) {
-            $url = $url ?: route('admin.dashboard');
-            $a->notify($title, $body, $url, $sms && (int) setting('admin_sms_alerts'), 'admin', 'admin_alert');
+        $smsOn = $sms && (int) setting('admin_sms_alerts');
+        $url = $url ?: route('admin.dashboard');
+        $sent = [];
+        static::where('role', 'admin')->where('is_active', true)->get()->each(function ($a) use ($title, $body, $url, $smsOn, &$sent) {
+            $a->notify($title, $body, $url, $smsOn, 'admin', 'admin_alert');
+            $smsOn && ($sent[] = $a->phone);
         });
+        if ($smsOn) {
+            foreach (array_diff(static::adminExtraPhones(), $sent) as $phone) {
+                \App\Support\Sms::event('admin_alert', $phone, ['title' => $title, 'body' => (string) $body], $url);
+            }
+        }
+    }
+
+    /** شماره‌های اضافه‌ی مدیریت (هر خط/جداشده با ویرگول) که حساب کاربری ندارند ولی پیامک هشدار می‌گیرند */
+    public static function adminExtraPhones(): array
+    {
+        $raw = \App\Support\Jalali::latinDigits((string) setting('admin_sms_phones'));
+
+        return collect(preg_split('/[\r\n,;،]+/u', $raw, -1, PREG_SPLIT_NO_EMPTY))
+            ->map(fn ($p) => preg_replace('/[\s\-]+/u', '', $p))
+            ->map(fn ($p) => preg_match('/^(\+98|0098|98|0)?9\d{9}$/', $p) ? '0'.substr(preg_replace('/^(\+98|0098|98|0)/', '', $p), -10) : null)
+            ->filter()->unique()->values()->all();
+    }
+
+    /** همه‌ی گیرنده‌های پیامک هشدار مدیر: [['name'=>..,'phone'=>..,'source'=>'account|extra','active'=>bool]] */
+    public static function adminSmsRecipients(): array
+    {
+        $rows = static::where('role', 'admin')->orderBy('id')->get()->map(fn ($a) => ['name' => $a->name, 'phone' => $a->phone, 'source' => 'account', 'active' => (bool) $a->is_active])->all();
+        $have = array_column($rows, 'phone');
+        foreach (static::adminExtraPhones() as $p) {
+            if (! in_array($p, $have, true)) {
+                $rows[] = ['name' => 'شماره‌ی اضافه', 'phone' => $p, 'source' => 'extra', 'active' => true];
+            }
+        }
+
+        return $rows;
     }
 
     /* ---------- میزبان: احراز هویت و حساب بانکی ---------- */

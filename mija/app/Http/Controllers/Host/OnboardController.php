@@ -79,7 +79,7 @@ class OnboardController extends Controller
             return back()->withInput()->withErrors(['sheba' => 'شماره شبا معتبر نیست (۲۴ رقم پس از IR).']);
         }
         $u->update($d + ['bank_name' => Iran::bank($d['card_number']), 'host_onboarded_at' => now()]);
-        \App\Models\User::notifyAdmins('پرونده‌ی میزبان تکمیل شد (هویت و حساب بانکی)', $u->name.' · '.fa($u->phone), route('admin.documents'));
+        \App\Models\User::notifyAdmins('پرونده‌ی میزبان تکمیل شد (هویت و حساب بانکی)', $u->name.' · '.fa($u->phone), route('admin.documents'), true);
         $u->notify('اطلاعات شما تکمیل شد', 'اکنون می‌توانید اقامتگاه ثبت کنید.', route('host.properties.create'));
 
         return redirect()->route('host.properties.create')->with('ok', 'اطلاعات هویتی و بانکی شما تکمیل شد. اولین اقامتگاه خود را ثبت کنید.');

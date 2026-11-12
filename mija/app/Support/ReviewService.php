@@ -45,7 +45,7 @@ class ReviewService
     {
         abort_unless($r->status === 'pending_host', 422);
         $r->update(['status' => 'host_rejected', 'host_reject_reason' => $reason]);
-        User::where('role', 'admin')->get()->each(fn ($a) => $a->notify('نظر ردشده توسط میزبان — نیاز به بررسی', $r->property->title, route('admin.reviews', ['tab' => 'flagged'])));
+        User::notifyAdmins('نظر ردشده توسط میزبان — نیاز به بررسی', $r->property->title, route('admin.reviews', ['tab' => 'flagged']), true);
     }
 
     public static function adminApprove(Review $r): void

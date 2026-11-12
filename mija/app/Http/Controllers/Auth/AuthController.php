@@ -91,7 +91,7 @@ class AuthController extends Controller
         $user = User::create($data + ['referred_by' => $referrer?->id]);
         \App\Models\MarketingContact::where('phone', $user->phone)->update(['status' => 'registered', 'registered_at' => now(), 'user_id' => $user->id]);
         Auth::login($user);
-        User::notifyAdmins($user->isHost() ? 'میزبان جدید ثبت‌نام کرد' : 'مهمان جدید ثبت‌نام کرد', $user->name.' · '.fa($user->phone), route('admin.users.edit', $user));
+        User::notifyAdmins($user->isHost() ? 'میزبان جدید ثبت‌نام کرد' : 'مهمان جدید ثبت‌نام کرد', $user->name.' · '.fa($user->phone), route('admin.users.edit', $user), $user->isHost());  // پیامک فقط برای میزبانِ جدید (مهمان نیاز به تأیید ندارد)
         $user->notify('به می‌جا خوش آمدید', $user->isHost() ? 'ابتدا اطلاعات هویتی و بانکی را تکمیل کنید.' : 'اقامتگاه رویایی‌تان را پیدا کنید.');
 
         return redirect($user->isHost() ? route('host.onboard') : $user->homeRoute());

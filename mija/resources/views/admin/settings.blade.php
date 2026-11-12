@@ -40,8 +40,10 @@
   @include('partials.help', ['title' => 'راهنمای اتصال', 'text' => 'از پنل ippanel، «توکن دسترسی (AccessKey)» و شماره‌ی خط ارسال را بردارید و اینجا وارد کنید، سپس «ارسال فعال باشد» را بزنید. تا زمانی که خاموش یا خالی باشد، پیامک‌ها فقط در «گزارش پیامک» ثبت می‌شوند و ارسال واقعی انجام نمی‌شود. همه‌ی پیامک‌ها «پترن‌دار» ارسال می‌شوند و پیش‌فرض بدون لینک است (ippanel پترن دارای لینک را رد می‌کند)؛ متن و کد پترن هر پیامک را در بخش «پترن‌های پیامک» پایین همین صفحه بردارید.'])
   @php $chk('sms_enabled', 'ارسال پیامک فعال باشد') @endphp
   @php $chk('admin_sms_alerts', 'برای رویدادهای مهم، پیامک به مدیران هم برود (درخواست برداشت، پرداخت کارت‌به‌کارت…)') @endphp
+  <div class="field mt"><label>شماره‌های اضافه برای پیامک هشدار مدیر (اختیاری)</label><textarea class="input" dir="ltr" name="admin_sms_phones" rows="2" placeholder="09123456789&#10;09351234567">{{ setting('admin_sms_phones') }}</textarea><div class="help">مدیرانِ دارای حساب خودکار پیامک می‌گیرند. شماره‌های دیگر را اینجا بنویسید (هر خط یک شماره).</div></div><input type="hidden" name="keys[]" value="admin_sms_phones">
   <div class="grid2 mt">@php $txt('sms_token', 'توکن (AccessKey)') @endphp @php $txt('sms_originator', 'شماره خط ارسال', 'مثلاً +983000505') @endphp @php $txt('sms_base_url', 'آدرس API', 'پیش‌فرض: https://rest.ippanel.com/v1 (معمولاً دست نزنید)') @endphp @php $txt('sms_provider', 'سرویس‌دهنده') @endphp</div>
   <button class="btn mt">ذخیره و بررسی اتصال</button> <a class="btn btn-light mt" href="{{ route('admin.sms') }}">گزارش پیامک‌ها</a></form>
+@include('admin.partials.sms-admin-alerts')
 @include('admin.partials.sms-patterns')
 @elseif($tab === 'gateway')
 @include('admin.partials.gateways')
