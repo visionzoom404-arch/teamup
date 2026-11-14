@@ -27,7 +27,6 @@ html[data-theme="dark"] ::selection{background:rgba(240,162,72,.35)}
 html[data-theme="dark"] hr,html[data-theme="dark"] .divider{border-color:var(--line)}
 
 /* ----- رفع‌های دستی روی خروجی خودکار (dark.auto.css) ----- */
-html[data-theme="dark"] .brand-logo,html[data-theme="dark"] .auth-logo img,html[data-theme="dark"] .footer2 img[src*="mija-logo"]{filter:invert(1) hue-rotate(180deg) brightness(1.08)}
 html[data-theme="dark"] ::placeholder{color:#8B8274;opacity:1}
 html[data-theme="dark"] select option,html[data-theme="dark"] select optgroup{background:#241D16;color:#F4EDE3}
 html[data-theme="dark"] input[type=checkbox],html[data-theme="dark"] input[type=radio]{accent-color:#F0A248}
@@ -62,7 +61,6 @@ html[data-theme="dark"] .au-orb{background:radial-gradient(circle at 30% 30%,rgb
 html[data-theme="dark"] .au-copy h2,html[data-theme="dark"] .au-chip b,html[data-theme="dark"] .au-stats b{color:#FFF3DD!important}
 html[data-theme="dark"] .au-copy p,html[data-theme="dark"] .au-chip small,html[data-theme="dark"] .au-stats small{color:#EBD3AE!important}
 html[data-theme="dark"] .au-stats>div{background:linear-gradient(145deg,rgba(255,255,255,.10),rgba(255,255,255,.04))!important;border-color:rgba(255,255,255,.14)!important}
-html[data-theme="dark"] .au-logo img{filter:invert(1) hue-rotate(180deg) brightness(1.08)}
 
 /* تصویر جایگزین (placeholder) در دارک کم‌نور شود تا خیره‌کننده نباشد */
 html[data-theme="dark"] img[src*="placeholder"],html[data-theme="dark"] img[src*="/storage/seed/"]{filter:brightness(.62) saturate(.9)}

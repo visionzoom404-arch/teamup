@@ -13,7 +13,7 @@
   <div class="container">
     <div class="f2-grid">
       <div class="f2-brand">
-        <img class="foot-logo" src="{{ asset('img/mija-logo-h.png') }}" alt="می‌جا" width="103" height="42">
+        <img class="foot-logo" src="{{ asset('img/mija-logo-h.png') }}" alt="می‌جا" width="130" height="42">
         <p>{{ setting('footer_about') }}</p>
         <div class="f2-contact">@foreach(array_slice(contact_lines('contact_phones'), 0, 3) as [$ct, $cn])<a href="tel:{{ preg_replace('/[^\d+]/', '', \App\Support\Jalali::latinDigits($cn)) }}"><x-icon name="phone" class="sm"/> <span class="ltr">{{ fa($cn) }}</span></a>@endforeach @if(setting('support_email'))<a href="mailto:{{ setting('support_email') }}"><x-icon name="mail" class="sm"/> <span class="ltr">{{ setting('support_email') }}</span></a>@endif @foreach(array_slice(contact_lines('contact_addresses'), 0, 1) as [$at, $ad])<a href="{{ route('page', 'contact') }}" class="f2-addr"><x-icon name="pin" class="sm"/> <span>{{ $ad }}</span></a>@endforeach</div>
       </div>

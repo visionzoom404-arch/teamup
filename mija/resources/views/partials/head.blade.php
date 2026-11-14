@@ -5,7 +5,9 @@
 <script>(function(){try{if(/MijaApp\//.test(navigator.userAgent)||navigator.standalone||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches))document.documentElement.classList.add('is-app')}catch(e){}try{var t=localStorage.getItem('mija-theme');if(t!=='dark'&&t!=='light')t=(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';document.documentElement.setAttribute('data-theme',t);if(t==='dark'){var m=document.querySelector('meta[name=theme-color]');if(m)m.setAttribute('content','#17120D')}}catch(e){document.documentElement.setAttribute('data-theme','light')}})()</script>
 @include('partials.seo')
 <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
-<link rel="icon" href="{{ asset('favicon.png') }}" type="image/png">
+<link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
+<link rel="icon" href="{{ asset('favicon-32.png') }}" type="image/png" sizes="32x32">
+<link rel="icon" href="{{ asset('favicon.png') }}" type="image/png" sizes="64x64">
 <link rel="apple-touch-icon" href="{{ asset('icons/apple-touch-icon.png') }}">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">

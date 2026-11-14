@@ -21,8 +21,8 @@ class LogoArt
         for ($i = 1; $i < 7; $i++) {
             $lines .= "<circle cx='450' cy='320' r='".($i * 62)."' fill='none' stroke='#E8B25A' stroke-opacity='".(.28 - $i * .03)."' stroke-width='1'/>";
         }
-        $h = 250 * $scale;
-        $w = $h * 479 / 555;
+        $w = 300 * $scale;        // علامت‌ی جدید عریض است (۶۰۰×۴۳۹)
+        $h = $w * 439 / 600;
 
         return "<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' viewBox='0 0 900 600' preserveAspectRatio='xMidYMid slice'><defs>"
             ."<linearGradient id='bg' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='$a'/><stop offset='.55' stop-color='$b'/><stop offset='1' stop-color='$c'/></linearGradient>"

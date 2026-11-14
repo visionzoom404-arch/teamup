@@ -30,7 +30,7 @@
 @if($bv = setting('bing_verify'))<meta name="msvalidate.01" content="{{ $bv }}">@endif
 @unless($private)
 <script type="application/ld+json">{!! json_encode(['@context' => 'https://schema.org', '@graph' => [
-  ['@type' => 'Organization', '@id' => url('/').'#org', 'name' => 'می‌جا', 'alternateName' => ['Mija', 'mija.click'], 'url' => url('/'), 'logo' => asset('img/mija-logo.png'), 'description' => 'پلتفرم رزرو آنلاین ویلا، کلبه و اقامتگاه در سراسر ایران'],
+  ['@type' => 'Organization', '@id' => url('/').'#org', 'name' => 'می‌جا', 'alternateName' => ['Mija', 'mija.click'], 'url' => url('/'), 'logo' => asset('icons/icon-512.png'), 'description' => 'پلتفرم رزرو آنلاین ویلا، کلبه و اقامتگاه در سراسر ایران'],
   ['@type' => 'WebSite', '@id' => url('/').'#web', 'url' => url('/'), 'name' => 'می‌جا — رزرو ویلا و کلبه', 'inLanguage' => 'fa-IR', 'publisher' => ['@id' => url('/').'#org'],
     'potentialAction' => ['@type' => 'SearchAction', 'target' => url('/search').'?q={search_term_string}', 'query-input' => 'required name=search_term_string']],
 ]], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>

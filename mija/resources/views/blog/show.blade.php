@@ -9,7 +9,7 @@
 <script type="application/ld+json">{!! json_encode(['@context' => 'https://schema.org', '@graph' => [
   ['@type' => 'Article', '@id' => $a->url().'#article', 'mainEntityOfPage' => $a->url(), 'headline' => mb_substr($a->title, 0, 110), 'description' => $a->excerpt, 'image' => [$a->imageUrl()], 'inLanguage' => 'fa-IR',
    'datePublished' => ($a->published_at ?? $a->created_at)->toIso8601String(), 'dateModified' => $a->updated_at->toIso8601String(), 'articleSection' => $a->category, 'keywords' => $a->keyword, 'wordCount' => str_word_count(strip_tags($a->body), 0, 'آابپتثجچحخدذرزژسشصضطظعغفقکگلمنوهیئءةۀ'),
-   'author' => ['@type' => 'Organization', 'name' => 'تیم می‌جا', 'url' => url('/')], 'publisher' => ['@type' => 'Organization', 'name' => 'می‌جا', 'logo' => ['@type' => 'ImageObject', 'url' => asset('img/mija-logo.png')]]],
+   'author' => ['@type' => 'Organization', 'name' => 'تیم می‌جا', 'url' => url('/')], 'publisher' => ['@type' => 'Organization', 'name' => 'می‌جا', 'logo' => ['@type' => 'ImageObject', 'url' => asset('icons/icon-512.png')]]],
   ['@type' => 'BreadcrumbList', 'itemListElement' => [['@type' => 'ListItem', 'position' => 1, 'name' => 'خانه', 'item' => url('/')], ['@type' => 'ListItem', 'position' => 2, 'name' => 'مجله', 'item' => route('blog')], ['@type' => 'ListItem', 'position' => 3, 'name' => $a->title, 'item' => $a->url()]]],
 ]], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
 @endpush

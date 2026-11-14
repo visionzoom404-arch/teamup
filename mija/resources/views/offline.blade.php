@@ -23,7 +23,6 @@ html[data-theme="dark"] body{color:#F4EDE3;background:radial-gradient(700px 480p
   box-shadow:0 30px 60px -28px rgba(120,60,0,.45),inset 0 1px 0 #fff;-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
 html[data-theme="dark"] .card{background:linear-gradient(180deg,rgba(46,36,27,.85),rgba(28,21,15,.78));border-color:rgba(255,255,255,.12);box-shadow:0 30px 60px -28px rgba(0,0,0,.85),inset 0 1px 0 rgba(255,255,255,.08)}
 .logo{height:40px;width:auto;margin:0 auto 16px;display:block}
-html[data-theme="dark"] .logo{filter:invert(1) hue-rotate(180deg) brightness(1.08)}
 .ic{width:56px;height:56px;margin:0 auto 12px;display:grid;place-items:center;border-radius:50%;background:rgba(232,134,12,.14);color:#C4650C}
 html[data-theme="dark"] .ic{background:rgba(240,162,72,.16);color:#F8C98A}
 .ic svg{width:28px;height:28px}

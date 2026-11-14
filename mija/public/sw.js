@@ -1,5 +1,5 @@
 /* سرویس‌ورکر می‌جا — کش استاتیک + صفحه‌ی آفلاین */
-const V = 'mija-v4';
+const V = 'mija-v5';
 const STATIC = ['/css/lux.css', '/css/glass.css', '/css/resp.css', '/js/app.js', '/js/jalali.js', '/img/mija-logo-h.png', '/img/placeholder.svg', '/fonts/Vazirmatn-Regular.woff2', '/fonts/Vazirmatn-Bold.woff2', '/offline'];
 
 self.addEventListener('install', e => { e.waitUntil(caches.open(V).then(c => c.addAll(STATIC)).then(() => self.skipWaiting())); });

@@ -16,7 +16,7 @@
     <section class="up-hero glass">
       <div class="up-ring" aria-hidden="true">
         <svg viewBox="0 0 120 120"><circle class="rg-bg" cx="60" cy="60" r="52"/><circle class="rg-fg" cx="60" cy="60" r="52"/></svg>
-        <img src="{{ asset('img/mija-mark.png') }}" alt="" width="52" height="60">
+        <img src="{{ asset('img/mija-mark.png') }}" alt="" width="60" height="44">
         <span class="up-badge up-ok"><x-icon name="check"/></span>
         <span class="up-badge up-new"><x-icon name="download"/></span>
       </div>
