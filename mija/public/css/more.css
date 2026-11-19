@@ -694,3 +694,8 @@ html[data-theme="dark"] .pc-mk:not(.gold){background:linear-gradient(180deg,rgba
   .pcard .fav{width:30px;height:30px;top:7px;inset-inline-end:7px}.pcard .fav .icon{width:16px;height:16px}
 }
 @media(max-width:360px){.pcard .tag-sale{font-size:9.5px!important;padding:2px 7px!important}}
+
+/* تقویم شمسی: پنجره به body منتقل می‌شود (همه‌جا داخل صفحه، بدون بریده‌شدن توسط ستون‌های اسکرول‌دار) */
+.rp-pop.rp-float{z-index:99980;background:var(--surface,#fff)!important;color:var(--ink);-webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+  box-shadow:0 30px 70px -22px rgba(20,10,0,.55)!important;border:1px solid var(--line-2)!important;max-width:calc(100vw - 24px)}
+@media(max-width:860px){.rp-pop.rp-float{left:10px;right:10px;width:auto;max-width:none}}

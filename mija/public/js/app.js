@@ -152,9 +152,29 @@
       for (let i = 0; i < n; i++) { html += month(y, m); if (++m > 12) { m = 1; y++; } }
       html += '</div><div class="rp-legend"><span><i class="free"></i>خالی (قیمت شب)</span><span><i class="hot"></i>گران‌تر</span><span><i class="booked"></i>پر / غیرقابل رزرو</span></div><div class="rp-foot"><button type="button" class="btn btn-sm btn-ghost" data-clear>پاک کردن</button><button type="button" class="btn btn-sm" data-close>تأیید</button></div>';
       pop.innerHTML = html;
+      if (typeof place === 'function') place();
     }
-    const open = () => { render(); pop.classList.add('open'); };
+    // پنجره‌ی تقویم به <body> منتقل می‌شود تا هیچ کادر اسکرول‌دار/شیشه‌ای (مثل ستون فیلترها) آن را نبُرد و همیشه داخل صفحه جا بگیرد
+    const place = () => {
+      if (!pop.classList.contains('open')) return;
+      if (narrow()) { ['position', 'top', 'left', 'right', 'bottom', 'width', 'maxHeight', 'insetInlineStart'].forEach(k => { pop.style[k] = ''; }); return; }
+      const vw = document.documentElement.clientWidth, vh = innerHeight, r = root.getBoundingClientRect();
+      const w = Math.min(660, vw - 24);
+      pop.style.position = 'fixed'; pop.style.width = w + 'px'; pop.style.insetInlineStart = 'auto'; pop.style.right = 'auto'; pop.style.bottom = 'auto';
+      pop.style.left = Math.round(Math.min(Math.max(12, r.right - w), vw - w - 12)) + 'px';   // هم‌تراز لبه‌ی راست فیلد (راست‌به‌چپ) ولی داخل صفحه
+      const below = vh - r.bottom - 22, above = r.top - 22, h = pop.offsetHeight || 420;
+      let top, mh;
+      if (below >= Math.min(h, 460) || below >= above) { top = r.bottom + 12; mh = Math.max(300, below); }
+      else { mh = Math.max(300, above); top = Math.max(12, r.top - 12 - Math.min(h, mh)); }
+      pop.style.top = Math.round(top) + 'px'; pop.style.maxHeight = Math.round(mh) + 'px'; pop.style.overflow = 'auto';
+    };
+    const open = () => {
+      if (pop.parentElement !== document.body) document.body.appendChild(pop);
+      pop.classList.add('rp-float'); render(); pop.classList.add('open'); place();
+      requestAnimationFrame(place);
+    };
     const close = () => pop.classList.remove('open');
+    addEventListener('scroll', () => place(), { passive: true, capture: true });
     $('.rp-field', root).addEventListener('click', () => pop.classList.contains('open') ? close() : open());
     pop.addEventListener('click', e => {
       const t = e.target;
@@ -167,8 +187,8 @@
         sync(); render(); if (end) setTimeout(close, 250);
       }
     });
-    document.addEventListener('click', e => { if (!e.composedPath().includes(root)) close(); });
-    window.addEventListener('resize', () => pop.classList.contains('open') && render());
+    document.addEventListener('click', e => { const path = e.composedPath(); if (!path.includes(root) && !path.includes(pop)) close(); });
+    window.addEventListener('resize', () => { if (pop.classList.contains('open')) { render(); place(); } });
     root._rp = { set(a, b) { start = a; end = b; if (a) [vy, vm] = Jalali.parseISO(a).slice(0, 2); sync(); if (pop.classList.contains('open')) render(); } };
     sync();
   }
